@@ -1,7 +1,7 @@
 /**
  * Kapruka MCP Client
  * Thin wrapper around the public Kapruka MCP endpoint.
- * Transport: Streamable HTTP (JSON-RPC 2.0)
+ * Transport: Streamable HTTP (JSON-RPC 2.0 + session management)
  * Endpoint: https://mcp.kapruka.com/mcp
  * No auth required. Rate limits: 60 req/min, 30 orders/hr per IP.
  */
@@ -9,17 +9,95 @@
 const MCP_ENDPOINT =
   import.meta.env.DEV
     ? '/api/mcp'                      // Vite proxy → avoids CORS in local dev
-    : 'https://mcp.kapruka.com/mcp'; // Direct in production (server-side or deployed)
+    : 'https://mcp.kapruka.com/mcp'; // Direct in production
+
 let _reqId = 1;
 
 // ---------------------------------------------------------------------------
-// Core JSON-RPC call
+// Session management
+// MCP Streamable HTTP requires an initialize → initialized handshake before
+// tool calls. The session ID returned must be sent in every subsequent request.
+// ---------------------------------------------------------------------------
+
+let _sessionId: string | null = null;
+let _initPromise: Promise<void> | null = null;
+
+async function initSession(): Promise<void> {
+  // Send `initialize` request
+  const initBody = {
+    jsonrpc: '2.0',
+    id: _reqId++,
+    method: 'initialize',
+    params: {
+      protocolVersion: '2024-11-05',
+      capabilities: {},
+      clientInfo: { name: 'kapruka-wish-tree', version: '1.0.0' },
+    },
+  };
+
+  const initRes = await fetch(MCP_ENDPOINT, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json, text/event-stream',
+    },
+    body: JSON.stringify(initBody),
+  });
+
+  if (!initRes.ok) {
+    throw new Error(`MCP init failed ${initRes.status}: ${initRes.statusText}`);
+  }
+
+  // Capture session ID from response header
+  const sid = initRes.headers.get('mcp-session-id');
+  if (sid) _sessionId = sid;
+
+  // Drain the response body (required before sending next request)
+  await initRes.text();
+
+  // Send `initialized` notification (fire-and-forget, no response expected)
+  const notifBody = {
+    jsonrpc: '2.0',
+    method: 'notifications/initialized',
+    params: {},
+  };
+
+  const notifHeaders: Record<string, string> = {
+    'Content-Type': 'application/json',
+    Accept: 'application/json, text/event-stream',
+  };
+  if (_sessionId) notifHeaders['mcp-session-id'] = _sessionId;
+
+  await fetch(MCP_ENDPOINT, {
+    method: 'POST',
+    headers: notifHeaders,
+    body: JSON.stringify(notifBody),
+  }).catch(() => { /* notification response is optional */ });
+}
+
+/** Lazily initialise once; reuse the session for all subsequent calls. */
+async function ensureSession(): Promise<void> {
+  if (_sessionId) return;
+  if (!_initPromise) {
+    _initPromise = initSession().catch((err) => {
+      // Reset so next call retries
+      _initPromise = null;
+      throw err;
+    });
+  }
+  return _initPromise;
+}
+
+// ---------------------------------------------------------------------------
+// Core JSON-RPC tool call
 // ---------------------------------------------------------------------------
 
 async function callTool<T = unknown>(
   toolName: string,
   toolArgs: Record<string, unknown>
 ): Promise<T> {
+  await ensureSession();
+
   const id = _reqId++;
   const body = {
     jsonrpc: '2.0',
@@ -31,16 +109,25 @@ async function callTool<T = unknown>(
     },
   };
 
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    Accept: 'application/json, text/event-stream',
+  };
+  if (_sessionId) headers['mcp-session-id'] = _sessionId;
+
   const res = await fetch(MCP_ENDPOINT, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Accept: 'application/json, text/event-stream',
-    },
+    headers,
     body: JSON.stringify(body),
   });
 
   if (!res.ok) {
+    // If session expired (404), reset and retry once
+    if (res.status === 404 && _sessionId) {
+      _sessionId = null;
+      _initPromise = null;
+      return callTool<T>(toolName, toolArgs);
+    }
     throw new Error(`MCP HTTP error ${res.status}: ${res.statusText}`);
   }
 
@@ -49,7 +136,6 @@ async function callTool<T = unknown>(
   // Handle SSE streaming responses (text/event-stream)
   if (contentType.includes('text/event-stream')) {
     const text = await res.text();
-    // Parse the last non-empty `data:` line that contains a result
     const lines = text.split('\n');
     let lastResult: T | null = null;
     for (const line of lines) {
@@ -58,7 +144,7 @@ async function callTool<T = unknown>(
           const json = JSON.parse(line.slice(5).trim());
           if (json.result !== undefined) lastResult = extractContent<T>(json.result);
         } catch {
-          // ignore parse errors for non-data SSE lines
+          // ignore non-JSON SSE lines
         }
       }
     }
