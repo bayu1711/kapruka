@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { X, ShoppingCart, Tag, ExternalLink, Loader2, Package } from 'lucide-react';
 import type { Product } from '../data/scenario';
 import { getProduct, type KaprukaMCPProduct } from '../lib/kapruka-mcp';
+import { DeliveryChecker } from './DeliveryChecker';
 
 interface ProductDetailsModalProps {
   product: Product | null;
@@ -175,6 +176,9 @@ export function ProductDetailsModal({
             </a>
           )}
         </div>
+
+        {/* Delivery Checker */}
+        <DeliveryChecker productId={product.id} />
       </motion.div>
     </div>
   );
