@@ -2,9 +2,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { useWishTree } from './hooks/useWishTree';
 import { BrandLockup } from './components/BrandLockup';
-
+import { AiStatus } from './components/AiStatus';
 import { WishTree } from './components/WishTree';
-
 import { WishInputBar } from './components/WishInputBar';
 import { ProductPager } from './components/ProductPager';
 import { CartBadge } from './components/CartBadge';
@@ -16,8 +15,7 @@ const PRODUCT_PAGE_SIZE = 20;
 export function App() {
   const {
     state,
-    advanceStage,
-    refineProducts,
+    handleSubmit,
     selectProduct,
     addToCart,
     toggleCart,
@@ -31,14 +29,8 @@ export function App() {
   useEffect(() => {
     document.documentElement.classList.add('dark');
   }, []);
-  const handleSubmit = () => {
-    if (state.stage < 3) {
-      // First submit: jump straight to stage 3 so products appear immediately
-      advanceStage(3);
-    } else {
-      // Subsequent submits: refine the product list with the new context
-      refineProducts();
-    }
+  const onSubmit = () => {
+    handleSubmit(state.inputValue);
   };
   const cartProducts = state.cartItems.map(
     (id) => products.find((p) => p.id === id)!
@@ -58,7 +50,14 @@ export function App() {
     }
     return arr;
   }, [products, state.productSeed]);
+
   const [productStart, setProductStart] = useState(0);
+  const [isPaging, setIsPaging] = useState(false);
+
+  useEffect(() => {
+    setIsPaging(false);
+  }, [state.stage, state.productSeed]);
+
   const visibleProducts = shuffledProducts.slice(
     productStart,
     productStart + PRODUCT_PAGE_SIZE
@@ -80,7 +79,7 @@ export function App() {
 
       {/* UI Components */}
       <BrandLockup />
-
+      <AiStatus status={state.aiStatus} show={!!state.aiStatus} />
       <CartBadge count={state.cartItems.length} onClick={toggleCart} />
 
 
@@ -92,7 +91,9 @@ export function App() {
           stage={state.stage}
           products={visibleProducts}
           selectedProduct={state.selectedProduct}
-          onSelectProduct={selectProduct} />
+          onSelectProduct={selectProduct}
+          isPaging={isPaging}
+        />
         
       </div>
 
@@ -102,17 +103,20 @@ export function App() {
         start={productStart}
         pageSize={PRODUCT_PAGE_SIZE}
         total={products.length}
-        onPrev={() =>
-        setProductStart((s) => Math.max(0, s - PRODUCT_PAGE_SIZE))
-        }
-        onNext={() =>
-        setProductStart((s) =>
-        Math.min(
-          Math.max(0, products.length - PRODUCT_PAGE_SIZE),
-          s + PRODUCT_PAGE_SIZE
-        )
-        )
-        } />
+        onPrev={() => {
+          setIsPaging(true);
+          setProductStart((s) => Math.max(0, s - PRODUCT_PAGE_SIZE));
+        }}
+        onNext={() => {
+          setIsPaging(true);
+          setProductStart((s) =>
+            Math.min(
+              Math.max(0, products.length - PRODUCT_PAGE_SIZE),
+              s + PRODUCT_PAGE_SIZE
+            )
+          );
+        }}
+      />
 
       }
 
@@ -121,11 +125,11 @@ export function App() {
       <WishInputBar
         value={state.inputValue}
         onChange={updateInput}
-        onSubmit={handleSubmit}
+        onSubmit={onSubmit}
         placeholder={
         currentConfig?.prompt || 'What are you wishing for today?'
         }
-        disabled={state.showCheckout || state.showConfirmation} />
+        disabled={state.showCheckout || state.showConfirmation || state.isSearching} />
 
       }
 

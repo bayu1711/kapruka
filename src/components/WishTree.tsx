@@ -7,6 +7,7 @@ interface WishTreeProps {
   products: Product[];
   selectedProduct: string | null;
   onSelectProduct: (id: string) => void;
+  isPaging?: boolean;
 }
 type CellType = 'foliage' | 'label' | 'product';
 interface GridCell {
@@ -97,7 +98,8 @@ export function WishTree({
   stage,
   products,
   selectedProduct,
-  onSelectProduct
+  onSelectProduct,
+  isPaging
 }: WishTreeProps) {
   const [showDebugGrid, setShowDebugGrid] = useState(false);
   const showProducts = stage >= 3;
@@ -402,7 +404,7 @@ export function WishTree({
       if (i >= finalProductSlots.length) return;
       const slot = finalProductSlots[i];
       const coordKey = `${slot.col},${slot.row}`;
-      const isLargeOverride = coordKey === '9,2' || coordKey === '2,1';
+      const isLargeOverride = ['9,2', '2,1', '7,6', '3,5', '9,4', '7,3'].includes(coordKey);
       let multiplier = slot.colSpan === 2 ? 0.85 : 0.75; // Provide padding
       if (isLargeOverride) {
         multiplier = 0.95; // Increase size for these specific green tiles
@@ -417,9 +419,10 @@ export function WishTree({
       const dy = slot.row - originRow;
       const dist = Math.sqrt(dx * dx + dy * dy);
 
-      const rot = (seededRandom() - 0.5) * 16; // Random rotation
-      const jx = (seededRandom() - 0.5) * 2.5;
-      const jy = (seededRandom() - 0.5) * 2.5;
+      const isCentered = coordKey === '3,5' || coordKey === '9,3';
+      const rot = isCentered ? 0 : (seededRandom() - 0.5) * 16; // Random rotation
+      const jx = isCentered ? 0 : (seededRandom() - 0.5) * 2.5;
+      const jy = isCentered ? 0 : (seededRandom() - 0.5) * 2.5;
 
       productCells.push({
         id: product.id,
@@ -682,12 +685,13 @@ export function WishTree({
                   damping: 20,
                   delay: cell.delay
                 }}
-                className={`absolute rounded-xl overflow-hidden cursor-pointer group z-20 transition-all duration-300 border-2 ${isSelected ? 'border-emerald-400 shadow-[0_0_24px_rgba(16,185,129,0.8)] z-30' : 'border-emerald-500/30 shadow-[0_0_16px_rgba(16,185,129,0.4)] hover:scale-105 hover:shadow-[0_0_20px_rgba(16,185,129,0.6)]'}`}
+                className={`absolute rounded-xl overflow-hidden cursor-pointer group z-20 duration-300 border-2 ${isSelected ? 'border-emerald-400 shadow-[0_0_24px_rgba(16,185,129,0.8)] z-30' : 'border-emerald-500/30 shadow-[0_0_16px_rgba(16,185,129,0.4)] hover:scale-105 hover:shadow-[0_0_20px_rgba(16,185,129,0.6)]'}`}
                 style={{
                   left: cell.left,
                   top: cell.top,
                   width: cell.width,
-                  height: cell.height
+                  height: cell.height,
+                  transitionProperty: isPaging ? 'all' : 'box-shadow, transform, border-color, opacity'
                 }}
                 onClick={() => onSelectProduct(product.id)}>
                 
