@@ -1,8 +1,8 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { scenarioBlocks, stageConfigs } from '../data/scenario';
 import type { Product } from '../data/scenario';
 import { useScreenInit } from '../useScreenInit.js';
-import { searchProducts } from '../lib/kapruka-mcp';
+import { searchProducts, listCategories } from '../lib/kapruka-mcp';
 
 export interface WishTreeState {
   stage: number;
@@ -48,6 +48,21 @@ export function useWishTree() {
 
   // Live products fetched from Kapruka MCP (replaces static mock data)
   const [liveProducts, setLiveProducts] = useState<Product[]>([]);
+
+  // Live categories from Kapruka MCP (used by tree label chips)
+  const [liveCategories, setLiveCategories] = useState<string[]>([]);
+
+  // Fetch categories on mount — these power the stage-1 white chips in WishTree
+  useEffect(() => {
+    listCategories()
+      .then((cats) => {
+        // Take the first 6 category names for the tree label positions
+        setLiveCategories(cats.slice(0, 6).map((c) => c.name).filter(Boolean));
+      })
+      .catch((err) => {
+        console.warn('[MCP] listCategories failed, using defaults:', err);
+      });
+  }, []);
 
   const advanceStage = useCallback((targetStage?: number) => {
     setState((prev) => {
@@ -177,5 +192,6 @@ export function useWishTree() {
     updateInput,
     currentConfig,
     products: liveProducts,
+    liveCategories,
   };
 }

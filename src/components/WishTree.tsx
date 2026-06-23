@@ -8,6 +8,7 @@ interface WishTreeProps {
   selectedProduct: string | null;
   onSelectProduct: (id: string) => void;
   isPaging?: boolean;
+  liveCategories?: string[];
 }
 type CellType = 'foliage' | 'label' | 'product';
 interface GridCell {
@@ -99,7 +100,8 @@ export function WishTree({
   products,
   selectedProduct,
   onSelectProduct,
-  isPaging
+  isPaging,
+  liveCategories = [],
 }: WishTreeProps) {
   const [showDebugGrid, setShowDebugGrid] = useState(false);
   const showProducts = stage >= 3;
@@ -151,7 +153,18 @@ export function WishTree({
       return seed / 233280;
     };
 
-    const baseCells = GRID_LAYOUT.map((cell) => {
+    // Apply live category names to label cells if we have them from MCP
+    const labelCells = GRID_LAYOUT.filter((c) => c.type === 'label');
+    const liveLayout: GridCell[] = GRID_LAYOUT.map((cell) => {
+      if (cell.type !== 'label' || liveCategories.length === 0) return cell;
+      const idx = labelCells.indexOf(cell);
+      if (idx >= 0 && idx < liveCategories.length) {
+        return { ...cell, contentId: liveCategories[idx] };
+      }
+      return cell;
+    });
+
+    const baseCells = liveLayout.map((cell) => {
       const multiplier = 0.70; // Shrunk to add organic spacing
       const width = cellWidth * cell.colSpan * multiplier;
       const height = cellHeight * cell.rowSpan * multiplier;
@@ -173,7 +186,7 @@ export function WishTree({
         delay: delayById[cell.id]
       };
     });
-    const usedCoords = new Set(GRID_LAYOUT.map(c => `${c.col},${c.row}`));
+    const usedCoords = new Set(liveLayout.map(c => `${c.col},${c.row}`));
     const canopyCx = 50;
     const canopyCy = 35;
     const canopyRx = 45;
@@ -489,7 +502,7 @@ export function WishTree({
     const allCells = [...baseCells, ...emptyBlueCells, ...productCells];
 
     return allCells;
-  }, [products]);
+  }, [products, liveCategories]);
   return (
     <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
       {/* Responsive square container — kept strictly 1:1 so the % grid stays aligned to the canopy */}

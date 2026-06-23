@@ -23,7 +23,8 @@ export function App() {
     confirmOrder,
     updateInput,
     currentConfig,
-    products
+    products,
+    liveCategories,
   } = useWishTree();
   // Enable dark mode
   useEffect(() => {
@@ -93,6 +94,7 @@ export function App() {
           selectedProduct={state.selectedProduct}
           onSelectProduct={selectProduct}
           isPaging={isPaging}
+          liveCategories={liveCategories}
         />
         
       </div>
