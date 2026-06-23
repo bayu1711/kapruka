@@ -523,8 +523,8 @@ export function WishTree({
               <stop offset="100%" stopColor="#241740" />
             </linearGradient>
             <radialGradient id="canopyGrad" cx="50%" cy="40%" r="60%">
-              <stop offset="0%" stopColor="#402970" stopOpacity="0.55" />
-              <stop offset="100%" stopColor="#241740" stopOpacity="0.15" />
+              <stop offset="0%" stopColor="#10b981" stopOpacity="0.55" />
+              <stop offset="100%" stopColor="#064e3b" stopOpacity="0.15" />
             </radialGradient>
           </defs>
 
