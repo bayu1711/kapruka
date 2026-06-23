@@ -88,12 +88,12 @@ export function ProductDetailsModal({
             </div>
           ) : (
             <img
-              src={displayImage}
+              src={displayImage || `https://placehold.co/400x400/1e293b/6ee7b7?text=${encodeURIComponent(displayName)}`}
               alt={displayName}
               className="w-full h-full object-cover"
               onError={(e) => {
                 (e.target as HTMLImageElement).src =
-                  'https://via.placeholder.com/400x400/1e293b/6ee7b7?text=Kapruka';
+                  'https://placehold.co/400x400/1e293b/6ee7b7?text=Kapruka';
               }}
             />
           )}

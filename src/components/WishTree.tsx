@@ -708,10 +708,14 @@ export function WishTree({
                 }}
                 onClick={() => onSelectProduct(product.id)}>
                 
-                  <img
-                  src={product.image}
+                <img
+                  src={product.image || `https://placehold.co/400x400/1e293b/6ee7b7?text=${encodeURIComponent(product.name)}`}
                   alt={product.name}
-                  className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                  className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = 'https://placehold.co/400x400/1e293b/6ee7b7?text=Kapruka';
+                  }}
+                />
                 </motion.div>);
 
           }
