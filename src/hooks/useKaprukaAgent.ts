@@ -13,6 +13,8 @@ export interface AgentResult {
   aiStatusMessage: string;
 }
 
+const chatHistory: string[] = [];
+
 export async function parseUserQuery(userMessage: string): Promise<AgentResult> {
   if (!ai) {
     console.warn('Gemini API key not found. Falling back to dumb search.');
@@ -23,13 +25,17 @@ export async function parseUserQuery(userMessage: string): Promise<AgentResult> 
     };
   }
 
+  // Keep last 6 messages for context
+  chatHistory.push(`User: ${userMessage}`);
+  if (chatHistory.length > 6) chatHistory.shift();
+
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
-      contents: userMessage,
+      contents: `Conversation History:\n${chatHistory.join('\n')}\n\nBased on the entire conversation history, extract the best Kapruka search query.`,
       config: {
         systemInstruction: `You are the Kapruka AI Shopping Assistant. The user wants to find products on Kapruka (Sri Lanka's largest e-commerce platform). 
-Extract the best search query to find the actual item they want to buy. 
+Extract the best search query to find the actual item they want to buy, considering the full conversation history. 
 Also suggest 4 to 6 relevant Kapruka categories (e.g., Cakes, Flowers, GreetingCards, Bicycle, Electronics, Clothing, Giftset, Sweets, etc.) that match their occasion or context.`,
         responseMimeType: 'application/json',
         responseSchema: {
