@@ -3,6 +3,7 @@ import { scenarioBlocks, stageConfigs } from '../data/scenario';
 import type { Product } from '../data/scenario';
 import { useScreenInit } from '../useScreenInit.js';
 import { searchProducts, listCategories } from '../lib/kapruka-mcp';
+import { parseUserQuery } from './useKaprukaAgent';
 
 export interface WishTreeState {
   stage: number;
@@ -99,7 +100,21 @@ export function useWishTree() {
     }));
 
     try {
-      const result = await searchProducts(query, { limit: 40 });
+      // 1. Let Gemini AI parse the query to understand context
+      const agentResult = await parseUserQuery(query);
+      
+      // Update UI with AI's understanding
+      setState((prev) => ({
+        ...prev,
+        aiStatus: agentResult.aiStatusMessage,
+      }));
+
+      if (agentResult.suggestedCategories.length > 0) {
+        setLiveCategories(agentResult.suggestedCategories);
+      }
+
+      // 2. Fetch from MCP using the optimized search keyword
+      const result = await searchProducts(agentResult.searchQuery, { limit: 40 });
       const mapped: Product[] = result.products.map((p) => ({
         id: p.id,
         name: p.name,
@@ -114,7 +129,7 @@ export function useWishTree() {
       setState((prev) => ({
         ...prev,
         isSearching: false,
-        aiStatus: `Found ${mapped.length} results for "${query}"`,
+        aiStatus: `Found ${mapped.length} results for "${agentResult.searchQuery}"`,
         productSeed: prev.productSeed + 1, // trigger reshuffle with new products
       }));
 
