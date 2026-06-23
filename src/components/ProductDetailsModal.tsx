@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { X, ShoppingCart, Tag } from 'lucide-react';
+import { X, ShoppingCart, Tag, ExternalLink, Loader2, Package } from 'lucide-react';
 import type { Product } from '../data/scenario';
+import { getProduct, type KaprukaMCPProduct } from '../lib/kapruka-mcp';
 
 interface ProductDetailsModalProps {
   product: Product | null;
@@ -12,9 +13,41 @@ interface ProductDetailsModalProps {
 export function ProductDetailsModal({
   product,
   onClose,
-  onAddToCart
+  onAddToCart,
 }: ProductDetailsModalProps) {
+  const [details, setDetails] = useState<KaprukaMCPProduct | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!product) {
+      setDetails(null);
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    getProduct(product.id)
+      .then((d) => {
+        setDetails(d);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error('[MCP] getProduct failed:', err);
+        setError('Could not load full details.');
+        setLoading(false);
+      });
+  }, [product?.id]);
+
   if (!product) return null;
+
+  // Merge: prefer live details, fall back to the product we already have
+  const displayName = details?.name ?? product.name;
+  const displayPrice = details?.price ?? product.price;
+  const displayImage = details?.image || product.image;
+  const displayCategory = details?.category ?? product.category;
+  const displayUrl = details?.url;
+  const displayVariants = details?.variants ?? [];
+  const inStock = details ? details.inStock !== false : true;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -35,10 +68,10 @@ export function ProductDetailsModal({
         transition={{ type: 'spring', duration: 0.4 }}
         className="relative bg-slate-900/90 border border-white/10 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-[0_0_50px_rgba(16,185,129,0.25)] backdrop-blur-xl z-10 overflow-hidden"
       >
-        {/* Soft glowing ambient background blur */}
+        {/* Soft glowing ambient */}
         <div className="absolute -top-20 -right-20 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
 
-        {/* Close button */}
+        {/* Close */}
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-white/50 hover:text-white transition-colors bg-white/5 hover:bg-white/10 p-2 rounded-full z-20"
@@ -48,40 +81,100 @@ export function ProductDetailsModal({
 
         {/* Product Image */}
         <div className="relative w-full aspect-square rounded-2xl overflow-hidden mb-6 border border-white/5 bg-slate-950">
-          <img
-            src={product.image}
-            alt={product.name}
-            className="w-full h-full object-cover"
-          />
+          {loading ? (
+            <div className="w-full h-full flex items-center justify-center">
+              <Loader2 className="w-8 h-8 text-emerald-400 animate-spin" />
+            </div>
+          ) : (
+            <img
+              src={displayImage}
+              alt={displayName}
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src =
+                  'https://via.placeholder.com/400x400/1e293b/6ee7b7?text=Kapruka';
+              }}
+            />
+          )}
         </div>
 
-        {/* Category Tag */}
-        <div className="flex items-center gap-1.5 text-emerald-400 text-xs font-mono tracking-wider bg-emerald-500/10 px-3 py-1 rounded-full w-fit mb-3 border border-emerald-500/20">
-          <Tag className="w-3 h-3" />
-          <span>{product.category.toUpperCase()}</span>
+        {/* Category + Stock */}
+        <div className="flex items-center gap-2 mb-3 flex-wrap">
+          <div className="flex items-center gap-1.5 text-emerald-400 text-xs font-mono tracking-wider bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
+            <Tag className="w-3 h-3" />
+            <span>{displayCategory.toUpperCase() || 'KAPRUKA'}</span>
+          </div>
+          {!loading && (
+            <div className={`flex items-center gap-1.5 text-xs font-mono px-3 py-1 rounded-full border ${inStock ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' : 'text-red-400 bg-red-500/10 border-red-500/20'}`}>
+              <Package className="w-3 h-3" />
+              <span>{inStock ? 'IN STOCK' : 'OUT OF STOCK'}</span>
+            </div>
+          )}
         </div>
 
         {/* Title */}
-        <h3 className="text-2xl font-bold font-heading text-white mb-2 leading-snug">
-          {product.name}
-        </h3>
+        {loading ? (
+          <div className="h-7 bg-white/10 rounded-lg animate-pulse mb-2 w-3/4" />
+        ) : (
+          <h3 className="text-2xl font-bold font-heading text-white mb-2 leading-snug">
+            {displayName}
+          </h3>
+        )}
 
         {/* Price */}
-        <p className="text-xl font-mono text-emerald-400 font-bold mb-6">
-          LKR {product.price.toLocaleString()}
-        </p>
+        {loading ? (
+          <div className="h-6 bg-white/10 rounded-lg animate-pulse mb-6 w-1/3" />
+        ) : (
+          <p className="text-xl font-mono text-emerald-400 font-bold mb-4">
+            LKR {displayPrice.toLocaleString()}
+          </p>
+        )}
 
-        {/* Add to Cart button */}
-        <button
-          onClick={() => {
-            onAddToCart(product.id);
-            onClose();
-          }}
-          className="w-full py-4 px-6 bg-emerald-500 hover:bg-emerald-400 text-white font-bold rounded-2xl flex items-center justify-center gap-3 transition-all duration-300 shadow-[0_4px_20px_rgba(16,185,129,0.3)] hover:shadow-[0_4px_30px_rgba(16,185,129,0.5)] transform hover:-translate-y-0.5 active:translate-y-0"
-        >
-          <ShoppingCart className="w-5 h-5" />
-          <span>Add to Wishlist / Cart</span>
-        </button>
+        {/* Variants */}
+        {displayVariants.length > 0 && (
+          <div className="mb-4 flex flex-wrap gap-2">
+            {displayVariants.map((v, i) => (
+              <span
+                key={i}
+                className="text-xs font-mono bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-white/70"
+              >
+                {v.name}: {v.value}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* Error note */}
+        {error && (
+          <p className="text-xs text-amber-400/80 mb-3 font-mono">{error}</p>
+        )}
+
+        {/* Action buttons */}
+        <div className="flex flex-col gap-3">
+          <button
+            onClick={() => {
+              onAddToCart(product.id);
+              onClose();
+            }}
+            disabled={!inStock && !loading}
+            className="w-full py-4 px-6 bg-emerald-500 hover:bg-emerald-400 disabled:bg-white/10 disabled:cursor-not-allowed text-white font-bold rounded-2xl flex items-center justify-center gap-3 transition-all duration-300 shadow-[0_4px_20px_rgba(16,185,129,0.3)] hover:shadow-[0_4px_30px_rgba(16,185,129,0.5)] transform hover:-translate-y-0.5 active:translate-y-0"
+          >
+            <ShoppingCart className="w-5 h-5" />
+            <span>Add to Cart</span>
+          </button>
+
+          {displayUrl && (
+            <a
+              href={displayUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full py-3 px-6 border border-white/20 hover:border-emerald-400/50 text-white/80 hover:text-white font-medium rounded-2xl flex items-center justify-center gap-2 transition-all duration-300 text-sm hover:bg-white/5"
+            >
+              <ExternalLink className="w-4 h-4" />
+              View on Kapruka
+            </a>
+          )}
+        </div>
       </motion.div>
     </div>
   );
