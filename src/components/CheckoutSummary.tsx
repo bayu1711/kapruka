@@ -26,7 +26,6 @@ export function CheckoutSummary({ items, onConfirm }: CheckoutSummaryProps) {
 
   // Checkout state
   const [placing, setPlacing] = useState(false);
-  const [payUrl, setPayUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const subtotal = items.reduce((sum, item) => sum + item.price, 0);
@@ -52,7 +51,6 @@ export function CheckoutSummary({ items, onConfirm }: CheckoutSummaryProps) {
       });
 
       if (result.payUrl) {
-        setPayUrl(result.payUrl);
         // Open the pay link in a new tab automatically
         window.open(result.payUrl, '_blank', 'noopener,noreferrer');
         // Notify parent that order is placed

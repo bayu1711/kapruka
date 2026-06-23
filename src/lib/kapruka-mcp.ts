@@ -105,7 +105,8 @@ async function callTool<T = unknown>(
     method: 'tools/call',
     params: {
       name: toolName,
-      arguments: toolArgs,
+      // The Kapruka MCP server expects arguments.params to contain the actual args
+      arguments: { params: toolArgs },
     },
   };
 
@@ -164,18 +165,64 @@ async function callTool<T = unknown>(
 function extractContent<T>(result: unknown): T {
   if (!result || typeof result !== 'object') return result as T;
   const r = result as Record<string, unknown>;
+
+  // Check isError flag
+  if (r['isError'] === true) {
+    const errContent = (r['content'] as Array<{type:string;text:string}>)?.[0]?.text ?? 'MCP tool error';
+    throw new Error(errContent);
+  }
+
   const content = r['content'];
   if (Array.isArray(content) && content.length > 0) {
     const block = content[0] as Record<string, unknown>;
     if (block['type'] === 'text' && typeof block['text'] === 'string') {
+      const text = block['text'];
+      // Try JSON first
       try {
-        return JSON.parse(block['text']) as T;
+        return JSON.parse(text) as T;
       } catch {
-        return block['text'] as unknown as T;
+        // Return the raw markdown text — the normaliser will parse it
+        return text as unknown as T;
       }
     }
   }
   return result as T;
+}
+
+// ---------------------------------------------------------------------------
+// Markdown response parser
+// The Kapruka MCP server returns human-readable markdown for search results.
+// We parse the structured fields out of the markdown text.
+// ---------------------------------------------------------------------------
+
+function parseMarkdownProducts(text: string): KaprukaMCPProduct[] {
+  const products: KaprukaMCPProduct[] = [];
+  // Each product block starts with "**N. Name**"
+  const blocks = text.split(/\n(?=\*\*\d+\.)/g);
+  for (const block of blocks) {
+    // Title line: **1. Apple Iphone 13 128gb**
+    const titleMatch = block.match(/\*\*\d+\.\s+(.+?)\*\*/);
+    if (!titleMatch) continue;
+    const name = titleMatch[1].trim();
+
+    // ID: `EF_PC_...` · LKR 182,000 · ...
+    const idMatch = block.match(/ID:\s*`([^`]+)`/);
+    const id = idMatch ? idMatch[1] : String(Date.now() + Math.random());
+
+    // Price: LKR 182,000
+    const priceMatch = block.match(/LKR\s*([\d,]+)/);
+    const price = priceMatch ? parseInt(priceMatch[1].replace(/,/g, ''), 10) : 0;
+
+    // URL: [View product](https://...)
+    const urlMatch = block.match(/\[View product\]\(([^)]+)\)/);
+    const url = urlMatch ? urlMatch[1] : undefined;
+
+    // In stock
+    const inStock = !block.toLowerCase().includes('out of stock');
+
+    products.push({ id, name, price, image: '', category: '', url, inStock });
+  }
+  return products;
 }
 
 // ---------------------------------------------------------------------------
@@ -334,6 +381,12 @@ export async function trackOrder(orderNumber: string): Promise<KaprukaTrackResul
 // ---------------------------------------------------------------------------
 
 function normaliseSearchResult(raw: unknown): KaprukaSearchResult {
+  // The Kapruka MCP returns markdown text for search results — parse it
+  if (typeof raw === 'string') {
+    const products = parseMarkdownProducts(raw);
+    return { products, total: products.length };
+  }
+
   if (!raw || typeof raw !== 'object') return { products: [], total: 0 };
   const r = raw as Record<string, unknown>;
 
@@ -361,7 +414,45 @@ function normaliseSearchResult(raw: unknown): KaprukaSearchResult {
   return { products: [], total: 0 };
 }
 
+
+function parseMarkdownProduct(text: string): KaprukaMCPProduct {
+  // ## Product Name
+  const nameMatch = text.match(/^##\s+(.+)/m);
+  const name = nameMatch ? nameMatch[1].trim() : 'Product';
+
+  // **ID**: `EF_PC_ELEC0V18POD00115P`
+  const idMatch = text.match(/\*\*ID\*\*:\s*`([^`]+)`/);
+  const id = idMatch ? idMatch[1] : String(Date.now());
+
+  // **Price**: LKR 182,000
+  const priceMatch = text.match(/\*\*Price\*\*:\s*LKR\s*([\d,]+)/);
+  const price = priceMatch ? parseInt(priceMatch[1].replace(/,/g, ''), 10) : 0;
+
+  // **Category**: ELECTRONICS
+  const catMatch = text.match(/\*\*Category\*\*:\s*(.+)/);
+  const category = catMatch ? catMatch[1].trim() : '';
+
+  // **Image**: https://...
+  const imgMatch = text.match(/\*\*Image\*\*:\s*(https?:\/\/\S+)/);
+  const image = imgMatch ? imgMatch[1].trim() : '';
+
+  // [View on Kapruka](https://...)
+  const urlMatch = text.match(/\[View on Kapruka\]\(([^)]+)\)/);
+  const url = urlMatch ? urlMatch[1] : undefined;
+
+  // **Stock**: In stock / Out of stock
+  const stockMatch = text.match(/\*\*Stock\*\*:\s*(.+)/);
+  const inStock = !stockMatch || !stockMatch[1].toLowerCase().includes('out of stock');
+
+  // Description: text after the last table/bold line before Image
+  const descMatch = text.match(/\*\*International shipping\*\*:.*?\n+([^\n*\[#].+)/s);
+  const description = descMatch ? descMatch[1].substring(0, 200).trim() : undefined;
+
+  return { id, name, price, image, category, url, inStock, description };
+}
+
 function normaliseProduct(raw: unknown): KaprukaMCPProduct {
+  if (typeof raw === 'string') return parseMarkdownProduct(raw);
   if (!raw || typeof raw !== 'object') {
     return { id: String(Date.now()), name: 'Unknown', price: 0, image: '', category: '' };
   }
@@ -388,6 +479,16 @@ function normaliseProduct(raw: unknown): KaprukaMCPProduct {
 }
 
 function normaliseCategories(raw: unknown): KaprukaCategory[] {
+  // Markdown format: "- [Name](url)" per line
+  if (typeof raw === 'string') {
+    return raw
+      .split('\n')
+      .map((line) => {
+        const m = line.match(/^-\s+\[([^\]]+)\]\(([^)]+)\)/);
+        return m ? { name: m[1].trim(), url: m[2].trim() } : null;
+      })
+      .filter(Boolean) as KaprukaCategory[];
+  }
   if (Array.isArray(raw)) {
     return (raw as unknown[]).map((c) => {
       if (typeof c === 'string') return { name: c };
@@ -395,19 +496,22 @@ function normaliseCategories(raw: unknown): KaprukaCategory[] {
       return { name: String(r['name'] ?? ''), url: r['url'] as string | undefined };
     });
   }
-  if (raw && typeof raw === 'object') {
-    const r = raw as Record<string, unknown>;
-    const arr = (r['categories'] ?? r['items'] ?? []) as unknown[];
-    return arr.map((c) => {
-      if (typeof c === 'string') return { name: c };
-      const rc = c as Record<string, unknown>;
-      return { name: String(rc['name'] ?? ''), url: rc['url'] as string | undefined };
-    });
-  }
   return [];
 }
 
 function normaliseCities(raw: unknown): string[] {
+  // Markdown format: "- [City Name](url)" or plain "- City Name"
+  if (typeof raw === 'string') {
+    return raw
+      .split('\n')
+      .map((line) => {
+        const linkMatch = line.match(/^-\s+\[([^\]]+)\]/);
+        if (linkMatch) return linkMatch[1].trim();
+        const plainMatch = line.match(/^-\s+(.+)/);
+        return plainMatch ? plainMatch[1].trim() : null;
+      })
+      .filter(Boolean) as string[];
+  }
   if (Array.isArray(raw)) {
     return (raw as unknown[]).map((c) => {
       if (typeof c === 'string') return c;
@@ -415,17 +519,9 @@ function normaliseCities(raw: unknown): string[] {
       return String(r['name'] ?? r['city'] ?? '');
     }).filter(Boolean);
   }
-  if (raw && typeof raw === 'object') {
-    const r = raw as Record<string, unknown>;
-    const arr = (r['cities'] ?? r['results'] ?? []) as unknown[];
-    return arr.map((c) => {
-      if (typeof c === 'string') return c;
-      const rc = c as Record<string, unknown>;
-      return String(rc['name'] ?? '');
-    }).filter(Boolean);
-  }
   return [];
 }
+
 
 function normaliseDelivery(raw: unknown): KaprukaDeliveryResult {
   if (!raw || typeof raw !== 'object') return { available: false };
