@@ -5,6 +5,13 @@ import { useScreenInit } from '../useScreenInit.js';
 import { searchProducts, listCategories } from '../lib/kapruka-mcp';
 import { parseUserQuery } from './useKaprukaAgent';
 
+export interface HistorySnapshot {
+  query: string;
+  aiStatus: string;
+  products: Product[];
+  categories: string[];
+}
+
 export interface WishTreeState {
   stage: number;
   visibleBlocks: typeof scenarioBlocks;
@@ -53,12 +60,16 @@ export function useWishTree() {
   // Live categories from Kapruka MCP (used by tree label chips)
   const [liveCategories, setLiveCategories] = useState<string[]>([]);
 
+  // History snapshots to restore previous conversational states
+  const [history, setHistory] = useState<HistorySnapshot[]>([]);
+
   // Fetch categories on mount — these power the stage-1 white chips in WishTree
   useEffect(() => {
     listCategories()
       .then((cats) => {
         // Take the first 6 category names for the tree label positions
-        setLiveCategories(cats.slice(0, 6).map((c) => c.name).filter(Boolean));
+        const initialCats = cats.slice(0, 6).map((c) => c.name).filter(Boolean);
+        setLiveCategories(initialCats);
       })
       .catch((err) => {
         console.warn('[MCP] listCategories failed, using defaults:', err);
@@ -126,12 +137,26 @@ export function useWishTree() {
       }));
 
       setLiveProducts(mapped);
+      
+      const statusMsg = `Found ${mapped.length} results for "${agentResult.searchQuery}"`;
+      
       setState((prev) => ({
         ...prev,
         isSearching: false,
-        aiStatus: `Found ${mapped.length} results for "${agentResult.searchQuery}"`,
+        aiStatus: statusMsg,
         productSeed: prev.productSeed + 1, // trigger reshuffle with new products
       }));
+
+      // Save a snapshot to history
+      setHistory((prev) => [
+        ...prev,
+        {
+          query: query,
+          aiStatus: statusMsg,
+          products: mapped,
+          categories: agentResult.suggestedCategories.length > 0 ? agentResult.suggestedCategories : liveCategories,
+        }
+      ]);
 
       // Clear status after 3 seconds
       setTimeout(() => {
@@ -158,6 +183,22 @@ export function useWishTree() {
       return { ...prev, productSeed: prev.productSeed + 1 };
     });
   }, [handleSubmit]);
+
+  const restoreHistory = useCallback((index: number) => {
+    setHistory(prev => {
+      const snap = prev[index];
+      if (!snap) return prev;
+      setLiveProducts(snap.products);
+      setLiveCategories(snap.categories);
+      setState(s => ({
+        ...s,
+        aiStatus: snap.aiStatus,
+        searchQuery: snap.query,
+      }));
+      // Truncate history to forked point
+      return prev.slice(0, index + 1);
+    });
+  }, []);
 
   const selectProduct = useCallback((productId: string | null) => {
     setState((prev) => ({ ...prev, selectedProduct: productId }));
@@ -208,5 +249,7 @@ export function useWishTree() {
     currentConfig,
     products: liveProducts,
     liveCategories,
+    history,
+    restoreHistory,
   };
 }

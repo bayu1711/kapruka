@@ -25,6 +25,8 @@ export function App() {
     currentConfig,
     products,
     liveCategories,
+    history,
+    restoreHistory,
   } = useWishTree();
   // Enable dark mode
   useEffect(() => {
@@ -68,6 +70,9 @@ export function App() {
   !state.showCart &&
   !state.showCheckout &&
   !state.showConfirmation;
+
+  const hasMorePages = productStart + PRODUCT_PAGE_SIZE < products.length;
+  const hasPrevPages = productStart > 0;
   return (
     <div className="relative w-full h-[100dvh] bg-[#402970] overflow-hidden flex flex-col">
       {/* Background effects */}
@@ -131,7 +136,25 @@ export function App() {
         placeholder={
         currentConfig?.prompt || 'What are you wishing for today?'
         }
-        disabled={state.showCheckout || state.showConfirmation || state.isSearching} />
+        disabled={state.showCheckout || state.showConfirmation || state.isSearching}
+        history={history}
+        onHistoryClick={restoreHistory}
+        hasMorePages={hasMorePages}
+        hasPrevPages={hasPrevPages}
+        onNextPage={() => {
+          setIsPaging(true);
+          setProductStart((s) => Math.min(Math.max(0, products.length - PRODUCT_PAGE_SIZE), s + PRODUCT_PAGE_SIZE));
+        }}
+        onPrevPage={() => {
+          setIsPaging(true);
+          setProductStart((s) => Math.max(0, s - PRODUCT_PAGE_SIZE));
+        }}
+        onRandomize={() => {
+          const randomQueries = ["Surprise me with completely different gift ideas!", "Show me random best sellers", "I'm not sure, inspire me!"];
+          const q = randomQueries[Math.floor(Math.random() * randomQueries.length)];
+          handleSubmit(q);
+        }}
+      />
 
       }
 
