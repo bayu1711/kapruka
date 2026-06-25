@@ -5,7 +5,6 @@ import { BrandLockup } from './components/BrandLockup';
 import { AiStatus } from './components/AiStatus';
 import { WishTree } from './components/WishTree';
 import { WishInputBar } from './components/WishInputBar';
-import { ProductPager } from './components/ProductPager';
 import { CartBadge } from './components/CartBadge';
 import { CartDrawer } from './components/CartDrawer';
 import { CheckoutSummary } from './components/CheckoutSummary';
@@ -103,31 +102,6 @@ export function App() {
         />
         
       </div>
-
-      {/* Product pager (above the chat) */}
-      {showPager &&
-      <ProductPager
-        start={productStart}
-        pageSize={PRODUCT_PAGE_SIZE}
-        total={products.length}
-        onPrev={() => {
-          setIsPaging(true);
-          setProductStart((s) => Math.max(0, s - PRODUCT_PAGE_SIZE));
-        }}
-        onNext={() => {
-          setIsPaging(true);
-          setProductStart((s) =>
-            Math.min(
-              Math.max(0, products.length - PRODUCT_PAGE_SIZE),
-              s + PRODUCT_PAGE_SIZE
-            )
-          );
-        }}
-      />
-
-      }
-
-      {/* Input bar */}
       {!state.showCheckout && !state.showConfirmation &&
       <WishInputBar
         value={state.inputValue}
