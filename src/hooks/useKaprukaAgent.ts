@@ -1,75 +1,45 @@
-import { GoogleGenAI, Type } from '@google/genai';
-
-const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-
-let ai: GoogleGenAI | null = null;
-if (apiKey) {
-  ai = new GoogleGenAI({ apiKey });
-}
-
 export interface AgentResult {
   searchQuery: string;
   suggestedCategories: string[];
   aiStatusMessage: string;
+  products?: any[];
 }
 
 const chatHistory: string[] = [];
 
 export async function parseUserQuery(userMessage: string): Promise<AgentResult> {
-  if (!ai) {
-    console.warn('Gemini API key not found. Falling back to dumb search.');
-    return {
-      searchQuery: userMessage,
-      suggestedCategories: [],
-      aiStatusMessage: 'Searching Kapruka...',
-    };
-  }
-
   // Keep last 6 messages for context
   chatHistory.push(`User: ${userMessage}`);
   if (chatHistory.length > 6) chatHistory.shift();
 
   try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: `Conversation History:\n${chatHistory.join('\n')}\n\nBased on the entire conversation history, extract the best Kapruka search query.`,
-      config: {
-        systemInstruction: `You are the Kapruka AI Shopping Assistant. The user wants to find products on Kapruka (Sri Lanka's largest e-commerce platform). 
-Extract the best search query to find the actual item they want to buy, considering the full conversation history. 
-Also suggest 4 to 6 relevant Kapruka categories (e.g., Cakes, Flowers, GreetingCards, Bicycle, Electronics, Clothing, Giftset, Sweets, etc.) that match their occasion or context.`,
-        responseMimeType: 'application/json',
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            searchQuery: { 
-              type: Type.STRING, 
-              description: 'The core product keyword to search for (e.g. "bicycle", "chocolate cake", "roses")' 
-            },
-            suggestedCategories: { 
-              type: Type.ARRAY, 
-              items: { type: Type.STRING }, 
-              description: '4 to 6 relevant category names for the tree UI' 
-            },
-            aiStatusMessage: { 
-              type: Type.STRING, 
-              description: 'A short friendly status message for the UI (max 1 sentence), e.g. "Looking for bicycles and birthday gifts..."' 
-            }
-          },
-          required: ['searchQuery', 'suggestedCategories', 'aiStatusMessage']
-        }
-      }
+    const res = await fetch('http://localhost:3001/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: userMessage, history: chatHistory.slice(0, -1) })
     });
+    
+    if (!res.ok) {
+      throw new Error(`Backend error: ${res.statusText}`);
+    }
+    
+    const data = await res.json();
+    
+    return {
+      searchQuery: userMessage, // The backend agent handles the actual query internally now
+      suggestedCategories: data.categories || [],
+      aiStatusMessage: `Found ${data.products ? data.products.length : 0} items`,
+      products: data.products || []
+    };
 
-    const text = response.text;
-    if (!text) throw new Error('Empty response from Gemini');
-    return JSON.parse(text) as AgentResult;
   } catch (err) {
-    console.error('Gemini processing failed:', err);
-    // Fallback if AI fails
+    console.error('Backend agent processing failed:', err);
+    // Fallback
     return {
       searchQuery: userMessage,
       suggestedCategories: [],
-      aiStatusMessage: 'Searching Kapruka...',
+      aiStatusMessage: 'Search failed',
+      products: []
     };
   }
 }

@@ -112,27 +112,21 @@ export function useWishTree() {
 
     try {
       // 1. Let Gemini AI parse the query to understand context
+      // 1. Analyze with AI backend (which executes MCP autonomously)
       const agentResult = await parseUserQuery(query);
-      
-      // Update UI with AI's understanding
-      setState((prev) => ({
-        ...prev,
-        aiStatus: agentResult.aiStatusMessage,
-      }));
+      setState((prev) => ({ ...prev, aiStatus: agentResult.aiStatusMessage }));
 
-      if (agentResult.suggestedCategories.length > 0) {
+      if (agentResult.suggestedCategories && agentResult.suggestedCategories.length > 0) {
         setLiveCategories(agentResult.suggestedCategories);
       }
 
-      // 2. Fetch from MCP using the optimized search keyword
-      const result = await searchProducts(agentResult.searchQuery, { limit: 40 });
-      const mapped: Product[] = result.products.map((p) => ({
+      // 2. Map products from the backend response
+      const mapped: Product[] = (agentResult.products || []).map((p: any) => ({
         id: p.id,
         name: p.name,
         price: p.price,
         image: p.image,
         category: p.category,
-        // position is unused by the grid layout but required by the interface
         position: { x: 0, y: 0 },
       }));
 
