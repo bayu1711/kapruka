@@ -5,6 +5,9 @@ const { processChat } = require('./agent');
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.get('/', (req, res) => {
+  res.json({ status: 'ok', message: 'Kapruka Backend Agent is running' });
+});
 
 app.post('/chat', async (req, res) => {
   const { message, history } = req.body;

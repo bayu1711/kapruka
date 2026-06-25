@@ -1,0 +1,18 @@
+HTTP/2 200 
+date: Thu, 25 Jun 2026 09:50:39 GMT
+content-type: text/event-stream
+alt-svc: h3=":443"; ma=86400
+cache-control: no-cache, no-transform
+mcp-session-id: bbc97e0d6a494ff88702757cfb6c322b
+permissions-policy: geolocation=(), microphone=(), camera=()
+ratelimit-limit: 60
+ratelimit-remaining: 59
+ratelimit-reset: 60
+referrer-policy: strict-origin-when-cross-origin
+strict-transport-security: max-age=15552000; preload
+via: 1.1 Caddy
+x-content-type-options: nosniff
+cf-cache-status: DYNAMIC
+server: cloudflare
+cf-ray: a11311b99d3924d1-CMB
+

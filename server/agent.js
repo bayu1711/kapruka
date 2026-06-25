@@ -25,16 +25,34 @@ async function executeKaprukaSearch(args) {
         params: { protocolVersion: '2024-11-05', capabilities: {}, clientInfo: { name: 'agent', version: '1.0' } }
       })
     });
+    
+    if (!initRes.ok) throw new Error('Init failed');
     const sessionId = initRes.headers.get('mcp-session-id');
+    await initRes.text(); // drain
 
-    // 2. Call tool
+    // 2. Initialized notification
+    if (sessionId) {
+      await fetch(KAPRUKA_MCP_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json, text/event-stream',
+          'mcp-session-id': sessionId
+        },
+        body: JSON.stringify({ jsonrpc: '2.0', method: 'notifications/initialized', params: {} })
+      }).catch(() => {});
+    }
+
+    // 3. Call tool
+    const headers = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json, text/event-stream'
+    };
+    if (sessionId) headers['mcp-session-id'] = sessionId;
+
     const callRes = await fetch(KAPRUKA_MCP_URL, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json, text/event-stream',
-        'mcp-session-id': sessionId || ''
-      },
+      headers,
       body: JSON.stringify({
         jsonrpc: '2.0',
         id: 2,
@@ -53,116 +71,137 @@ async function executeKaprukaSearch(args) {
         throw new Error(`MCP HTTP error ${callRes.status}`);
     }
 
-    // Handle SSE chunked response parsing
-    const reader = callRes.body.getReader();
-    const decoder = new TextDecoder();
-    let result = '';
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      const chunk = decoder.decode(value, { stream: true });
-      const lines = chunk.split('\n');
+    const contentType = callRes.headers.get('content-type') || '';
+    if (contentType.includes('text/event-stream')) {
+      const text = await callRes.text();
+      const lines = text.split('\n');
+      let finalResult = null;
       for (const line of lines) {
-        if (line.startsWith('data: ')) {
+        if (line.startsWith('data:')) {
           try {
-            const data = JSON.parse(line.slice(6));
-            if (data.result && data.result.content) {
-              result += data.result.content.map(c => c.text).join('');
+            const json = JSON.parse(line.slice(5).trim());
+            console.log('[SSE Chunk JSON]', JSON.stringify(json).substring(0, 300));
+            if (json.result && json.result.content && json.result.content.length > 0) {
+              finalResult = json.result.content[0].text;
             }
           } catch (e) {
-            // ignore JSON parse errors in chunks
+            console.error('[SSE JSON Parse Error]', e.message, 'on chunk:', line.substring(0, 100));
           }
         }
       }
+      return finalResult || 'No products found.';
+    }
+
+    const json = await callRes.json();
+    console.log('[Kapruka API]', JSON.stringify(json).substring(0, 500));
+    if (json.error) {
+      throw new Error(`MCP error: ${json.error.message}`);
     }
     
-    return result || 'No products found.';
+    if (json.result && json.result.content && json.result.content.length > 0) {
+        return json.result.content[0].text;
+    }
+    return 'No products found.';
   } catch (error) {
     console.error('Kapruka MCP execution failed:', error);
     return `Search failed: ${error.message}`;
   }
 }
 
-const searchTool = {
-  functionDeclarations: [
-    {
-      name: 'kapruka_search_products',
-      description: 'Search for products on Kapruka. Use this to find items the user wants. If it returns 0 products, you should retry with a different or broader query (e.g. if "flower clock" fails, try "flower" or "clock").',
-      parameters: {
-        type: 'OBJECT',
-        properties: {
-          q: { type: 'STRING', description: 'The search query' }
-        },
-        required: ['q']
-      }
-    }
-  ]
-};
+function parseMarkdownProducts(text) {
+  const products = [];
+  const blocks = text.split(/\n(?=\*\*\d+\.)/g);
+  for (const block of blocks) {
+    const titleMatch = block.match(/\*\*\d+\.\s+(.+?)\*\*/);
+    if (!titleMatch) continue;
+    const name = titleMatch[1].trim();
+
+    const idMatch = block.match(/ID:\s*`([^`]+)`/);
+    const id = idMatch ? idMatch[1] : String(Date.now() + Math.random());
+
+    const priceMatch = block.match(/LKR\s*([\d,]+)/);
+    const price = priceMatch ? parseInt(priceMatch[1].replace(/,/g, ''), 10) : 0;
+
+    const urlMatch = block.match(/\[View product\]\(([^)]+)\)/);
+    const url = urlMatch ? urlMatch[1] : undefined;
+    
+    // Extract image if we can, or just let frontend handle placeholder
+    const parts = urlMatch ? urlMatch[1].split('/kid/') : [];
+    const imgId = parts.length > 1 ? parts[1] : null;
+    const image = imgId ? `https://www.kapruka.com/cdn-cgi/image/width=300,quality=90,format=auto/shops/specialGifts/productImages/${imgId}.jpg` : '';
+
+    const inStock = !block.toLowerCase().includes('out of stock');
+
+    products.push({ id, name, price, image, category: '', url, stock: inStock });
+  }
+  return products;
+}
 
 async function processChat(message, history) {
-  let context = "Conversation History:\n";
+  let context = "Conversation History:\\n";
   if (history && history.length > 0) {
-    context += history.join('\n') + '\n\n';
+    context += history.join('\\n') + '\\n\\n';
   }
   
-  const chat = ai.chats.create({
-    model: 'gemini-2.5-flash',
-    config: {
-      systemInstruction: `You are the Kapruka AI Shopping Assistant. The user wants to find products on Kapruka (Sri Lanka's largest e-commerce platform).
-Your job is to search for what they want using the kapruka_search_products tool.
-IMPORTANT: You MUST search using the tool first. 
-If the tool returns "No products found", you MUST call the tool again with a DIFFERENT, broader query. Do not give up immediately. Keep trying different synonyms up to 3 times.
-Once you have found products (or exhausted your retries), you must output a JSON response matching exactly this schema:
+  let internalSystemLog = "";
+  let finalProducts = [];
+  let suggestedCategories = [];
+  let attempt = 0;
+
+  while (attempt < 3 && finalProducts.length === 0) {
+    attempt++;
+    const prompt = `${context}${internalSystemLog}User: ${message}`;
+    
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: prompt,
+      config: {
+        systemInstruction: `You are the Kapruka AI Shopping Assistant. The user wants to find products on Kapruka (Sri Lanka's largest e-commerce platform).
+Your job is to determine the absolute BEST single search query keyword based on the user's request.
+Output a JSON response matching exactly this schema:
 {
-  "products": [ { "id": "...", "name": "...", "price": ..., "image": "...", "category": "...", "stock": true } ],
+  "searchQuery": "the keyword to search for (e.g. 'roses', 'birthday cake', 'watch')",
   "categories": ["Flowers", "Cakes", "Giftsets", "Electronics", "Clothing"] // 4-6 categories that match the user's occasion/intent
 }
-Extract the product array exactly as returned by the tool (it returns markdown JSON).
-DO NOT wrap the output in markdown \`\`\`json blocks. Just raw JSON text.`,
-      tools: [searchTool],
-      temperature: 0.2
-    }
-  });
+Extract the query and return ONLY raw JSON. Do not wrap in markdown blocks.`,
+        temperature: 0.3
+      }
+    });
 
-  const prompt = `${context}User: ${message}`;
-  let response = await chat.sendMessage({ message: prompt });
-  
-  // Agent loop for tool calls
-  let maxTurns = 5;
-  while (response.functionCalls && response.functionCalls.length > 0 && maxTurns > 0) {
-    const call = response.functionCalls[0];
-    if (call.name === 'kapruka_search_products') {
-      console.log(`[Agent] Calling tool: ${call.name} with args:`, call.args);
-      const toolResult = await executeKaprukaSearch(call.args);
-      console.log(`[Agent] Tool returned: ${toolResult.substring(0, 100)}...`);
-      
-      response = await chat.sendMessage({
-        message: [{
-          functionResponse: {
-            name: call.name,
-            response: { result: toolResult }
-          }
-        }]
-      });
+    let text = response.text.trim();
+    if (text.startsWith('```json')) text = text.slice(7);
+    if (text.startsWith('```')) text = text.slice(3);
+    if (text.endsWith('```')) text = text.slice(0, -3);
+
+    let parsed;
+    try {
+      parsed = JSON.parse(text.trim());
+    } catch (e) {
+      console.error("Failed to parse Gemini output:", text);
+      return { products: [], categories: [] };
     }
-    maxTurns--;
+
+    const { searchQuery, categories } = parsed;
+    suggestedCategories = categories || [];
+
+    console.log(`[Agent Attempt ${attempt}] Searching Kapruka for: "${searchQuery}"`);
+    const mcpRawText = await executeKaprukaSearch({ q: searchQuery });
+
+    if (mcpRawText === 'No products found.') {
+      console.log(`[Agent Attempt ${attempt}] 0 products. Retrying...`);
+      internalSystemLog += `[System Note]: The search query '${searchQuery}' returned 0 products. Please try a completely different, broader synonym or related term.\\n`;
+    } else {
+      finalProducts = parseMarkdownProducts(mcpRawText);
+      if (finalProducts.length === 0) {
+        internalSystemLog += `[System Note]: The search query '${searchQuery}' returned 0 parseable products. Please try a different query.\\n`;
+      } else {
+        console.log(`[Agent Attempt ${attempt}] Found ${finalProducts.length} products!`);
+        break; // Success!
+      }
+    }
   }
 
-  let finalOutput = response.text;
-  
-  // Clean up markdown block if present
-  finalOutput = finalOutput.trim();
-  if (finalOutput.startsWith('```json')) finalOutput = finalOutput.slice(7);
-  if (finalOutput.startsWith('```')) finalOutput = finalOutput.slice(3);
-  if (finalOutput.endsWith('```')) finalOutput = finalOutput.slice(0, -3);
-
-  try {
-    return JSON.parse(finalOutput.trim());
-  } catch (e) {
-    console.error("Failed to parse JSON response from agent. Raw response:", finalOutput);
-    return { products: [], categories: [] };
-  }
+  return { products: finalProducts, categories: suggestedCategories };
 }
 
 module.exports = { processChat };
