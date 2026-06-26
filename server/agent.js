@@ -11,7 +11,16 @@ const OutputSchema = z.object({
   reasoning: z.string().describe("Analyze the recipient and occasion. Explain what types of gifts are appropriate vs inappropriate, and why you are choosing the specific Kapruka search query."),
   recipient: z.string().describe("Who the gift is for (e.g. mother, friend, self, unspecified)"),
   searchQuery: z.string().describe("The specific Kapruka search term (e.g. 'roses', 'birthday cake', 'saree')"),
-  categories: z.array(z.string()).describe("4-6 matching categories")
+  categories: z.array(z.string()).describe("4-6 matching categories"),
+  searchParameters: z.array(z.object({
+    key: z.string().describe("The name of the filter, e.g. 'max_price', 'color', 'brand'"),
+    value: z.string().describe("The value of the filter, e.g. '200000', 'red', 'Apple'")
+  })).optional().describe("Any additional dynamic constraints/filters the user specified")
+});
+
+const PostFilterSchema = z.object({
+  postFilterReasoning: z.string().describe("Reasoning for which products are irrelevant/wrong model and why they are being removed."),
+  invalidProductIds: z.array(z.string()).describe("Array of product IDs that should be deleted because they are completely irrelevant to the user's specific request.")
 });
 
 const KAPRUKA_MCP_URL = 'https://mcp.kapruka.com/mcp';
@@ -194,18 +203,14 @@ async function enrichProductsWithImages(products) {
   }));
 }
 
-async function processChat(message, history) {
-  let context = "Conversation History:\n";
-  if (history && history.length > 0) {
-    context += history.join('\n') + '\n\n';
-  }
-  
+async function processChat(message, history, enablePostFilter = false) {
   let internalSystemLog = "";
   let finalProducts = [];
   let suggestedCategories = [];
   let finalReasoning = "";
   let finalRecipient = "";
   let finalSearchQuery = "";
+  let finalPostFilterReasoning = "";
   let attempt = 0;
 
   const llm = new ChatGoogleGenerativeAI({
@@ -221,10 +226,19 @@ async function processChat(message, history) {
     
     const messages = [
       new SystemMessage(`You are the Kapruka AI Shopping Assistant. The user wants to find products on Kapruka (Sri Lanka's largest e-commerce platform).
-Your job is to determine the absolute BEST single search query keyword based on the user's request.
-Before picking a query, analyze the intent and recipient. Avoid generic terms like 'gift', and avoid suggesting inappropriate items (e.g. romantic red roses for a mother, or kids toys for a boss). Instead, pick concrete, appropriate categories or items (e.g. 'saree', 'perfume', 'cake', 'watch').`),
-      new HumanMessage(`${context}${internalSystemLog}User: ${message}`)
+Your job is to determine the absolute BEST single search query keyword based on the user's LATEST request, while using the conversation history for context.
+Before picking a query, analyze the intent and recipient. Avoid generic terms like 'gift'. Pick concrete, appropriate categories or items (e.g. 'saree', 'perfume', 'cake', 'iPhone').
+If the user specifies constraints like budget, brand, or color (e.g., "under 200000", "Apple", "red"), put them in the searchParameters array with clear keys (e.g. "max_price", "brand", "color").`)
     ];
+
+    if (history && history.length > 0) {
+      history.forEach(msg => messages.push(new HumanMessage(msg)));
+    }
+    
+    if (internalSystemLog) {
+      messages.push(new SystemMessage(internalSystemLog));
+    }
+    messages.push(new HumanMessage(`User: ${message}`));
 
     let parsed;
     try {
@@ -234,14 +248,18 @@ Before picking a query, analyze the intent and recipient. Avoid generic terms li
       return { products: [], categories: [], reasoning: '', recipient: '', searchQuery: '' };
     }
 
-    const { reasoning, recipient, searchQuery, categories } = parsed;
+    const { reasoning, recipient, searchQuery, categories, searchParameters } = parsed;
     suggestedCategories = categories || [];
     finalReasoning = reasoning || '';
     finalRecipient = recipient || '';
     finalSearchQuery = searchQuery || '';
+    const params = {};
+    if (searchParameters) {
+      searchParameters.forEach(p => { params[p.key] = p.value; });
+    }
 
-    console.log(`[Agent Attempt ${attempt}] Searching Kapruka for: "${searchQuery}"`);
-    const mcpRawText = await executeKaprukaSearch({ q: searchQuery });
+    console.log(`[Agent Attempt ${attempt}] Searching Kapruka for: "${searchQuery}" with params:`, params);
+    const mcpRawText = await executeKaprukaSearch({ q: searchQuery, ...params });
 
     if (mcpRawText === 'No products found.') {
       console.log(`[Agent Attempt ${attempt}] 0 products. Retrying...`);
@@ -254,6 +272,29 @@ Before picking a query, analyze the intent and recipient. Avoid generic terms li
         internalSystemLog += `[System Note]: The search query '${searchQuery}' returned 0 parseable products. Please try a different query.\n`;
       } else {
         console.log(`[Agent Attempt ${attempt}] Found ${finalProducts.length} products!`);
+        
+        if (enablePostFilter) {
+          console.log(`[Agent Attempt ${attempt}] Executing Post-Filter...`);
+          try {
+            const productListForAi = finalProducts.map(p => ({ id: p.id, name: p.name }));
+            const postFilterLlm = llm.withStructuredOutput(PostFilterSchema, { name: "PostFilter" });
+            const filterMessages = [
+              new SystemMessage(`The user explicitly asked for: "${message}". You must strictly filter the following Kapruka products. Remove any products that are completely irrelevant or the wrong model (e.g., remove iPhone 17 if they asked for iPhone 13). ONLY remove items that are definitely wrong.`),
+              new HumanMessage(JSON.stringify(productListForAi))
+            ];
+            
+            const filterResult = await postFilterLlm.invoke(filterMessages);
+            finalPostFilterReasoning = filterResult.postFilterReasoning || '';
+            const invalidIds = new Set(filterResult.invalidProductIds || []);
+            
+            console.log(`[Agent Post-Filter] Flagged ${invalidIds.size} products for removal.`);
+            finalProducts = finalProducts.filter(p => !invalidIds.has(p.id));
+          } catch (err) {
+            console.error("Post-Filter failed, skipping:", err);
+            finalPostFilterReasoning = "Post-Filter failed to execute.";
+          }
+        }
+        
         break; // Success!
       }
     }
@@ -264,7 +305,8 @@ Before picking a query, analyze the intent and recipient. Avoid generic terms li
     categories: suggestedCategories,
     reasoning: finalReasoning,
     recipient: finalRecipient,
-    searchQuery: finalSearchQuery
+    searchQuery: finalSearchQuery,
+    postFilterReasoning: finalPostFilterReasoning
   };
 }
 

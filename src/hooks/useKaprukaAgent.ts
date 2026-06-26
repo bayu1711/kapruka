@@ -6,11 +6,12 @@ export interface AgentResult {
   reasoning?: string;
   recipient?: string;
   actualSearchQuery?: string;
+  postFilterReasoning?: string;
 }
 
 const chatHistory: string[] = [];
 
-export async function parseUserQuery(userMessage: string): Promise<AgentResult> {
+export async function parseUserQuery(userMessage: string, enablePostFilter: boolean = false): Promise<AgentResult> {
   // Keep last 6 messages for context
   chatHistory.push(`User: ${userMessage}`);
   if (chatHistory.length > 6) chatHistory.shift();
@@ -19,7 +20,7 @@ export async function parseUserQuery(userMessage: string): Promise<AgentResult> 
     const res = await fetch('http://localhost:3001/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: userMessage, history: chatHistory.slice(0, -1) })
+      body: JSON.stringify({ message: userMessage, history: chatHistory.slice(0, -1), enablePostFilter })
     });
     
     if (!res.ok) {
@@ -35,7 +36,8 @@ export async function parseUserQuery(userMessage: string): Promise<AgentResult> 
       aiStatusMessage: `Found ${data.products ? data.products.length : 0} items`,
       products: data.products || [],
       reasoning: data.reasoning,
-      recipient: data.recipient
+      recipient: data.recipient,
+      postFilterReasoning: data.postFilterReasoning
     };
 
   } catch (err) {

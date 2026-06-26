@@ -4,6 +4,7 @@ import { useWishTree } from './hooks/useWishTree';
 import { BrandLockup } from './components/BrandLockup';
 import { AiStatus } from './components/AiStatus';
 import { WishTree } from './components/WishTree';
+import { DevToolsDrawer } from './components/DevToolsDrawer';
 import { WishInputBar } from './components/WishInputBar';
 import { CartBadge } from './components/CartBadge';
 import { CartDrawer } from './components/CartDrawer';
@@ -32,7 +33,7 @@ export function App() {
     document.documentElement.classList.add('dark');
   }, []);
   const onSubmit = () => {
-    handleSubmit(state.inputValue);
+    handleSubmit(state.inputValue, enablePostFilter);
   };
   const cartProducts = state.cartItems.map(
     (id) => products.find((p) => p.id === id)!
@@ -55,6 +56,9 @@ export function App() {
 
   const [productStart, setProductStart] = useState(0);
   const [isPaging, setIsPaging] = useState(false);
+  const [isDevToolsOpen, setIsDevToolsOpen] = useState(false);
+  const [enablePostFilter, setEnablePostFilter] = useState(false);
+  const [showDebugGrid, setShowDebugGrid] = useState(false);
 
   useEffect(() => {
     setIsPaging(false);
@@ -102,6 +106,8 @@ export function App() {
           aiReasoning={state.aiReasoning}
           aiRecipient={state.aiRecipient}
           aiActualSearchQuery={state.aiActualSearchQuery}
+          onOpenDevTools={() => setIsDevToolsOpen(true)}
+          showDebugGrid={showDebugGrid}
         />
         
       </div>
@@ -142,6 +148,19 @@ export function App() {
         items={cartProducts}
         onCheckout={proceedToCheckout} />
       
+      {/* Dev Tools drawer */}
+      <DevToolsDrawer
+        isOpen={isDevToolsOpen}
+        onClose={() => setIsDevToolsOpen(false)}
+        showDebugGrid={showDebugGrid}
+        onToggleDebugGrid={() => setShowDebugGrid(!showDebugGrid)}
+        enablePostFilter={enablePostFilter}
+        onTogglePostFilter={() => setEnablePostFilter(!enablePostFilter)}
+        aiReasoning={state.aiReasoning}
+        aiRecipient={state.aiRecipient}
+        aiActualSearchQuery={state.aiActualSearchQuery}
+        aiPostFilterReasoning={state.aiPostFilterReasoning}
+      />
 
       {/* Checkout */}
       {state.showCheckout &&

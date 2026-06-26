@@ -1,7 +1,8 @@
 import React, { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Grid3x3 } from 'lucide-react';
+import { Grid3x3, Settings } from 'lucide-react';
 import type { Product } from '../data/scenario';
+
 interface WishTreeProps {
   stage: number;
   products: Product[];
@@ -12,6 +13,8 @@ interface WishTreeProps {
   aiReasoning?: string;
   aiRecipient?: string;
   aiActualSearchQuery?: string;
+  onOpenDevTools: () => void;
+  showDebugGrid: boolean;
 }
 type CellType = 'foliage' | 'label' | 'product';
 interface GridCell {
@@ -107,9 +110,10 @@ export function WishTree({
   liveCategories = [],
   aiReasoning,
   aiRecipient,
-  aiActualSearchQuery
+  aiActualSearchQuery,
+  onOpenDevTools,
+  showDebugGrid
 }: WishTreeProps) {
-  const [showDebugGrid, setShowDebugGrid] = useState(false);
   const showProducts = stage >= 3;
   // Calculate cell positions based on the 11x8 grid
   const gridCells = useMemo(() => {
@@ -562,17 +566,12 @@ export function WishTree({
 
         <button
           type="button"
-          onClick={() => setShowDebugGrid((v) => !v)}
-          aria-pressed={showDebugGrid}
-          aria-label={showDebugGrid ? 'Hide debug grid' : 'Show debug grid'}
-          className={`absolute top-2 right-2 z-[60] flex items-center gap-1.5 rounded-full border px-2.5 py-1.5 text-[10px] sm:text-xs font-mono font-semibold transition-colors ${
-            showDebugGrid
-              ? 'border-white/30 bg-white/15 text-white hover:bg-white/25'
-              : 'border-white/10 bg-slate-950/50 text-white/60 hover:bg-slate-950/70 hover:text-white/80'
-          }`}
+          onClick={onOpenDevTools}
+          aria-label="Open Developer Tools"
+          className="absolute top-2 right-2 z-[60] flex items-center gap-1.5 rounded-full border px-2.5 py-1.5 text-[10px] sm:text-xs font-mono font-semibold transition-colors border-white/30 bg-black/40 text-white hover:bg-black/60 backdrop-blur-sm"
         >
-          <Grid3x3 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-          {showDebugGrid ? 'Hide Grid' : 'Show Grid'}
+          <Settings className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-purple-400" />
+          Dev Tools
         </button>
 
         {/* Debug Grid Overlay */}
@@ -601,35 +600,6 @@ export function WishTree({
             </div>
           );
         })}
-
-        {/* AI Debug Panel Overlay */}
-        {showDebugGrid && (
-          <div className="absolute left-[30%] sm:left-1/2 top-[70%] sm:top-[65%] -translate-x-1/2 -translate-y-1/2 z-[60] w-[90%] sm:w-full max-w-sm pointer-events-none">
-            <div className="backdrop-blur-xl bg-slate-950/85 border border-purple-500/30 rounded-2xl p-4 shadow-2xl text-white pointer-events-auto">
-              <h3 className="text-[10px] sm:text-xs font-bold text-purple-400 uppercase tracking-wider mb-3">AI Agent Debug Info</h3>
-              <div className="space-y-3 text-xs sm:text-sm">
-                <div>
-                  <span className="text-white/50 text-[10px] sm:text-xs block mb-1">Search Query</span>
-                  <div className="font-mono bg-black/40 px-2 py-1 rounded border border-white/10 text-emerald-400 inline-block">
-                    {aiActualSearchQuery || 'None'}
-                  </div>
-                </div>
-                <div>
-                  <span className="text-white/50 text-[10px] sm:text-xs block mb-1">Detected Recipient</span>
-                  <div className="font-medium text-white/90">
-                    {aiRecipient || 'Unspecified'}
-                  </div>
-                </div>
-                <div>
-                  <span className="text-white/50 text-[10px] sm:text-xs block mb-1">Reasoning Strategy</span>
-                  <div className="text-white/80 leading-relaxed italic border-l-2 border-purple-500/50 pl-2 text-[10px] sm:text-xs">
-                    {aiReasoning || 'No reasoning available for this search.'}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Unified Grid: Foliage, Labels, and Products */}
         {gridCells.

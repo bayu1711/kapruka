@@ -13,6 +13,7 @@ export interface HistorySnapshot {
   aiReasoning?: string;
   aiRecipient?: string;
   aiActualSearchQuery?: string;
+  aiPostFilterReasoning?: string;
 }
 
 export interface WishTreeState {
@@ -31,6 +32,7 @@ export interface WishTreeState {
   aiReasoning?: string;
   aiRecipient?: string;
   aiActualSearchQuery?: string;
+  aiPostFilterReasoning?: string;
 }
 
 export function useWishTree() {
@@ -117,9 +119,8 @@ export function useWishTree() {
     }));
 
     try {
-      // 1. Let Gemini AI parse the query to understand context
       // 1. Analyze with AI backend (which executes MCP autonomously)
-      const agentResult = await parseUserQuery(query);
+      const agentResult = await parseUserQuery(query, enablePostFilter);
       setState((prev) => ({ ...prev, aiStatus: agentResult.aiStatusMessage }));
 
       if (agentResult.suggestedCategories && agentResult.suggestedCategories.length > 0) {
@@ -148,6 +149,7 @@ export function useWishTree() {
         aiReasoning: agentResult.reasoning,
         aiRecipient: agentResult.recipient,
         aiActualSearchQuery: agentResult.actualSearchQuery,
+        aiPostFilterReasoning: agentResult.postFilterReasoning,
       }));
 
       // Save a snapshot to history
@@ -161,6 +163,7 @@ export function useWishTree() {
           aiReasoning: agentResult.reasoning,
           aiRecipient: agentResult.recipient,
           aiActualSearchQuery: agentResult.actualSearchQuery,
+          aiPostFilterReasoning: agentResult.postFilterReasoning,
         }
       ]);
 
