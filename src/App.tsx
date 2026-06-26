@@ -99,6 +99,9 @@ export function App() {
           onSelectProduct={selectProduct}
           isPaging={isPaging}
           liveCategories={liveCategories}
+          aiReasoning={state.aiReasoning}
+          aiRecipient={state.aiRecipient}
+          aiActualSearchQuery={state.aiActualSearchQuery}
         />
         
       </div>

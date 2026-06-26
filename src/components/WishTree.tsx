@@ -9,6 +9,9 @@ interface WishTreeProps {
   onSelectProduct: (id: string) => void;
   isPaging?: boolean;
   liveCategories?: string[];
+  aiReasoning?: string;
+  aiRecipient?: string;
+  aiActualSearchQuery?: string;
 }
 type CellType = 'foliage' | 'label' | 'product';
 interface GridCell {
@@ -100,8 +103,11 @@ export function WishTree({
   products,
   selectedProduct,
   onSelectProduct,
-  isPaging,
+  isPaging = false,
   liveCategories = [],
+  aiReasoning,
+  aiRecipient,
+  aiActualSearchQuery
 }: WishTreeProps) {
   const [showDebugGrid, setShowDebugGrid] = useState(false);
   const showProducts = stage >= 3;
@@ -595,6 +601,35 @@ export function WishTree({
             </div>
           );
         })}
+
+        {/* AI Debug Panel Overlay */}
+        {showDebugGrid && (
+          <div className="absolute left-[30%] sm:left-1/2 top-[70%] sm:top-[65%] -translate-x-1/2 -translate-y-1/2 z-[60] w-[90%] sm:w-full max-w-sm pointer-events-none">
+            <div className="backdrop-blur-xl bg-slate-950/85 border border-purple-500/30 rounded-2xl p-4 shadow-2xl text-white pointer-events-auto">
+              <h3 className="text-[10px] sm:text-xs font-bold text-purple-400 uppercase tracking-wider mb-3">AI Agent Debug Info</h3>
+              <div className="space-y-3 text-xs sm:text-sm">
+                <div>
+                  <span className="text-white/50 text-[10px] sm:text-xs block mb-1">Search Query</span>
+                  <div className="font-mono bg-black/40 px-2 py-1 rounded border border-white/10 text-emerald-400 inline-block">
+                    {aiActualSearchQuery || 'None'}
+                  </div>
+                </div>
+                <div>
+                  <span className="text-white/50 text-[10px] sm:text-xs block mb-1">Detected Recipient</span>
+                  <div className="font-medium text-white/90">
+                    {aiRecipient || 'Unspecified'}
+                  </div>
+                </div>
+                <div>
+                  <span className="text-white/50 text-[10px] sm:text-xs block mb-1">Reasoning Strategy</span>
+                  <div className="text-white/80 leading-relaxed italic border-l-2 border-purple-500/50 pl-2 text-[10px] sm:text-xs">
+                    {aiReasoning || 'No reasoning available for this search.'}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Unified Grid: Foliage, Labels, and Products */}
         {gridCells.

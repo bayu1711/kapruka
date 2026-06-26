@@ -146,6 +146,9 @@ async function processChat(message, history) {
   let internalSystemLog = "";
   let finalProducts = [];
   let suggestedCategories = [];
+  let finalReasoning = "";
+  let finalRecipient = "";
+  let finalSearchQuery = "";
   let attempt = 0;
 
   while (attempt < 3 && finalProducts.length === 0) {
@@ -158,10 +161,13 @@ async function processChat(message, history) {
       config: {
         systemInstruction: `You are the Kapruka AI Shopping Assistant. The user wants to find products on Kapruka (Sri Lanka's largest e-commerce platform).
 Your job is to determine the absolute BEST single search query keyword based on the user's request.
+Before picking a query, analyze the intent and recipient. Avoid generic terms like 'gift', and avoid suggesting inappropriate items (e.g. romantic red roses for a mother, or kids toys for a boss). Instead, pick concrete, appropriate categories or items (e.g. 'saree', 'perfume', 'cake', 'watch').
 Output a JSON response matching exactly this schema:
 {
-  "searchQuery": "the keyword to search for (e.g. 'roses', 'birthday cake', 'watch')",
-  "categories": ["Flowers", "Cakes", "Giftsets", "Electronics", "Clothing"] // 4-6 categories that match the user's occasion/intent
+  "reasoning": "Analyze the recipient and occasion. Explain what types of gifts are appropriate vs inappropriate, and why you are choosing the specific Kapruka search query.",
+  "recipient": "Who the gift is for (e.g. mother, friend, self, unspecified)",
+  "searchQuery": "The specific Kapruka search term (e.g. 'roses', 'birthday cake', 'saree')",
+  "categories": ["Flowers", "Cakes", "Giftsets", "Electronics", "Clothing"] // 4-6 matching categories
 }
 Extract the query and return ONLY raw JSON. Do not wrap in markdown blocks.`,
         temperature: 0.3
@@ -178,11 +184,14 @@ Extract the query and return ONLY raw JSON. Do not wrap in markdown blocks.`,
       parsed = JSON.parse(text.trim());
     } catch (e) {
       console.error("Failed to parse Gemini output:", text);
-      return { products: [], categories: [] };
+      return { products: [], categories: [], reasoning: '', recipient: '', searchQuery: '' };
     }
 
-    const { searchQuery, categories } = parsed;
+    const { reasoning, recipient, searchQuery, categories } = parsed;
     suggestedCategories = categories || [];
+    finalReasoning = reasoning || '';
+    finalRecipient = recipient || '';
+    finalSearchQuery = searchQuery || '';
 
     console.log(`[Agent Attempt ${attempt}] Searching Kapruka for: "${searchQuery}"`);
     const mcpRawText = await executeKaprukaSearch({ q: searchQuery });
@@ -201,7 +210,13 @@ Extract the query and return ONLY raw JSON. Do not wrap in markdown blocks.`,
     }
   }
 
-  return { products: finalProducts, categories: suggestedCategories };
+  return { 
+    products: finalProducts, 
+    categories: suggestedCategories,
+    reasoning: finalReasoning,
+    recipient: finalRecipient,
+    searchQuery: finalSearchQuery
+  };
 }
 
 module.exports = { processChat };

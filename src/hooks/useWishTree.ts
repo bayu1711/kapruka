@@ -10,6 +10,9 @@ export interface HistorySnapshot {
   aiStatus: string;
   products: Product[];
   categories: string[];
+  aiReasoning?: string;
+  aiRecipient?: string;
+  aiActualSearchQuery?: string;
 }
 
 export interface WishTreeState {
@@ -25,6 +28,9 @@ export interface WishTreeState {
   aiStatus: string;
   isSearching: boolean;
   searchQuery: string;
+  aiReasoning?: string;
+  aiRecipient?: string;
+  aiActualSearchQuery?: string;
 }
 
 export function useWishTree() {
@@ -139,6 +145,9 @@ export function useWishTree() {
         isSearching: false,
         aiStatus: statusMsg,
         productSeed: prev.productSeed + 1, // trigger reshuffle with new products
+        aiReasoning: agentResult.reasoning,
+        aiRecipient: agentResult.recipient,
+        aiActualSearchQuery: agentResult.actualSearchQuery,
       }));
 
       // Save a snapshot to history
@@ -149,6 +158,9 @@ export function useWishTree() {
           aiStatus: statusMsg,
           products: mapped,
           categories: agentResult.suggestedCategories.length > 0 ? agentResult.suggestedCategories : liveCategories,
+          aiReasoning: agentResult.reasoning,
+          aiRecipient: agentResult.recipient,
+          aiActualSearchQuery: agentResult.actualSearchQuery,
         }
       ]);
 

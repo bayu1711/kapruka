@@ -3,6 +3,9 @@ export interface AgentResult {
   suggestedCategories: string[];
   aiStatusMessage: string;
   products?: any[];
+  reasoning?: string;
+  recipient?: string;
+  actualSearchQuery?: string;
 }
 
 const chatHistory: string[] = [];
@@ -26,10 +29,13 @@ export async function parseUserQuery(userMessage: string): Promise<AgentResult> 
     const data = await res.json();
     
     return {
-      searchQuery: userMessage, // The backend agent handles the actual query internally now
+      searchQuery: userMessage, 
+      actualSearchQuery: data.searchQuery, // The actual query Gemini used
       suggestedCategories: data.categories || [],
       aiStatusMessage: `Found ${data.products ? data.products.length : 0} items`,
-      products: data.products || []
+      products: data.products || [],
+      reasoning: data.reasoning,
+      recipient: data.recipient
     };
 
   } catch (err) {
