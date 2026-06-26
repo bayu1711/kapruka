@@ -135,6 +135,56 @@ function parseMarkdownProducts(text) {
     products.push({ id, name, price, image, category: '', url, stock: inStock });
   }
   return products;
+}const imageCache = new Map();
+
+async function fetchImageForUrl(url) {
+  if (!url) return '';
+  if (imageCache.has(url)) return imageCache.get(url);
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 4000);
+    const res = await fetch(url, { 
+      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36' },
+      signal: controller.signal
+    });
+    clearTimeout(timeout);
+    
+    const html = await res.text();
+    const match = html.match(/<meta\s+property="og:image"\s+content="([^"]+)"/i);
+    let imageUrl = '';
+    
+    if (match && match[1]) {
+      imageUrl = match[1];
+    } else {
+      const parts = url.split('/kid/');
+      const imgId = parts.length > 1 ? parts[1].replace(/[^a-zA-Z0-9]/g, '') : null;
+      if (imgId) {
+        imageUrl = `https://www.kapruka.com/cdn-cgi/image/width=300,quality=90,format=auto/shops/specialGifts/productImages/${imgId}.jpg`;
+      }
+    }
+    
+    imageCache.set(url, imageUrl);
+    return imageUrl;
+  } catch (e) {
+    console.error('Error fetching image for URL', url, e.message);
+    const parts = url.split('/kid/');
+    const imgId = parts.length > 1 ? parts[1].replace(/[^a-zA-Z0-9]/g, '') : null;
+    let fallback = '';
+    if (imgId) {
+       fallback = `https://www.kapruka.com/cdn-cgi/image/width=300,quality=90,format=auto/shops/specialGifts/productImages/${imgId}.jpg`;
+    }
+    return fallback;
+  }
+}
+
+async function enrichProductsWithImages(products) {
+  // Fetch up to 20 images at a time (chunked to avoid overwhelming the network)
+  return await Promise.all(products.map(async (p) => {
+    if (!p.image && p.url) {
+      p.image = await fetchImageForUrl(p.url);
+    }
+    return p;
+  }));
 }
 
 async function processChat(message, history) {
@@ -200,7 +250,9 @@ Extract the query and return ONLY raw JSON. Do not wrap in markdown blocks.`,
       console.log(`[Agent Attempt ${attempt}] 0 products. Retrying...`);
       internalSystemLog += `[System Note]: The search query '${searchQuery}' returned 0 products. Please try a completely different, broader synonym or related term.\\n`;
     } else {
-      finalProducts = parseMarkdownProducts(mcpRawText);
+      let parsedProducts = parseMarkdownProducts(mcpRawText);
+      // Wait to fetch the images (will resolve cached or scrape)
+      finalProducts = await enrichProductsWithImages(parsedProducts);
       if (finalProducts.length === 0) {
         internalSystemLog += `[System Note]: The search query '${searchQuery}' returned 0 parseable products. Please try a different query.\\n`;
       } else {

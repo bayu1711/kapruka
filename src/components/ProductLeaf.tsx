@@ -49,11 +49,17 @@ export function ProductLeaf({
         border-2 transition-all duration-300
         ${isSelected ? 'border-emerald-400 shadow-[0_0_24px_rgba(16,185,129,0.8)] scale-105' : 'border-emerald-500/30 shadow-[0_0_16px_rgba(16,185,129,0.4)] hover:scale-105 hover:shadow-[0_0_20px_rgba(16,185,129,0.6)]'}
       `}>
-        
         <img
           src={product.image}
           alt={product.name}
-          className="w-full h-full object-cover" />
+          className="w-full h-full object-cover relative z-10"
+          onError={(e) => {
+            e.currentTarget.style.display = 'none';
+          }}
+        />
+        <div className="absolute inset-0 flex items-center justify-center p-2 text-center text-xs font-medium text-emerald-100/70 z-0">
+          {product.name}
+        </div>
         
         {isSelected &&
         <motion.div
