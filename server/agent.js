@@ -1,11 +1,18 @@
-const { GoogleGenAI } = require('@google/genai');
+const { ChatGoogleGenerativeAI } = require('@langchain/google-genai');
+const { z } = require('zod');
+const { HumanMessage, SystemMessage } = require('@langchain/core/messages');
 const dotenv = require('dotenv');
 const path = require('path');
 
 // Load .env.local from parent directory
 dotenv.config({ path: path.join(__dirname, '../.env.local') });
 
-const ai = new GoogleGenAI({ apiKey: process.env.VITE_GEMINI_API_KEY });
+const OutputSchema = z.object({
+  reasoning: z.string().describe("Analyze the recipient and occasion. Explain what types of gifts are appropriate vs inappropriate, and why you are choosing the specific Kapruka search query."),
+  recipient: z.string().describe("Who the gift is for (e.g. mother, friend, self, unspecified)"),
+  searchQuery: z.string().describe("The specific Kapruka search term (e.g. 'roses', 'birthday cake', 'saree')"),
+  categories: z.array(z.string()).describe("4-6 matching categories")
+});
 
 const KAPRUKA_MCP_URL = 'https://mcp.kapruka.com/mcp';
 
@@ -188,9 +195,9 @@ async function enrichProductsWithImages(products) {
 }
 
 async function processChat(message, history) {
-  let context = "Conversation History:\\n";
+  let context = "Conversation History:\n";
   if (history && history.length > 0) {
-    context += history.join('\\n') + '\\n\\n';
+    context += history.join('\n') + '\n\n';
   }
   
   let internalSystemLog = "";
@@ -201,39 +208,29 @@ async function processChat(message, history) {
   let finalSearchQuery = "";
   let attempt = 0;
 
+  const llm = new ChatGoogleGenerativeAI({
+    model: "gemini-2.5-flash",
+    temperature: 0.3,
+    apiKey: process.env.VITE_GEMINI_API_KEY
+  });
+  
+  const structuredLlm = llm.withStructuredOutput(OutputSchema, { name: "ShoppingPlan" });
+
   while (attempt < 3 && finalProducts.length === 0) {
     attempt++;
-    const prompt = `${context}${internalSystemLog}User: ${message}`;
     
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: prompt,
-      config: {
-        systemInstruction: `You are the Kapruka AI Shopping Assistant. The user wants to find products on Kapruka (Sri Lanka's largest e-commerce platform).
+    const messages = [
+      new SystemMessage(`You are the Kapruka AI Shopping Assistant. The user wants to find products on Kapruka (Sri Lanka's largest e-commerce platform).
 Your job is to determine the absolute BEST single search query keyword based on the user's request.
-Before picking a query, analyze the intent and recipient. Avoid generic terms like 'gift', and avoid suggesting inappropriate items (e.g. romantic red roses for a mother, or kids toys for a boss). Instead, pick concrete, appropriate categories or items (e.g. 'saree', 'perfume', 'cake', 'watch').
-Output a JSON response matching exactly this schema:
-{
-  "reasoning": "Analyze the recipient and occasion. Explain what types of gifts are appropriate vs inappropriate, and why you are choosing the specific Kapruka search query.",
-  "recipient": "Who the gift is for (e.g. mother, friend, self, unspecified)",
-  "searchQuery": "The specific Kapruka search term (e.g. 'roses', 'birthday cake', 'saree')",
-  "categories": ["Flowers", "Cakes", "Giftsets", "Electronics", "Clothing"] // 4-6 matching categories
-}
-Extract the query and return ONLY raw JSON. Do not wrap in markdown blocks.`,
-        temperature: 0.3
-      }
-    });
-
-    let text = response.text.trim();
-    if (text.startsWith('```json')) text = text.slice(7);
-    if (text.startsWith('```')) text = text.slice(3);
-    if (text.endsWith('```')) text = text.slice(0, -3);
+Before picking a query, analyze the intent and recipient. Avoid generic terms like 'gift', and avoid suggesting inappropriate items (e.g. romantic red roses for a mother, or kids toys for a boss). Instead, pick concrete, appropriate categories or items (e.g. 'saree', 'perfume', 'cake', 'watch').`),
+      new HumanMessage(`${context}${internalSystemLog}User: ${message}`)
+    ];
 
     let parsed;
     try {
-      parsed = JSON.parse(text.trim());
+      parsed = await structuredLlm.invoke(messages);
     } catch (e) {
-      console.error("Failed to parse Gemini output:", text);
+      console.error("Failed to parse Gemini output via LangChain:", e);
       return { products: [], categories: [], reasoning: '', recipient: '', searchQuery: '' };
     }
 
@@ -248,13 +245,13 @@ Extract the query and return ONLY raw JSON. Do not wrap in markdown blocks.`,
 
     if (mcpRawText === 'No products found.') {
       console.log(`[Agent Attempt ${attempt}] 0 products. Retrying...`);
-      internalSystemLog += `[System Note]: The search query '${searchQuery}' returned 0 products. Please try a completely different, broader synonym or related term.\\n`;
+      internalSystemLog += `[System Note]: The search query '${searchQuery}' returned 0 products. Please try a completely different, broader synonym or related term.\n`;
     } else {
       let parsedProducts = parseMarkdownProducts(mcpRawText);
       // Wait to fetch the images (will resolve cached or scrape)
       finalProducts = await enrichProductsWithImages(parsedProducts);
       if (finalProducts.length === 0) {
-        internalSystemLog += `[System Note]: The search query '${searchQuery}' returned 0 parseable products. Please try a different query.\\n`;
+        internalSystemLog += `[System Note]: The search query '${searchQuery}' returned 0 parseable products. Please try a different query.\n`;
       } else {
         console.log(`[Agent Attempt ${attempt}] Found ${finalProducts.length} products!`);
         break; // Success!
