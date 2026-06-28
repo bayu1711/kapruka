@@ -17,6 +17,32 @@ This project is a modern web application that provides an interactive interface 
 - **AI & Integrations**: `@google/genai`, LangChain (`@langchain/core`, `@langchain/google-genai`)
 - **API**: Kapruka MCP (Model Context Protocol) via Streamable HTTP (JSON-RPC 2.0)
 
+## How the AI Agent & MCP Integration Works
+
+The core of this application revolves around an intelligent retrieval pipeline connecting user input to the Kapruka catalog via the Model Context Protocol (MCP).
+
+### 1. Connection and Session Handshake
+All frontend direct requests and backend autonomous agent calls communicate with Kapruka's MCP server located at `https://mcp.kapruka.com/mcp` (proxied through `/api/mcp` in local development via Vite to avoid CORS). It uses a streamable HTTP JSON-RPC 2.0 interface.
+Before tool execution, the client wrapper (`src/lib/kapruka-mcp.ts`) performs a handshake by sending an `initialize` request and receiving an `mcp-session-id`, which is then passed in the headers of all subsequent requests.
+
+### 2. Natural Language Processing & Autonomous Tool Execution
+When a user inputs a natural language query (e.g., "I need a birthday gift for my 5-year-old nephew"), the frontend passes this to the backend AI agent endpoint (`/chat`) managed by LangChain and Google GenAI. The backend AI parses the intent and autonomously decides which MCP tools to invoke. 
+
+The primary Kapruka MCP tools exposed and used include:
+- `kapruka_search_products`: Searches the catalog using a keyword (`q`) and filters like `category`, `min_price`, `max_price`, and `sort`.
+- `kapruka_get_product`: Fetches full details for a single product by `product_id`.
+- `kapruka_list_categories`: Retrieves top-level product categories.
+- `kapruka_list_delivery_cities`: Searches delivery cities by name.
+- `kapruka_check_delivery`: Validates delivery availability and fees for a `city` and `delivery_date`.
+- `kapruka_create_order`: Creates a guest-checkout order, returning a `pay_url`.
+- `kapruka_track_order`: Checks the status of an order using an `order_number`.
+
+### 3. Data Normalization & Delivery
+Because MCP responses can be returned as standard JSON or SSE (Server-Sent Events) streams with markdown formatting, the client normalizes these into typed TypeScript interfaces (`KaprukaMCPProduct`, `KaprukaSearchResult`, etc.). The backend AI agent may also inject reasoning (e.g., "Selected educational toys and remote-controlled cars suitable for a 5-year-old boy") before returning the payload to the frontend.
+
+### 4. Interactive Display & Direct Calls
+The React frontend (`useWishTree` hook) parses the AI response and maps the returned products into the interactive visual "Wish Tree" UI. For non-search operations (like checking categories on initial load, or initiating checkout), the frontend bypasses the AI and communicates directly with the Kapruka MCP using the predefined tool names in the `src/lib/kapruka-mcp.ts` wrapper.
+
 ## Getting Started
 
 ### Prerequisites

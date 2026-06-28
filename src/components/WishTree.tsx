@@ -358,12 +358,12 @@ export function WishTree({
     };
     let finalProductSlots = [...selectedProductSlots];
 
-    // Move product 2,6 → 5,1
+    // Move product 2,6 → 5,0
     const moveIdx = finalProductSlots.findIndex(
       (s) => s.col === 2 && s.row === 6 && s.colSpan === 1
     );
     if (moveIdx >= 0) {
-      finalProductSlots[moveIdx] = { ...finalProductSlots[moveIdx], col: 5, row: 1 };
+      finalProductSlots[moveIdx] = { ...finalProductSlots[moveIdx], col: 5, row: 0 };
     }
 
     // Swap product 6,3 ↔ blue frame tile 9,4
@@ -442,7 +442,7 @@ export function WishTree({
       const dy = slot.row - originRow;
       const dist = Math.sqrt(dx * dx + dy * dy);
 
-      const isCentered = coordKey === '3,5' || coordKey === '9,3';
+      const isCentered = coordKey === '3,5' || coordKey === '9,3' || coordKey === '5,0';
       const rot = isCentered ? 0 : (seededRandom() - 0.5) * 16; // Random rotation
       const jx = isCentered ? 0 : (seededRandom() - 0.5) * 2.5;
       const jy = isCentered ? 0 : (seededRandom() - 0.5) * 2.5;
