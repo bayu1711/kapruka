@@ -15,7 +15,8 @@ const OutputSchema = z.object({
   searchParameters: z.array(z.object({
     key: z.string().describe("The name of the filter, e.g. 'max_price', 'color', 'brand'"),
     value: z.string().describe("The value of the filter, e.g. '200000', 'red', 'Apple'")
-  })).optional().describe("Any additional dynamic constraints/filters the user specified")
+  })).optional().describe("Any additional dynamic constraints/filters the user specified"),
+  followUpQuestions: z.array(z.string()).describe("2 to 3 leading/follow-up questions to ask the user next, to help refine their wish. e.g. 'Under what budget?' or 'Is it for a boy or a girl?'")
 });
 
 const PostFilterSchema = z.object({
@@ -217,6 +218,7 @@ async function processChat(message, history, enablePostFilter = false) {
   let finalRecipient = "";
   let finalSearchQuery = "";
   let finalPostFilterReasoning = "";
+  let finalFollowUpQuestions = [];
   let attempt = 0;
 
   const llm = new ChatGoogleGenerativeAI({
@@ -256,11 +258,12 @@ CRITICAL RULES FOR SEARCH QUERY:
       return { products: [], categories: [], reasoning: '', recipient: '', searchQuery: '' };
     }
 
-    const { reasoning, recipient, searchQuery, categories, searchParameters } = parsed;
+    const { reasoning, recipient, searchQuery, categories, searchParameters, followUpQuestions } = parsed;
     suggestedCategories = categories || [];
     finalReasoning = reasoning || '';
     finalRecipient = recipient || '';
     finalSearchQuery = searchQuery || '';
+    finalFollowUpQuestions = followUpQuestions || [];
     const params = {};
     if (searchParameters) {
       searchParameters.forEach(p => { params[p.key] = p.value; });
@@ -314,7 +317,8 @@ CRITICAL RULES FOR SEARCH QUERY:
     reasoning: finalReasoning,
     recipient: finalRecipient,
     searchQuery: finalSearchQuery,
-    postFilterReasoning: finalPostFilterReasoning
+    postFilterReasoning: finalPostFilterReasoning,
+    followUpQuestions: finalFollowUpQuestions
   };
 }
 

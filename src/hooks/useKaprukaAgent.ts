@@ -7,6 +7,7 @@ export interface AgentResult {
   recipient?: string;
   actualSearchQuery?: string;
   postFilterReasoning?: string;
+  followUpQuestions?: string[];
 }
 
 const chatHistory: string[] = [];
@@ -37,7 +38,8 @@ export async function parseUserQuery(userMessage: string, enablePostFilter: bool
       products: data.products || [],
       reasoning: data.reasoning,
       recipient: data.recipient,
-      postFilterReasoning: data.postFilterReasoning
+      postFilterReasoning: data.postFilterReasoning,
+      followUpQuestions: data.followUpQuestions || []
     };
 
   } catch (err) {

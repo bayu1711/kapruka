@@ -138,6 +138,8 @@ export function App() {
           const q = randomQueries[Math.floor(Math.random() * randomQueries.length)];
           handleSubmit(q);
         }}
+        followUpQuestions={state.followUpQuestions}
+        onFollowUpClick={(q) => handleSubmit(q)}
       />
 
       }

@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import 'regenerator-runtime/runtime';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowUp, RefreshCw, ChevronRight, ChevronLeft } from 'lucide-react';
+import { ArrowUp, RefreshCw, ChevronRight, ChevronLeft, Mic, MicOff, MessageCircleQuestion } from 'lucide-react';
 import type { HistorySnapshot } from '../hooks/useWishTree';
+import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 
 interface WishInputBarProps {
   value: string;
@@ -16,6 +18,8 @@ interface WishInputBarProps {
   onRandomize?: () => void;
   hasMorePages?: boolean;
   hasPrevPages?: boolean;
+  followUpQuestions?: string[];
+  onFollowUpClick?: (q: string) => void;
 }
 
 /** A small tree SVG used as the loading indicator on the send button */
@@ -65,6 +69,23 @@ export function WishInputBar({
 }: WishInputBarProps) {
   const [loading, setLoading] = useState(false);
 
+  const { transcript, listening, resetTranscript, browserSupportsSpeechRecognition } = useSpeechRecognition();
+
+  useEffect(() => {
+    if (transcript) {
+      onChange(transcript);
+    }
+  }, [transcript, onChange]);
+
+  const toggleListening = () => {
+    if (listening) {
+      SpeechRecognition.stopListening();
+    } else {
+      resetTranscript();
+      SpeechRecognition.startListening({ continuous: true });
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (value.trim() && !disabled && !loading) {
@@ -102,38 +123,53 @@ export function WishInputBar({
         )}
 
         {/* Action Chips */}
-        {(hasPrevPages || hasMorePages || onRandomize) && (
-          <div className="w-full flex flex-wrap justify-end items-center gap-2 px-2 mb-3">
-            {hasPrevPages && (
-              <button
-                type="button"
-                onClick={onPrevPage}
-                className="flex items-center gap-1.5 text-xs font-semibold text-white bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 rounded-full px-3 py-1.5 transition-colors"
-              >
-                <ChevronLeft className="w-3.5 h-3.5" />
-                Previous items
-              </button>
-            )}
-            {hasMorePages && (
-              <button
-                type="button"
-                onClick={onNextPage}
-                className="flex items-center gap-1.5 text-xs font-semibold text-white bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 rounded-full px-3 py-1.5 transition-colors"
-              >
-                Load more items
-                <ChevronRight className="w-3.5 h-3.5" />
-              </button>
-            )}
-            {onRandomize && (
-              <button
-                type="button"
-                onClick={onRandomize}
-                className="flex items-center gap-1.5 text-xs font-semibold text-emerald-100 bg-emerald-500/20 hover:bg-emerald-500/40 backdrop-blur-md border border-emerald-500/30 rounded-full px-3 py-1.5 transition-colors"
-              >
-                <RefreshCw className="w-3.5 h-3.5" />
-                Show me something else
-              </button>
-            )}
+        {(hasPrevPages || hasMorePages || onRandomize || (followUpQuestions && followUpQuestions.length > 0)) && (
+          <div className="w-full flex flex-wrap justify-between items-end gap-2 px-2 mb-3">
+            <div className="flex flex-wrap gap-2 justify-start max-w-[50%]">
+              {followUpQuestions?.map((q, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => onFollowUpClick?.(q)}
+                  className="flex items-center gap-1.5 text-xs font-semibold text-emerald-100 bg-emerald-500/20 hover:bg-emerald-500/40 backdrop-blur-md border border-emerald-500/30 rounded-full px-3 py-1.5 transition-colors text-left"
+                >
+                  <MessageCircleQuestion className="w-3.5 h-3.5 shrink-0" />
+                  <span className="truncate">{q}</span>
+                </button>
+              ))}
+            </div>
+            <div className="flex flex-wrap gap-2 justify-end">
+              {hasPrevPages && (
+                <button
+                  type="button"
+                  onClick={onPrevPage}
+                  className="flex items-center gap-1.5 text-xs font-semibold text-white bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 rounded-full px-3 py-1.5 transition-colors"
+                >
+                  <ChevronLeft className="w-3.5 h-3.5" />
+                  Previous items
+                </button>
+              )}
+              {hasMorePages && (
+                <button
+                  type="button"
+                  onClick={onNextPage}
+                  className="flex items-center gap-1.5 text-xs font-semibold text-white bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 rounded-full px-3 py-1.5 transition-colors"
+                >
+                  Load more items
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </button>
+              )}
+              {onRandomize && (
+                <button
+                  type="button"
+                  onClick={onRandomize}
+                  className="flex items-center gap-1.5 text-xs font-semibold text-emerald-100 bg-emerald-500/20 hover:bg-emerald-500/40 backdrop-blur-md border border-emerald-500/30 rounded-full px-3 py-1.5 transition-colors"
+                >
+                  <RefreshCw className="w-3.5 h-3.5" />
+                  Show me something else
+                </button>
+              )}
+            </div>
           </div>
         )}
 
@@ -145,8 +181,21 @@ export function WishInputBar({
             onChange={(e) => onChange(e.target.value)}
             placeholder={placeholder}
             disabled={disabled}
-            className="w-full px-4 py-3 sm:px-6 sm:py-4 pr-12 sm:pr-14 bg-transparent text-white placeholder:text-white/40 font-heading text-base sm:text-lg outline-none"
+            className={`w-full px-4 py-3 sm:px-6 sm:py-4 ${browserSupportsSpeechRecognition ? 'pr-20 sm:pr-24' : 'pr-12 sm:pr-14'} bg-transparent text-white placeholder:text-white/40 font-heading text-base sm:text-lg outline-none`}
           />
+          {browserSupportsSpeechRecognition && (
+            <button
+              type="button"
+              onClick={toggleListening}
+              className={`absolute right-12 sm:right-16 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center transition-colors ${
+                listening 
+                  ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30' 
+                  : 'bg-white/5 text-white/50 hover:bg-white/10 hover:text-white/80'
+              }`}
+            >
+              {listening ? <MicOff className="w-4 h-4 sm:w-5 sm:h-5" /> : <Mic className="w-4 h-4 sm:w-5 sm:h-5" />}
+            </button>
+          )}
           <button
             type="submit"
             disabled={!value.trim() || disabled || isLoading}

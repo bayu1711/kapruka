@@ -14,6 +14,7 @@ export interface HistorySnapshot {
   aiRecipient?: string;
   aiActualSearchQuery?: string;
   aiPostFilterReasoning?: string;
+  followUpQuestions?: string[];
 }
 
 export interface WishTreeState {
@@ -33,6 +34,7 @@ export interface WishTreeState {
   aiRecipient?: string;
   aiActualSearchQuery?: string;
   aiPostFilterReasoning?: string;
+  followUpQuestions?: string[];
   page: number;
 }
 
@@ -212,6 +214,7 @@ export function useWishTree() {
         aiRecipient: agentResult.recipient,
         aiActualSearchQuery: agentResult.actualSearchQuery,
         aiPostFilterReasoning: agentResult.postFilterReasoning,
+        followUpQuestions: agentResult.followUpQuestions,
       }));
 
       // Save a snapshot to history
@@ -226,6 +229,7 @@ export function useWishTree() {
           aiRecipient: agentResult.recipient,
           aiActualSearchQuery: agentResult.actualSearchQuery,
           aiPostFilterReasoning: agentResult.postFilterReasoning,
+          followUpQuestions: agentResult.followUpQuestions,
         }
       ]);
 
