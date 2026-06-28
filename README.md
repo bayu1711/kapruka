@@ -30,7 +30,7 @@ When a user inputs a natural language query (e.g., "I need a birthday gift for m
 
 The primary Kapruka MCP tools exposed and used include:
 - `kapruka_search_products`: Searches the catalog using a keyword (`q`) and filters like `category`, `min_price`, `max_price`, and `sort`. 
-  **Returns:** A list of product objects (id, name, price, image, category, url, inStock) and a total count.
+  **Returns:** A list of product objects (id, name, price, category, url, inStock) and a total count. Note: The MCP does not natively return product images; they are attempted to be scraped from the URL or fall back to generic placeholders.
 - `kapruka_get_product`: Fetches full details for a single product by `product_id`.
   **Returns:** A detailed product object including description and available variants.
 - `kapruka_list_categories`: Retrieves top-level product categories.

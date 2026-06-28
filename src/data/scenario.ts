@@ -8,6 +8,8 @@ export interface Block {
   delay?: number;
 }
 
+import type { KaprukaMCPProduct } from '../lib/kapruka-mcp';
+
 export interface Product {
   id: string;
   name: string;
@@ -15,6 +17,7 @@ export interface Product {
   image: string;
   category: string;
   position: {x: number;y: number;};
+  details?: KaprukaMCPProduct;
 }
 
 // LocalStorage key for product catalog

@@ -25,6 +25,14 @@ export function ProductDetailsModal({
       setDetails(null);
       return;
     }
+
+    if (product.details) {
+      // If we already background-cached the details, use them instantly
+      setDetails(product.details);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     setError(null);
     getProduct(product.id)
@@ -37,7 +45,7 @@ export function ProductDetailsModal({
         setError('Could not load full details.');
         setLoading(false);
       });
-  }, [product?.id]);
+  }, [product]);
 
   if (!product) return null;
 

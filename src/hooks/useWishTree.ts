@@ -139,6 +139,29 @@ export function useWishTree() {
       }));
 
       setLiveProducts(mapped);
+
+      // Background fetch detailed product data (specifically images) from Kapruka MCP
+      (async () => {
+        const updatedProducts = [...mapped];
+        for (let i = 0; i < mapped.length; i++) {
+          try {
+            const details = await import('../lib/kapruka-mcp').then(m => m.getProduct(mapped[i].id));
+            if (details) {
+              updatedProducts[i] = { 
+                ...updatedProducts[i], 
+                details, // Cache the full details here!
+                image: details.image || updatedProducts[i].image
+              };
+              // Incrementally update the UI so images pop in as they are found
+              setLiveProducts([...updatedProducts]);
+            }
+          } catch (e) {
+            // Ignore errors for individual background fetches
+          }
+          // Small delay to prevent rate-limiting Kapruka's MCP server
+          await new Promise((r) => setTimeout(r, 800));
+        }
+      })();
       
       const statusMsg = `Found ${mapped.length} results for "${agentResult.searchQuery}"`;
       

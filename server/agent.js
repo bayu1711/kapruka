@@ -141,10 +141,16 @@ function parseMarkdownProducts(text) {
     const urlMatch = block.match(/\[.*?\]\((https?:\/\/[^)]+)\)/);
     const url = urlMatch ? urlMatch[1] : undefined;
     
-    // Extract image if we can, or just let frontend handle placeholder
-    const parts = urlMatch ? urlMatch[1].split('/kid/') : [];
-    const imgId = parts.length > 1 ? parts[1] : null;
-    const image = imgId ? `https://www.kapruka.com/cdn-cgi/image/width=300,quality=90,format=auto/shops/specialGifts/productImages/${imgId}.jpg` : '';
+    // Extract image directly from markdown if MCP provided it (e.g., **Image**: https://... or ![Image](https://...))
+    const imgExplicitMatch = block.match(/\*\*Image\*\*:\s*(https?:\/\/\S+)/) || block.match(/!\[.*?\]\((https?:\/\/[^)]+)\)/);
+    let image = '';
+    if (imgExplicitMatch) {
+      image = imgExplicitMatch[1].trim();
+    } else {
+      const parts = urlMatch ? urlMatch[1].split('/kid/') : [];
+      const imgId = parts.length > 1 ? parts[1].split('/').pop() : null; // Get only the ID part, drop category prefix
+      image = imgId ? `https://www.kapruka.com/cdn-cgi/image/width=300,quality=90,format=auto/shops/specialGifts/productImages/${imgId}.jpg` : '';
+    }
 
     const inStock = !block.toLowerCase().includes('out of stock');
 
@@ -184,7 +190,7 @@ async function fetchImageForUrl(url) {
   } catch (e) {
     console.error('Error fetching image for URL', url, e.message);
     const parts = url.split('/kid/');
-    const imgId = parts.length > 1 ? parts[1].replace(/[^a-zA-Z0-9]/g, '') : null;
+    const imgId = parts.length > 1 ? parts[1].split('/').pop() : null;
     let fallback = '';
     if (imgId) {
        fallback = `https://www.kapruka.com/cdn-cgi/image/width=300,quality=90,format=auto/shops/specialGifts/productImages/${imgId}.jpg`;
