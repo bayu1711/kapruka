@@ -138,7 +138,7 @@ function parseMarkdownProducts(text) {
     const priceMatch = block.match(/LKR\s*([\d,]+)/);
     const price = priceMatch ? parseInt(priceMatch[1].replace(/,/g, ''), 10) : 0;
 
-    const urlMatch = block.match(/\[View product\]\(([^)]+)\)/);
+    const urlMatch = block.match(/\[.*?\]\((https?:\/\/[^)]+)\)/);
     const url = urlMatch ? urlMatch[1] : undefined;
     
     // Extract image if we can, or just let frontend handle placeholder

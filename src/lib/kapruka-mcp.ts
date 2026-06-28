@@ -213,8 +213,8 @@ function parseMarkdownProducts(text: string): KaprukaMCPProduct[] {
     const priceMatch = block.match(/LKR\s*([\d,]+)/);
     const price = priceMatch ? parseInt(priceMatch[1].replace(/,/g, ''), 10) : 0;
 
-    // URL: [View product](https://...)
-    const urlMatch = block.match(/\[View product\]\(([^)]+)\)/);
+    // URL: [View product](https://...) or [View on Kapruka]
+    const urlMatch = block.match(/\[.*?\]\((https?:\/\/[^)]+)\)/);
     const url = urlMatch ? urlMatch[1] : undefined;
 
     // In stock
