@@ -29,13 +29,20 @@ Before tool execution, the client wrapper (`src/lib/kapruka-mcp.ts`) performs a 
 When a user inputs a natural language query (e.g., "I need a birthday gift for my 5-year-old nephew"), the frontend passes this to the backend AI agent endpoint (`/chat`) managed by LangChain and Google GenAI. The backend AI parses the intent and autonomously decides which MCP tools to invoke. 
 
 The primary Kapruka MCP tools exposed and used include:
-- `kapruka_search_products`: Searches the catalog using a keyword (`q`) and filters like `category`, `min_price`, `max_price`, and `sort`.
+- `kapruka_search_products`: Searches the catalog using a keyword (`q`) and filters like `category`, `min_price`, `max_price`, and `sort`. 
+  **Returns:** A list of product objects (id, name, price, image, category, url, inStock) and a total count.
 - `kapruka_get_product`: Fetches full details for a single product by `product_id`.
+  **Returns:** A detailed product object including description and available variants.
 - `kapruka_list_categories`: Retrieves top-level product categories.
+  **Returns:** A list of category objects containing the category `name` and optional `url`.
 - `kapruka_list_delivery_cities`: Searches delivery cities by name.
+  **Returns:** A flat list of city name strings.
 - `kapruka_check_delivery`: Validates delivery availability and fees for a `city` and `delivery_date`.
-- `kapruka_create_order`: Creates a guest-checkout order, returning a `pay_url`.
+  **Returns:** Delivery availability status (boolean), calculated delivery `fee` in LKR, and any `perishableWarning`.
+- `kapruka_create_order`: Creates a guest-checkout order.
+  **Returns:** An `orderId` and a direct `payUrl` for completing the purchase.
 - `kapruka_track_order`: Checks the status of an order using an `order_number`.
+  **Returns:** Current order `status`, recipient details, and a chronological timeline of tracking `steps` (status, timestamp).
 
 ### 3. Data Normalization & Delivery
 Because MCP responses can be returned as standard JSON or SSE (Server-Sent Events) streams with markdown formatting, the client normalizes these into typed TypeScript interfaces (`KaprukaMCPProduct`, `KaprukaSearchResult`, etc.). The backend AI agent may also inject reasoning (e.g., "Selected educational toys and remote-controlled cars suitable for a 5-year-old boy") before returning the payload to the frontend.
