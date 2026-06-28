@@ -33,6 +33,28 @@ export interface WishTreeState {
   aiRecipient?: string;
   aiActualSearchQuery?: string;
   aiPostFilterReasoning?: string;
+  page: number;
+}
+
+const CART_STORAGE_KEY = 'kapruka_magic_cart';
+const HISTORY_STORAGE_KEY = 'kapruka_magic_history';
+
+function loadCart(): string[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const saved = localStorage.getItem(CART_STORAGE_KEY);
+    if (saved) return JSON.parse(saved);
+  } catch (e) {}
+  return [];
+}
+
+function loadHistory(): HistorySnapshot[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const saved = localStorage.getItem(HISTORY_STORAGE_KEY);
+    if (saved) return JSON.parse(saved);
+  } catch (e) {}
+  return [];
 }
 
 export function useWishTree() {
@@ -51,7 +73,7 @@ export function useWishTree() {
     cartItems:
       screenInit.showCart || screenInit.showCheckout || screenInit.showConfirmation
         ? ['p1']
-        : [],
+        : loadCart(),
     showCart: screenInit.showCart ?? false,
     showCheckout: screenInit.showCheckout ?? false,
     showConfirmation: screenInit.showConfirmation ?? false,
@@ -60,7 +82,10 @@ export function useWishTree() {
     aiStatus: '',
     isSearching: false,
     searchQuery: '',
+    page: 0,
   });
+
+  const pageSize = 20;
 
   // Live products fetched from Kapruka MCP (replaces static mock data)
   const [liveProducts, setLiveProducts] = useState<Product[]>([]);
@@ -69,7 +94,19 @@ export function useWishTree() {
   const [liveCategories, setLiveCategories] = useState<string[]>([]);
 
   // History snapshots to restore previous conversational states
-  const [history, setHistory] = useState<HistorySnapshot[]>([]);
+  const [history, setHistory] = useState<HistorySnapshot[]>(loadHistory);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(state.cartItems));
+    }
+  }, [state.cartItems]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(history));
+    }
+  }, [history]);
 
   // Fetch categories on mount — these power the stage-1 white chips in WishTree
   useEffect(() => {
@@ -117,6 +154,7 @@ export function useWishTree() {
       inputValue: '',
       productSeed: prev.productSeed + 1,
       selectedProduct: null,
+      page: 0,
     }));
 
     try {
@@ -266,6 +304,14 @@ export function useWishTree() {
     setState((prev) => ({ ...prev, inputValue: value }));
   }, []);
 
+  const nextPage = useCallback(() => {
+    setState((prev) => ({ ...prev, page: prev.page + 1, productSeed: prev.productSeed + 1 }));
+  }, []);
+
+  const prevPage = useCallback(() => {
+    setState((prev) => ({ ...prev, page: Math.max(0, prev.page - 1), productSeed: prev.productSeed + 1 }));
+  }, []);
+
   const currentConfig = stageConfigs[state.stage];
 
   return {
@@ -279,8 +325,12 @@ export function useWishTree() {
     proceedToCheckout,
     confirmOrder,
     updateInput,
+    nextPage,
+    prevPage,
+    pageSize,
     currentConfig,
-    products: liveProducts,
+    products: liveProducts.slice(state.page * pageSize, (state.page + 1) * pageSize),
+    totalProducts: liveProducts.length,
     liveCategories,
     history,
     restoreHistory,

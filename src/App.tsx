@@ -24,9 +24,12 @@ export function App() {
     updateInput,
     currentConfig,
     products,
+    totalProducts,
     liveCategories,
     history,
     restoreHistory,
+    nextPage,
+    prevPage,
   } = useWishTree();
   // Enable dark mode
   useEffect(() => {
@@ -54,7 +57,6 @@ export function App() {
     return arr;
   }, [products, state.productSeed]);
 
-  const [productStart, setProductStart] = useState(0);
   const [isPaging, setIsPaging] = useState(false);
   const [isDevToolsOpen, setIsDevToolsOpen] = useState(false);
   const [enablePostFilter, setEnablePostFilter] = useState(false);
@@ -64,18 +66,17 @@ export function App() {
     setIsPaging(false);
   }, [state.stage, state.productSeed]);
 
-  const visibleProducts = shuffledProducts.slice(
-    productStart,
-    productStart + PRODUCT_PAGE_SIZE
-  );
+  // products is already sliced by useWishTree based on state.page
+  const visibleProducts = shuffledProducts;
+  
   const showPager =
   state.stage >= 3 &&
   !state.showCart &&
   !state.showCheckout &&
   !state.showConfirmation;
 
-  const hasMorePages = productStart + PRODUCT_PAGE_SIZE < products.length;
-  const hasPrevPages = productStart > 0;
+  const hasMorePages = (state.page + 1) * PRODUCT_PAGE_SIZE < totalProducts;
+  const hasPrevPages = state.page > 0;
   return (
     <div className="relative w-full h-[100dvh] bg-[#402970] overflow-hidden flex flex-col">
       {/* Background effects */}
@@ -126,11 +127,11 @@ export function App() {
         hasPrevPages={hasPrevPages}
         onNextPage={() => {
           setIsPaging(true);
-          setProductStart((s) => Math.min(Math.max(0, products.length - PRODUCT_PAGE_SIZE), s + PRODUCT_PAGE_SIZE));
+          nextPage();
         }}
         onPrevPage={() => {
           setIsPaging(true);
-          setProductStart((s) => Math.max(0, s - PRODUCT_PAGE_SIZE));
+          prevPage();
         }}
         onRandomize={() => {
           const randomQueries = ["Surprise me with completely different gift ideas!", "Show me random best sellers", "I'm not sure, inspire me!"];

@@ -232,9 +232,13 @@ async function processChat(message, history, enablePostFilter = false) {
     
     const messages = [
       new SystemMessage(`You are the Kapruka AI Shopping Assistant. The user wants to find products on Kapruka (Sri Lanka's largest e-commerce platform).
-Your job is to determine the absolute BEST single search query keyword based on the user's LATEST request, while using the conversation history for context.
-Before picking a query, analyze the intent and recipient. Avoid generic terms like 'gift'. Pick concrete, appropriate categories or items (e.g. 'saree', 'perfume', 'cake', 'iPhone').
-If the user specifies constraints like budget, brand, or color (e.g., "under 200000", "Apple", "red"), put them in the searchParameters array with clear keys (e.g. "max_price", "brand", "color").`)
+Your job is to determine the absolute BEST precise search phrase (can be multiple words) based on the user's LATEST request, while using the conversation history for context.
+
+CRITICAL RULES FOR SEARCH QUERY:
+1. NEVER output generic category names like 'toys', 'electronics', 'flowers', or 'gifts'. Kapruka's search engine works best with specific items.
+2. If the user intent is vague (e.g. "gift for 5 year old boy"), pick ONE highly specific, popular item type. E.g. use "remote control car" or "lego" instead of "toys".
+3. If the user intent is "gift for mom", pick "saree", "handbag", "perfume", or "mother's day cake" instead of "flowers".
+4. If the user specifies constraints like budget, brand, or color, put them in the searchParameters array with clear keys (e.g. "max_price", "brand", "color") and DO NOT include them in the query itself.`)
     ];
 
     if (history && history.length > 0) {
