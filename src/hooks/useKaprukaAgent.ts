@@ -17,7 +17,7 @@ export async function parseUserQuery(userMessage: string, enablePostFilter: bool
   if (chatHistory.length > 6) chatHistory.shift();
 
   try {
-    const res = await fetch('http://localhost:3001/chat', {
+    const res = await fetch('/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ message: userMessage, history: chatHistory.slice(0, -1), enablePostFilter })

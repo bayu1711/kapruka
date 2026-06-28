@@ -235,10 +235,8 @@ If the user specifies constraints like budget, brand, or color (e.g., "under 200
       history.forEach(msg => messages.push(new HumanMessage(msg)));
     }
     
-    if (internalSystemLog) {
-      messages.push(new SystemMessage(internalSystemLog));
-    }
-    messages.push(new HumanMessage(`User: ${message}`));
+    const finalUserMessage = internalSystemLog ? `${internalSystemLog}\nUser: ${message}` : `User: ${message}`;
+    messages.push(new HumanMessage(finalUserMessage));
 
     let parsed;
     try {
