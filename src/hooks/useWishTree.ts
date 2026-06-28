@@ -81,6 +81,7 @@ export function useWishTree() {
       })
       .catch((err) => {
         console.warn('[MCP] listCategories failed, using defaults:', err);
+        setLiveCategories(['Cakes', 'Flowers', 'Toys', 'Electronics', 'Clothing', 'Jewellery']);
       });
   }, []);
 
@@ -120,7 +121,7 @@ export function useWishTree() {
 
     try {
       // 1. Analyze with AI backend (which executes MCP autonomously)
-      const agentResult = await parseUserQuery(query, enablePostFilter);
+      const agentResult = await parseUserQuery(query);
       setState((prev) => ({ ...prev, aiStatus: agentResult.aiStatusMessage }));
 
       if (agentResult.suggestedCategories && agentResult.suggestedCategories.length > 0) {
