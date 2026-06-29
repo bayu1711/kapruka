@@ -199,7 +199,7 @@ export function WishInputBar({
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="w-full">
+        <form onSubmit={handleFormSubmit} className="w-full">
           <div className="relative bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl sm:rounded-2xl shadow-2xl overflow-hidden">
             <input
               type="text"
