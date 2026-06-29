@@ -551,18 +551,17 @@ export function WishTree({
 
           {/* Trunk */}
           <path
-            d="M370 800 C 370 650, 352 560, 380 480 L 420 480 C 448 560, 430 650, 430 800 Z"
+            d="M370 800 C 370 650, 352 560, 380 440 L 420 440 C 448 560, 430 650, 430 800 Z"
             fill="url(#trunkGrad)" />
           
-
-          {/* Branches (reach higher into the bigger canopy) */}
-          <g stroke="url(#trunkGrad)" strokeLinecap="round" fill="none">
-            <path d="M400 500 C 300 430, 230 340, 180 250" strokeWidth="32" />
-            <path d="M400 500 C 500 430, 570 340, 620 250" strokeWidth="32" />
-            <path d="M388 480 C 360 390, 350 290, 350 200" strokeWidth="28" />
-            <path d="M412 480 C 440 390, 452 300, 470 210" strokeWidth="26" />
-            <path d="M250 320 C 215 285, 195 255, 175 215" strokeWidth="16" />
-            <path d="M550 320 C 585 285, 605 255, 625 215" strokeWidth="16" />
+          {/* Kapruka 'u' smile (Yellow) */}
+          <g filter="drop-shadow(0px 8px 16px rgba(0,0,0,0.2))">
+            <path
+              d="M 180 300 A 220 120 0 0 0 620 300"
+              stroke="#FDE047"
+              strokeWidth="54"
+              strokeLinecap="round"
+              fill="none" />
           </g>
         </svg>
 
