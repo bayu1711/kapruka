@@ -516,9 +516,9 @@ export function WishTree({
     return allCells;
   }, [products, liveCategories]);
   return (
-    <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
+    <div className="relative w-full h-full flex items-end justify-center overflow-hidden">
       {/* Responsive square container — kept strictly 1:1 so the % grid stays aligned to the canopy */}
-      <div className="relative w-[min(150vw,68vh)] h-[min(150vw,68vh)] sm:w-[min(115vw,78vh)] sm:h-[min(115vw,78vh)] md:w-[800px] md:h-[800px] max-w-[800px] max-h-[800px] flex-shrink-0 origin-center">
+      <div className="relative w-[min(180vw,80vh)] h-[min(180vw,80vh)] sm:w-[min(140vw,90vh)] sm:h-[min(140vw,90vh)] md:w-[1000px] md:h-[1000px] max-w-[1000px] max-h-[1000px] flex-shrink-0 origin-center translate-y-8 sm:translate-y-12">
         {/* Soft glows behind the tree */}
         <div className="absolute inset-x-0 top-0 h-2/3 bg-emerald-500/15 blur-3xl rounded-full pointer-events-none" />
         <div className="absolute inset-0 bg-blue-500/10 blur-3xl rounded-full scale-90 pointer-events-none" />
@@ -551,7 +551,7 @@ export function WishTree({
 
           {/* Trunk */}
           <path
-            d="M370 750 C 370 650, 352 560, 380 480 L 420 480 C 448 560, 430 650, 430 750 Z"
+            d="M370 800 C 370 650, 352 560, 380 480 L 420 480 C 448 560, 430 650, 430 800 Z"
             fill="url(#trunkGrad)" />
           
 

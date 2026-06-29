@@ -101,7 +101,7 @@ export function App() {
       
 
       {/* Main tree visualization */}
-      <div className="flex-1 relative w-full flex flex-col pb-24 sm:pb-32 pt-16 sm:pt-0">
+      <div className="flex-1 relative w-full flex flex-col pb-4 sm:pb-8 pt-16 sm:pt-0">
         <AnimatePresence mode="wait">
           <motion.div
             key={currentSessionIndex}
