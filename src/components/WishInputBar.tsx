@@ -21,7 +21,6 @@ interface WishInputBarProps {
   hasMorePages?: boolean;
   hasPrevPages?: boolean;
   followUpQuestions?: string[];
-  followUpQuestions?: string[];
 }
 
 /** A small tree SVG used as the loading indicator on the send button */
@@ -111,13 +110,13 @@ export function WishInputBar({
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!value.trim() && !listening) return;
-    
+
     let finalVal = value;
     if (selectedQuestion) {
       finalVal = `Q: ${selectedQuestion}\nA: ${value}`;
       setSelectedQuestion(null);
     }
-    
+
     setLoading(true);
     await onSubmit(finalVal);
     setLoading(false);
@@ -202,67 +201,66 @@ export function WishInputBar({
 
         <form onSubmit={handleSubmit} className="w-full">
           <div className="relative bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl sm:rounded-2xl shadow-2xl overflow-hidden">
-          <input
-            type="text"
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
-            placeholder={t('PLACEHOLDER')}
-            disabled={disabled}
-            className={`w-full px-4 py-3 sm:px-6 sm:py-4 ${browserSupportsSpeechRecognition ? 'pr-28 sm:pr-32' : 'pr-12 sm:pr-14'} bg-transparent text-white placeholder:text-white/40 font-heading text-base sm:text-lg outline-none`}
-          />
-          {browserSupportsSpeechRecognition && (
-            <div className="absolute right-12 sm:right-16 top-1/2 -translate-y-1/2 flex items-center gap-1">
-              <button
-                type="button"
-                onClick={cycleLanguage}
-                className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center transition-colors bg-white/5 text-white/50 hover:bg-white/10 hover:text-white/80 font-mono text-xs sm:text-sm font-bold"
-                title="Change Voice Language"
-              >
-                {langLabel}
-              </button>
-              <button
-                type="button"
-                onClick={toggleListening}
-                className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center transition-colors ${
-                  listening 
-                    ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30' 
-                    : 'bg-white/5 text-white/50 hover:bg-white/10 hover:text-white/80'
-                }`}
-              >
-                {listening ? <MicOff className="w-4 h-4 sm:w-5 sm:h-5" /> : <Mic className="w-4 h-4 sm:w-5 sm:h-5" />}
-              </button>
-            </div>
-          )}
-          <button
-            type="submit"
-            disabled={!value.trim() || disabled || isLoading}
-            className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-emerald-500 hover:bg-emerald-600 disabled:bg-white/10 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
-          >
-            <AnimatePresence mode="wait" initial={false}>
-              {isLoading ? (
-                <motion.span
-                  key="tree"
-                  initial={{ scale: 0, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  exit={{ scale: 0, opacity: 0 }}
-                  transition={{ duration: 0.15 }}
+            <input
+              type="text"
+              value={value}
+              onChange={(e) => onChange(e.target.value)}
+              placeholder={t('PLACEHOLDER')}
+              disabled={disabled}
+              className={`w-full px-4 py-3 sm:px-6 sm:py-4 ${browserSupportsSpeechRecognition ? 'pr-28 sm:pr-32' : 'pr-12 sm:pr-14'} bg-transparent text-white placeholder:text-white/40 font-heading text-base sm:text-lg outline-none`}
+            />
+            {browserSupportsSpeechRecognition && (
+              <div className="absolute right-12 sm:right-16 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={cycleLanguage}
+                  className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center transition-colors bg-white/5 text-white/50 hover:bg-white/10 hover:text-white/80 font-mono text-xs sm:text-sm font-bold"
+                  title="Change Voice Language"
                 >
-                  <TreeSpinner />
-                </motion.span>
-              ) : (
-                <motion.span
-                  key="arrow"
-                  initial={{ scale: 0, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  exit={{ scale: 0, opacity: 0 }}
-                  transition={{ duration: 0.15 }}
+                  {langLabel}
+                </button>
+                <button
+                  type="button"
+                  onClick={toggleListening}
+                  className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center transition-colors ${listening
+                      ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30'
+                      : 'bg-white/5 text-white/50 hover:bg-white/10 hover:text-white/80'
+                    }`}
                 >
-                  <ArrowUp className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-                </motion.span>
-              )}
-            </AnimatePresence>
-          </button>
-        </div>
+                  {listening ? <MicOff className="w-4 h-4 sm:w-5 sm:h-5" /> : <Mic className="w-4 h-4 sm:w-5 sm:h-5" />}
+                </button>
+              </div>
+            )}
+            <button
+              type="submit"
+              disabled={!value.trim() || disabled || isLoading}
+              className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-emerald-500 hover:bg-emerald-600 disabled:bg-white/10 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
+            >
+              <AnimatePresence mode="wait" initial={false}>
+                {isLoading ? (
+                  <motion.span
+                    key="tree"
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0, opacity: 0 }}
+                    transition={{ duration: 0.15 }}
+                  >
+                    <TreeSpinner />
+                  </motion.span>
+                ) : (
+                  <motion.span
+                    key="arrow"
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0, opacity: 0 }}
+                    transition={{ duration: 0.15 }}
+                  >
+                    <ArrowUp className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </button>
+          </div>
         </form>
       </div>
     </motion.div>

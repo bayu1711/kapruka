@@ -13,9 +13,9 @@ const OutputSchema = z.object({
   searchQuery: z.string().describe("The specific Kapruka search term (e.g. 'roses', 'birthday cake', 'saree')"),
   categories: z.array(z.string()).describe("4-6 matching categories"),
   searchParameters: z.array(z.object({
-    key: z.string().describe("The name of the filter, ONLY use 'max_price' or 'min_price'"),
-    value: z.string().describe("The value of the filter, e.g. '200000'")
-  })).optional().describe("Budget constraints ONLY"),
+    key: z.string().describe("The name of the filter, e.g. 'max_price', 'color', 'brand', 'model'"),
+    value: z.string().describe("The value of the filter, e.g. '200000', 'red', 'Apple', '12 Pro Max'")
+  })).optional().describe("Any additional dynamic constraints/filters the user specified"),
   followUpQuestions: z.array(z.string()).describe("2 to 3 leading/follow-up questions to ask the user next, to help refine their wish. e.g. 'Under what budget?' or 'Is it for a boy or a girl?'")
 });
 
@@ -240,7 +240,7 @@ CRITICAL RULES FOR SEARCH QUERY:
 1. NEVER output generic category names like 'toys', 'electronics', 'flowers', or 'gifts'. Kapruka's search engine works best with specific items.
 2. If the user intent is vague (e.g. "gift for 5 year old boy"), pick ONE highly specific, popular item type. E.g. use "remote control car" or "lego" instead of "toys".
 3. If the user intent is "gift for mom", pick "saree", "handbag", "perfume", or "mother's day cake" instead of "flowers".
-4. If the user specifies constraints like color, style, or brand, INCLUDE them directly in the searchQuery (e.g., "red saree", "Apple iPhone"). DO NOT put them in searchParameters. Only use searchParameters for max_price or min_price if the user specifies a budget.
+4. If the user specifies constraints like budget, brand, color, or model, put them in the searchParameters array with clear keys (e.g. "max_price", "brand", "color", "model") and DO NOT include them in the query itself.
 5. The user's preferred language is ${language}. You MUST translate your 'reasoning', 'postFilterReasoning', and 'followUpQuestions' into ${language}. DO NOT translate the 'searchQuery' or 'categories' keys.`)
     ];
 
@@ -273,13 +273,24 @@ CRITICAL RULES FOR SEARCH QUERY:
     finalRecipient = recipient || '';
     finalSearchQuery = searchQuery || '';
     finalFollowUpQuestions = followUpQuestions || [];
+    let finalQueryStr = searchQuery || '';
     const params = {};
     if (searchParameters) {
-      searchParameters.forEach(p => { params[p.key] = p.value; });
+      searchParameters.forEach(p => {
+        if (p.key === 'max_price' || p.key === 'min_price') {
+          params[p.key] = p.value;
+        } else {
+          // Bundle unsupported parameters directly into the main query string
+          finalQueryStr += ` ${p.value}`;
+        }
+      });
     }
+    
+    finalQueryStr = finalQueryStr.trim();
+    finalSearchQuery = finalQueryStr;
 
-    console.log(`[Agent Attempt ${attempt}] Searching Kapruka for: "${searchQuery}" with params:`, params);
-    const mcpRawText = await executeKaprukaSearch({ q: searchQuery, ...params });
+    console.log(`[Agent Attempt ${attempt}] Searching Kapruka for: "${finalQueryStr}" with params:`, params);
+    const mcpRawText = await executeKaprukaSearch({ q: finalQueryStr, ...params });
 
     if (mcpRawText === 'No products found.') {
       console.log(`[Agent Attempt ${attempt}] 0 products. Retrying...`);
