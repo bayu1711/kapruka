@@ -10,7 +10,7 @@ import { Locale } from '../i18n/translations';
 interface WishInputBarProps {
   value: string;
   onChange: (value: string) => void;
-  onSubmit: () => void;
+  onSubmit: (finalValue?: string) => void;
   placeholder: string;
   disabled?: boolean;
   history?: HistorySnapshot[];
@@ -21,7 +21,7 @@ interface WishInputBarProps {
   hasMorePages?: boolean;
   hasPrevPages?: boolean;
   followUpQuestions?: string[];
-  onFollowUpClick?: (q: string) => void;
+  followUpQuestions?: string[];
 }
 
 /** A small tree SVG used as the loading indicator on the send button */
@@ -106,14 +106,21 @@ export function WishInputBar({
 
   const langLabel = ['EN', 'SI', 'TA'][['en-US', 'si-LK', 'ta-LK'].indexOf(locale)];
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [selectedQuestion, setSelectedQuestion] = useState<string | null>(null);
+
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (value.trim() && !disabled && !loading) {
-      setLoading(true);
-      onSubmit();
-      // Reset loading after the stage transition animation (~800ms)
-      setTimeout(() => setLoading(false), 900);
+    if (!value.trim() && !listening) return;
+    
+    let finalVal = value;
+    if (selectedQuestion) {
+      finalVal = `Q: ${selectedQuestion}\nA: ${value}`;
+      setSelectedQuestion(null);
     }
+    
+    setLoading(true);
+    await onSubmit(finalVal);
+    setLoading(false);
   };
 
   const isLoading = loading && !disabled;
@@ -150,8 +157,8 @@ export function WishInputBar({
                 <button
                   key={idx}
                   type="button"
-                  onClick={() => onFollowUpClick?.(q)}
-                  className="flex items-center gap-1.5 text-xs font-semibold text-emerald-100 bg-emerald-500/20 hover:bg-emerald-500/40 backdrop-blur-md border border-emerald-500/30 rounded-full px-3 py-1.5 transition-colors text-left"
+                  onClick={() => setSelectedQuestion(selectedQuestion === q ? null : q)}
+                  className={`flex items-center gap-1.5 text-xs font-semibold backdrop-blur-md rounded-full px-3 py-1.5 transition-colors text-left ${selectedQuestion === q ? 'bg-emerald-500 text-white border-emerald-400 border shadow-[0_0_12px_rgba(16,185,129,0.8)]' : 'text-emerald-100 bg-emerald-500/20 hover:bg-emerald-500/40 border-emerald-500/30 border'}`}
                 >
                   <MessageCircleQuestion className="w-3.5 h-3.5 shrink-0" />
                   <span className="truncate">{q}</span>

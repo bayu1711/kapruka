@@ -10,18 +10,17 @@ export interface AgentResult {
   followUpQuestions?: string[];
 }
 
-const chatHistory: string[] = [];
-
-export async function parseUserQuery(userMessage: string, enablePostFilter: boolean = false, language: string = 'en-US'): Promise<AgentResult> {
-  // Keep last 6 messages for context
-  chatHistory.push(`User: ${userMessage}`);
-  if (chatHistory.length > 6) chatHistory.shift();
-
+export async function parseUserQuery(
+  userMessage: string, 
+  history: { role: string; content: string }[] = [],
+  enablePostFilter: boolean = false, 
+  language: string = 'en-US'
+): Promise<AgentResult> {
   try {
     const res = await fetch('/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: userMessage, history: chatHistory.slice(0, -1), enablePostFilter, language })
+      body: JSON.stringify({ message: userMessage, history, enablePostFilter, language })
     });
     
     if (!res.ok) {

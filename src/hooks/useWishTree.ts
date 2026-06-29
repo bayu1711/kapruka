@@ -40,7 +40,7 @@ export interface Session {
 }
 
 export interface GlobalState {
-  cartItems: string[];
+  cartItems: Product[];
   showCart: boolean;
   showCheckout: boolean;
   showConfirmation: boolean;
@@ -50,11 +50,15 @@ const CART_STORAGE_KEY = 'kapruka_magic_cart';
 const SESSIONS_STORAGE_KEY = 'kapruka_magic_sessions';
 const SESSION_INDEX_KEY = 'kapruka_magic_session_idx';
 
-function loadCart(): string[] {
+function loadCart(): Product[] {
   if (typeof window === 'undefined') return [];
   try {
     const saved = localStorage.getItem(CART_STORAGE_KEY);
-    if (saved) return JSON.parse(saved);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (parsed.length > 0 && typeof parsed[0] === 'string') return [];
+      return parsed;
+    }
   } catch (e) {}
   return [];
 }
@@ -193,8 +197,14 @@ export function useWishTree() {
       page: 0,
     }));
 
+    const session = sessions[currentSessionIndex];
+    const formattedHistory = session?.history.flatMap(h => [
+      { role: 'user', content: h.query },
+      { role: 'assistant', content: h.aiReasoning ? `Reasoning: ${h.aiReasoning}\nSearched for: ${h.aiActualSearchQuery || 'Unknown'}\nFound: ${h.products.length} products.` : `Found ${h.products.length} products.` }
+    ]) || [];
+
     try {
-      const agentResult = await parseUserQuery(query, enablePostFilter, locale);
+      const agentResult = await parseUserQuery(query, formattedHistory, enablePostFilter, locale);
       updateSession((prev) => ({ ...prev, aiStatus: agentResult.aiStatusMessage }));
 
       const cats = agentResult.suggestedCategories && agentResult.suggestedCategories.length > 0
@@ -277,7 +287,7 @@ export function useWishTree() {
         updateSession((prev) => ({ ...prev, aiStatus: '' }));
       }, 3000);
     }
-  }, [updateSession, locale, t]);
+  }, [updateSession, locale, t, sessions, currentSessionIndex]);
 
   const refineProducts = useCallback(async (query?: string) => {
     const session = sessions[currentSessionIndex];
@@ -307,12 +317,16 @@ export function useWishTree() {
   }, [updateSession]);
 
   const addToCart = useCallback((productId: string) => {
+    const session = sessions[currentSessionIndex];
+    const product = session?.liveProducts.find(p => p.id === productId);
+    if (!product) return;
+
     setGlobalState((prev) => ({
       ...prev,
-      cartItems: [...prev.cartItems, productId],
+      cartItems: [...prev.cartItems, product],
       showCart: true,
     }));
-  }, []);
+  }, [sessions, currentSessionIndex]);
 
   const toggleCart = useCallback(() => {
     setGlobalState((prev) => ({ ...prev, showCart: !prev.showCart }));

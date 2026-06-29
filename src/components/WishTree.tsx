@@ -165,13 +165,22 @@ export function WishTree({
       return seed / 233280;
     };
 
-    // Apply live category names to label cells if we have them from MCP
     const labelCells = GRID_LAYOUT.filter((c) => c.type === 'label');
     const liveLayout: GridCell[] = GRID_LAYOUT.map((cell) => {
-      if (cell.type !== 'label' || liveCategories.length === 0) return cell;
+      if (cell.type !== 'label') return cell;
       const idx = labelCells.indexOf(cell);
-      if (idx >= 0 && idx < liveCategories.length) {
-        return { ...cell, contentId: liveCategories[idx] };
+      
+      const texts = [];
+      if (aiRecipient) texts.push(`For: ${aiRecipient}`);
+      if (aiActualSearchQuery) texts.push(`Query: ${aiActualSearchQuery}`);
+      if (aiReasoning) texts.push(`Reason: ${aiReasoning.substring(0, 50)}...`);
+      
+      const remaining = liveCategories || [];
+      const usedCategories = remaining.filter(c => !texts.includes(c));
+      const allTexts = [...texts, ...usedCategories];
+      
+      if (idx >= 0 && idx < allTexts.length) {
+        return { ...cell, contentId: allTexts[idx] };
       }
       return cell;
     });
@@ -557,10 +566,10 @@ export function WishTree({
           {/* Kapruka 'u' smile (Yellow) */}
           <g filter="drop-shadow(0px 8px 16px rgba(0,0,0,0.2))">
             <path
-              d="M 180 300 A 220 120 0 0 0 620 300"
+              d="M 240 350 A 160 100 0 0 0 560 350"
               stroke="#FDE047"
               strokeWidth="54"
-              strokeLinecap="round"
+              strokeLinecap="butt"
               fill="none" />
           </g>
         </svg>

@@ -40,12 +40,10 @@ export function App() {
   useEffect(() => {
     document.documentElement.classList.add('dark');
   }, []);
-  const onSubmit = () => {
-    handleSubmit(state.inputValue, enablePostFilter);
+  const onSubmit = (finalValue?: string) => {
+    handleSubmit(finalValue || state.inputValue, enablePostFilter);
   };
-  const cartProducts = state.cartItems.map(
-    (id) => products.find((p) => p.id === id)!
-  );
+  const cartProducts = state.cartItems;
   const selectedProductObj = state.selectedProduct
     ? products.find((p) => p.id === state.selectedProduct) || null
     : null;
@@ -187,7 +185,6 @@ export function App() {
           handleSubmit(q);
         }}
         followUpQuestions={state.followUpQuestions}
-        onFollowUpClick={(q) => handleSubmit(q)}
       />
 
       }
