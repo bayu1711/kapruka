@@ -129,7 +129,7 @@ export function WishInputBar({
       initial={{ y: 100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ type: 'spring', stiffness: 200, damping: 30 }}
-      className="fixed bottom-4 sm:bottom-8 inset-x-0 z-50 flex justify-center px-4"
+      className="w-full z-50 flex justify-center px-4 relative flex-shrink-0 pb-4 sm:pb-8 pt-2"
     >
       <div className="w-full max-w-2xl flex flex-col items-end">
         {/* History Log */}

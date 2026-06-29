@@ -99,7 +99,7 @@ export function App() {
       
 
       {/* Main tree visualization */}
-      <div className="flex-1 relative w-full flex flex-col pb-4 sm:pb-8 pt-16 sm:pt-0">
+      <div className="flex-1 relative w-full flex flex-col pt-16 sm:pt-0 min-h-0">
         <AnimatePresence mode="wait">
           <motion.div
             key={currentSessionIndex}
@@ -158,37 +158,35 @@ export function App() {
             </button>
           )}
         </div>
-      </div>
-      {!state.showCheckout && !state.showConfirmation &&
-      <WishInputBar
-        value={state.inputValue}
-        onChange={updateInput}
-        onSubmit={onSubmit}
-        placeholder={
-        currentConfig?.prompt || 'What are you wishing for today?'
+        
+        {!state.showCheckout && !state.showConfirmation &&
+        <WishInputBar
+          value={state.inputValue}
+          onChange={updateInput}
+          onSubmit={onSubmit}
+          placeholder={currentConfig?.prompt || 'What are you wishing for today?'}
+          disabled={state.showCheckout || state.showConfirmation || state.isSearching}
+          history={history}
+          onHistoryClick={restoreHistory}
+          hasMorePages={hasMorePages}
+          hasPrevPages={hasPrevPages}
+          onNextPage={() => {
+            setIsPaging(true);
+            nextPage();
+          }}
+          onPrevPage={() => {
+            setIsPaging(true);
+            prevPage();
+          }}
+          onRandomize={() => {
+            const randomQueries = ["Surprise me with completely different gift ideas!", "Show me random best sellers", "I'm not sure, inspire me!"];
+            const q = randomQueries[Math.floor(Math.random() * randomQueries.length)];
+            handleSubmit(q);
+          }}
+          followUpQuestions={state.followUpQuestions}
+        />
         }
-        disabled={state.showCheckout || state.showConfirmation || state.isSearching}
-        history={history}
-        onHistoryClick={restoreHistory}
-        hasMorePages={hasMorePages}
-        hasPrevPages={hasPrevPages}
-        onNextPage={() => {
-          setIsPaging(true);
-          nextPage();
-        }}
-        onPrevPage={() => {
-          setIsPaging(true);
-          prevPage();
-        }}
-        onRandomize={() => {
-          const randomQueries = ["Surprise me with completely different gift ideas!", "Show me random best sellers", "I'm not sure, inspire me!"];
-          const q = randomQueries[Math.floor(Math.random() * randomQueries.length)];
-          handleSubmit(q);
-        }}
-        followUpQuestions={state.followUpQuestions}
-      />
-
-      }
+      </div>
 
       {/* Cart drawer */}
       <CartDrawer
