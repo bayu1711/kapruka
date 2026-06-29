@@ -8,6 +8,7 @@ export interface AgentResult {
   actualSearchQuery?: string;
   postFilterReasoning?: string;
   followUpQuestions?: string[];
+  searchParameters?: {key: string, value: string}[];
 }
 
 export async function parseUserQuery(
@@ -38,7 +39,8 @@ export async function parseUserQuery(
       reasoning: data.reasoning,
       recipient: data.recipient,
       postFilterReasoning: data.postFilterReasoning,
-      followUpQuestions: data.followUpQuestions || []
+      followUpQuestions: data.followUpQuestions || [],
+      searchParameters: data.searchParameters || []
     };
 
   } catch (err) {

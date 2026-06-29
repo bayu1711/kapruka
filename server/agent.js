@@ -219,6 +219,7 @@ async function processChat(message, history, enablePostFilter = false, language 
   let finalSearchQuery = "";
   let finalPostFilterReasoning = "";
   let finalFollowUpQuestions = [];
+  let finalSearchParameters = [];
   let attempt = 0;
 
   const llm = new ChatGoogleGenerativeAI({
@@ -273,6 +274,7 @@ CRITICAL RULES FOR SEARCH QUERY:
     finalRecipient = recipient || '';
     finalSearchQuery = searchQuery || '';
     finalFollowUpQuestions = followUpQuestions || [];
+    finalSearchParameters = searchParameters || [];
     let finalQueryStr = searchQuery || '';
     const params = {};
     if (searchParameters) {
@@ -338,7 +340,8 @@ CRITICAL RULES FOR SEARCH QUERY:
     recipient: finalRecipient,
     searchQuery: finalSearchQuery,
     postFilterReasoning: finalPostFilterReasoning,
-    followUpQuestions: finalFollowUpQuestions
+    followUpQuestions: finalFollowUpQuestions,
+    searchParameters: finalSearchParameters
   };
 }
 

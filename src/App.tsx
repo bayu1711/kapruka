@@ -119,6 +119,7 @@ export function App() {
               aiReasoning={state.aiReasoning}
               aiRecipient={state.aiRecipient}
               aiActualSearchQuery={state.aiActualSearchQuery}
+              searchParameters={state.searchParameters}
               onOpenDevTools={() => setIsDevToolsOpen(true)}
               showDebugGrid={showDebugGrid}
             />

@@ -14,6 +14,7 @@ interface WishTreeProps {
   aiReasoning?: string;
   aiRecipient?: string;
   aiActualSearchQuery?: string;
+  searchParameters?: {key: string, value: string}[];
   onOpenDevTools: () => void;
   showDebugGrid: boolean;
 }
@@ -112,6 +113,7 @@ export function WishTree({
   aiReasoning,
   aiRecipient,
   aiActualSearchQuery,
+  searchParameters,
   onOpenDevTools,
   showDebugGrid
 }: WishTreeProps) {
@@ -172,7 +174,12 @@ export function WishTree({
       
       const texts = [];
       if (aiRecipient) texts.push(`For: ${aiRecipient}`);
-      if (aiActualSearchQuery) texts.push(`Query: ${aiActualSearchQuery}`);
+      if (aiActualSearchQuery) texts.push(aiActualSearchQuery);
+      if (searchParameters && searchParameters.length > 0) {
+        searchParameters.forEach(p => {
+          texts.push(`${p.key}: ${p.value}`);
+        });
+      }
       if (aiReasoning) texts.push(`Reason: ${aiReasoning.substring(0, 50)}...`);
       
       const remaining = liveCategories || [];

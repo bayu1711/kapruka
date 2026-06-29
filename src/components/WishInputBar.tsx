@@ -135,16 +135,22 @@ export function WishInputBar({
         {/* History Log */}
         {history && history.length > 0 && (
           <div className="w-full flex flex-col items-end gap-2 px-2 max-h-40 overflow-y-auto mb-4 no-scrollbar">
-            {history.map((snap, idx) => (
-              <button
-                key={idx}
-                type="button"
-                onClick={() => onHistoryClick?.(idx)}
-                className="text-right text-sm text-white/50 hover:text-white/80 transition-colors bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl px-4 py-2 max-w-[80%] break-words"
-              >
-                {snap.query}
-              </button>
-            ))}
+            {history.map((snap, idx) => {
+              let displayQuery = snap.query;
+              if (displayQuery.startsWith('Q: ') && displayQuery.includes('\nA: ')) {
+                displayQuery = displayQuery.split('\nA: ')[1];
+              }
+              return (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => onHistoryClick?.(idx)}
+                  className="text-right text-sm text-white/50 hover:text-white/80 transition-colors bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl px-4 py-2 max-w-[80%] break-words"
+                >
+                  {displayQuery}
+                </button>
+              );
+            })}
           </div>
         )}
 
