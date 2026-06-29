@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
+import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import { useWishTree } from './hooks/useWishTree';
 import { BrandLockup } from './components/BrandLockup';
 import { AiStatus } from './components/AiStatus';
@@ -30,6 +31,10 @@ export function App() {
     restoreHistory,
     nextPage,
     prevPage,
+    sessions,
+    currentSessionIndex,
+    goToNextSession,
+    goToPrevSession,
   } = useWishTree();
   // Enable dark mode
   useEffect(() => {
@@ -97,20 +102,63 @@ export function App() {
 
       {/* Main tree visualization */}
       <div className="flex-1 relative w-full flex flex-col pb-24 sm:pb-32 pt-16 sm:pt-0">
-        <WishTree
-          stage={state.stage}
-          products={visibleProducts}
-          selectedProduct={state.selectedProduct}
-          onSelectProduct={selectProduct}
-          isPaging={isPaging}
-          liveCategories={liveCategories}
-          aiReasoning={state.aiReasoning}
-          aiRecipient={state.aiRecipient}
-          aiActualSearchQuery={state.aiActualSearchQuery}
-          onOpenDevTools={() => setIsDevToolsOpen(true)}
-          showDebugGrid={showDebugGrid}
-        />
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentSessionIndex}
+            initial={{ opacity: 0, x: 100 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -100 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+            className="flex-1 w-full h-full relative"
+          >
+            <WishTree
+              stage={state.stage}
+              products={visibleProducts}
+              selectedProduct={state.selectedProduct}
+              onSelectProduct={selectProduct}
+              isPaging={isPaging}
+              liveCategories={liveCategories}
+              aiReasoning={state.aiReasoning}
+              aiRecipient={state.aiRecipient}
+              aiActualSearchQuery={state.aiActualSearchQuery}
+              onOpenDevTools={() => setIsDevToolsOpen(true)}
+              showDebugGrid={showDebugGrid}
+            />
+          </motion.div>
+        </AnimatePresence>
+
+        {/* Navigation Arrows */}
+        <div className="absolute inset-y-0 left-0 w-16 sm:w-24 pointer-events-none flex items-center justify-start z-40">
+          {currentSessionIndex > 0 && (
+            <button
+              onClick={goToPrevSession}
+              className="pointer-events-auto ml-2 sm:ml-6 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 flex items-center justify-center text-white/80 hover:text-white transition-all hover:scale-110 shadow-xl"
+            >
+              <ChevronLeft className="w-6 h-6" />
+            </button>
+          )}
+        </div>
         
+        <div className="absolute inset-y-0 right-0 w-32 pointer-events-none flex items-center justify-end z-40">
+          {currentSessionIndex === sessions.length - 1 ? (
+            <button
+              onClick={goToNextSession}
+              className="pointer-events-auto mr-2 sm:mr-6 px-4 py-3 rounded-full bg-emerald-500 hover:bg-emerald-400 backdrop-blur-md flex items-center gap-2 justify-center text-white font-heading transition-all hover:scale-105 shadow-[0_4px_20px_rgba(16,185,129,0.3)]"
+              title="Start New Wish"
+            >
+              <Plus className="w-5 h-5" />
+              <span className="font-semibold text-sm">New Wish</span>
+            </button>
+          ) : (
+            <button
+              onClick={goToNextSession}
+              className="pointer-events-auto mr-2 sm:mr-6 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 flex items-center justify-center text-white/80 hover:text-white transition-all hover:scale-110 shadow-xl"
+              title="Next Session"
+            >
+              <ChevronRight className="w-6 h-6" />
+            </button>
+          )}
+        </div>
       </div>
       {!state.showCheckout && !state.showConfirmation &&
       <WishInputBar
