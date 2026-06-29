@@ -66,6 +66,8 @@ export function WishInputBar({
   onRandomize,
   hasMorePages,
   hasPrevPages,
+  followUpQuestions,
+  onFollowUpClick,
 }: WishInputBarProps) {
   const [loading, setLoading] = useState(false);
 
