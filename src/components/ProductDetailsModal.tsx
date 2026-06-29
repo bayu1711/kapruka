@@ -4,6 +4,7 @@ import { X, ShoppingCart, Tag, ExternalLink, Loader2, Package } from 'lucide-rea
 import type { Product } from '../data/scenario';
 import { getProduct, type KaprukaMCPProduct } from '../lib/kapruka-mcp';
 import { DeliveryChecker } from './DeliveryChecker';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface ProductDetailsModalProps {
   product: Product | null;
@@ -19,6 +20,7 @@ export function ProductDetailsModal({
   const [details, setDetails] = useState<KaprukaMCPProduct | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { t } = useLanguage();
 
   useEffect(() => {
     if (!product) {
@@ -114,9 +116,11 @@ export function ProductDetailsModal({
             <span>{displayCategory.toUpperCase() || 'KAPRUKA'}</span>
           </div>
           {!loading && (
-            <div className={`flex items-center gap-1.5 text-xs font-mono px-3 py-1 rounded-full border ${inStock ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' : 'text-red-400 bg-red-500/10 border-red-500/20'}`}>
-              <Package className="w-3 h-3" />
-              <span>{inStock ? 'IN STOCK' : 'OUT OF STOCK'}</span>
+            <div className="absolute top-4 right-16 bg-black/40 backdrop-blur-md px-3 py-1 rounded-full border border-white/20 z-10 flex items-center gap-1.5">
+              <span className={`w-2 h-2 rounded-full ${inStock ? 'bg-emerald-400' : 'bg-red-400'}`} />
+              <span className="text-xs font-mono font-medium text-white tracking-wider">
+                {inStock ? 'IN STOCK' : t('OUT_OF_STOCK').toUpperCase()}
+              </span>
             </div>
           )}
         </div>
@@ -169,7 +173,7 @@ export function ProductDetailsModal({
             className="w-full py-4 px-6 bg-emerald-500 hover:bg-emerald-400 disabled:bg-white/10 disabled:cursor-not-allowed text-white font-bold rounded-2xl flex items-center justify-center gap-3 transition-all duration-300 shadow-[0_4px_20px_rgba(16,185,129,0.3)] hover:shadow-[0_4px_30px_rgba(16,185,129,0.5)] transform hover:-translate-y-0.5 active:translate-y-0"
           >
             <ShoppingCart className="w-5 h-5" />
-            <span>Add to Cart</span>
+            <span>{t('ADD_TO_CART')}</span>
           </button>
 
           {displayUrl && (

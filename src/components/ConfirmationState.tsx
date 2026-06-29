@@ -2,8 +2,10 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { CheckCircle, Sparkles } from 'lucide-react';
 import { OrderTracker } from './OrderTracker';
+import { useLanguage } from '../contexts/LanguageContext';
 
 export function ConfirmationState() {
+  const { t } = useLanguage();
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -32,7 +34,7 @@ export function ConfirmationState() {
           transition={{ delay: 0.3 }}
           className="text-3xl font-heading font-bold text-white mb-3"
         >
-          Your Wish is On Its Way!
+          {t('ORDER_CONFIRMED')}
         </motion.h2>
 
         <motion.p
@@ -51,7 +53,7 @@ export function ConfirmationState() {
           className="flex items-center justify-center gap-2 text-emerald-400 mb-8"
         >
           <Sparkles className="w-4 h-4" />
-          <span className="font-mono text-sm">The Wish Tree made it happen</span>
+          <span className="font-mono text-sm">{t('TREE_MADE_IT_HAPPEN')}</span>
           <Sparkles className="w-4 h-4" />
         </motion.div>
 

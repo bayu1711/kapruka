@@ -4,6 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowUp, RefreshCw, ChevronRight, ChevronLeft, Mic, MicOff, MessageCircleQuestion } from 'lucide-react';
 import type { HistorySnapshot } from '../hooks/useWishTree';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
+import { useLanguage } from '../contexts/LanguageContext';
+import { Locale } from '../i18n/translations';
 
 interface WishInputBarProps {
   value: string;
@@ -70,6 +72,7 @@ export function WishInputBar({
   onFollowUpClick,
 }: WishInputBarProps) {
   const [loading, setLoading] = useState(false);
+  const { locale, setLocale, t } = useLanguage();
 
   const { transcript, listening, resetTranscript, browserSupportsSpeechRecognition } = useSpeechRecognition();
 
@@ -84,9 +87,24 @@ export function WishInputBar({
       SpeechRecognition.stopListening();
     } else {
       resetTranscript();
-      SpeechRecognition.startListening({ continuous: true });
+      SpeechRecognition.startListening({ continuous: true, language: locale });
     }
   };
+
+  const cycleLanguage = () => {
+    const langs: Locale[] = ['en-US', 'si-LK', 'ta-LK'];
+    const nextIndex = (langs.indexOf(locale) + 1) % langs.length;
+    const nextLang = langs[nextIndex];
+    setLocale(nextLang);
+    if (listening) {
+      SpeechRecognition.stopListening();
+      setTimeout(() => {
+        SpeechRecognition.startListening({ continuous: true, language: nextLang });
+      }, 50);
+    }
+  };
+
+  const langLabel = ['EN', 'SI', 'TA'][['en-US', 'si-LK', 'ta-LK'].indexOf(locale)];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -148,7 +166,7 @@ export function WishInputBar({
                   className="flex items-center gap-1.5 text-xs font-semibold text-white bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 rounded-full px-3 py-1.5 transition-colors"
                 >
                   <ChevronLeft className="w-3.5 h-3.5" />
-                  Previous items
+                  {t('PREVIOUS')}
                 </button>
               )}
               {hasMorePages && (
@@ -157,7 +175,7 @@ export function WishInputBar({
                   onClick={onNextPage}
                   className="flex items-center gap-1.5 text-xs font-semibold text-white bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 rounded-full px-3 py-1.5 transition-colors"
                 >
-                  Load more items
+                  {t('LOAD_MORE')}
                   <ChevronRight className="w-3.5 h-3.5" />
                 </button>
               )}
@@ -168,7 +186,7 @@ export function WishInputBar({
                   className="flex items-center gap-1.5 text-xs font-semibold text-emerald-100 bg-emerald-500/20 hover:bg-emerald-500/40 backdrop-blur-md border border-emerald-500/30 rounded-full px-3 py-1.5 transition-colors"
                 >
                   <RefreshCw className="w-3.5 h-3.5" />
-                  Show me something else
+                  {t('RANDOMIZE')}
                 </button>
               )}
             </div>
@@ -181,22 +199,32 @@ export function WishInputBar({
             type="text"
             value={value}
             onChange={(e) => onChange(e.target.value)}
-            placeholder={placeholder}
+            placeholder={t('PLACEHOLDER')}
             disabled={disabled}
-            className={`w-full px-4 py-3 sm:px-6 sm:py-4 ${browserSupportsSpeechRecognition ? 'pr-20 sm:pr-24' : 'pr-12 sm:pr-14'} bg-transparent text-white placeholder:text-white/40 font-heading text-base sm:text-lg outline-none`}
+            className={`w-full px-4 py-3 sm:px-6 sm:py-4 ${browserSupportsSpeechRecognition ? 'pr-28 sm:pr-32' : 'pr-12 sm:pr-14'} bg-transparent text-white placeholder:text-white/40 font-heading text-base sm:text-lg outline-none`}
           />
           {browserSupportsSpeechRecognition && (
-            <button
-              type="button"
-              onClick={toggleListening}
-              className={`absolute right-12 sm:right-16 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center transition-colors ${
-                listening 
-                  ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30' 
-                  : 'bg-white/5 text-white/50 hover:bg-white/10 hover:text-white/80'
-              }`}
-            >
-              {listening ? <MicOff className="w-4 h-4 sm:w-5 sm:h-5" /> : <Mic className="w-4 h-4 sm:w-5 sm:h-5" />}
-            </button>
+            <div className="absolute right-12 sm:right-16 top-1/2 -translate-y-1/2 flex items-center gap-1">
+              <button
+                type="button"
+                onClick={cycleLanguage}
+                className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center transition-colors bg-white/5 text-white/50 hover:bg-white/10 hover:text-white/80 font-mono text-xs sm:text-sm font-bold"
+                title="Change Voice Language"
+              >
+                {langLabel}
+              </button>
+              <button
+                type="button"
+                onClick={toggleListening}
+                className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center transition-colors ${
+                  listening 
+                    ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30' 
+                    : 'bg-white/5 text-white/50 hover:bg-white/10 hover:text-white/80'
+                }`}
+              >
+                {listening ? <MicOff className="w-4 h-4 sm:w-5 sm:h-5" /> : <Mic className="w-4 h-4 sm:w-5 sm:h-5" />}
+              </button>
+            </div>
           )}
           <button
             type="submit"

@@ -210,7 +210,7 @@ async function enrichProductsWithImages(products) {
   }));
 }
 
-async function processChat(message, history, enablePostFilter = false) {
+async function processChat(message, history, enablePostFilter = false, language = 'en-US') {
   let internalSystemLog = "";
   let finalProducts = [];
   let suggestedCategories = [];
@@ -240,7 +240,8 @@ CRITICAL RULES FOR SEARCH QUERY:
 1. NEVER output generic category names like 'toys', 'electronics', 'flowers', or 'gifts'. Kapruka's search engine works best with specific items.
 2. If the user intent is vague (e.g. "gift for 5 year old boy"), pick ONE highly specific, popular item type. E.g. use "remote control car" or "lego" instead of "toys".
 3. If the user intent is "gift for mom", pick "saree", "handbag", "perfume", or "mother's day cake" instead of "flowers".
-4. If the user specifies constraints like budget, brand, or color, put them in the searchParameters array with clear keys (e.g. "max_price", "brand", "color") and DO NOT include them in the query itself.`)
+4. If the user specifies constraints like budget, brand, or color, put them in the searchParameters array with clear keys (e.g. "max_price", "brand", "color") and DO NOT include them in the query itself.
+5. The user's preferred language is ${language}. You MUST translate your 'reasoning', 'postFilterReasoning', and 'followUpQuestions' into ${language}. DO NOT translate the 'searchQuery' or 'categories' keys.`)
     ];
 
     if (history && history.length > 0) {

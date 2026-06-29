@@ -344,7 +344,7 @@ export async function checkDelivery(
 
 /** Create a guest-checkout order and return a click-to-pay URL. */
 export async function createOrder(params: {
-  productId: string;
+  cart: { productId: string; quantity: number }[];
   recipientName: string;
   recipientPhone: string;
   city: string;
@@ -354,7 +354,7 @@ export async function createOrder(params: {
 }): Promise<KaprukaOrderResult> {
   const args = {
     currency: 'LKR',
-    cart: [{ product_id: params.productId, quantity: 1 }],
+    cart: params.cart.map(c => ({ product_id: c.productId, quantity: c.quantity })),
     recipient: {
       name: params.recipientName,
       phone: params.recipientPhone,

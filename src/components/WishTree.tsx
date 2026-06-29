@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Grid3x3, Settings } from 'lucide-react';
 import type { Product } from '../data/scenario';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface WishTreeProps {
   stage: number;
@@ -114,6 +115,7 @@ export function WishTree({
   onOpenDevTools,
   showDebugGrid
 }: WishTreeProps) {
+  const { t } = useLanguage();
   const showProducts = stage >= 3;
   // Calculate cell positions based on the 11x8 grid
   const gridCells = useMemo(() => {
@@ -753,7 +755,7 @@ export function WishTree({
               }}
               className="text-4xl sm:text-6xl font-heading font-bold text-white mb-2 sm:mb-4">
               
-                KAPRUKA
+                {t('KAPRUKA')}
               </motion.h1>
               <motion.h2
               initial={{
@@ -769,7 +771,7 @@ export function WishTree({
               }}
               className="text-4xl sm:text-7xl font-heading font-bold text-emerald-400 mb-4 sm:mb-6 drop-shadow-[0_0_20px_rgba(16,185,129,0.5)]">
               
-                WISH TREE
+                {t('WISH_TREE_TITLE')}
               </motion.h2>
               <motion.p
               initial={{
@@ -785,7 +787,7 @@ export function WishTree({
               }}
               className="text-sm sm:text-xl text-white/80 font-heading">
               
-                AI grows the tree as it understands your wish
+                {t('TREE_SUBTITLE')}
               </motion.p>
             </div>
           </motion.div>

@@ -1,0 +1,81 @@
+export type Locale = 'en-US' | 'si-LK' | 'ta-LK';
+
+type Translations = Record<string, string>;
+
+const en: Translations = {
+  WISH_TREE_TITLE: 'WISH TREE',
+  KAPRUKA: 'KAPRUKA',
+  TREE_SUBTITLE: 'AI grows the tree as it understands your wish',
+  PLACEHOLDER: 'What are you wishing for today?',
+  SEARCHING: 'Searching Kapruka...',
+  LOAD_MORE: 'Load more items',
+  PREVIOUS: 'Previous items',
+  RANDOMIZE: 'Show me something else',
+  YOUR_CART: 'Your Cart',
+  SUBTOTAL: 'Subtotal',
+  DELIVERY: 'Delivery',
+  FREE: 'Free',
+  CHECKOUT: 'Checkout',
+  CHECKOUT_DETAILS: 'Checkout Details',
+  DELIVERY_INFO: 'Delivery Info',
+  CONFIRM_PAY: 'Confirm & Pay',
+  TOTAL: 'Total',
+  ADD_TO_CART: 'Add to Cart',
+  OUT_OF_STOCK: 'Out of Stock',
+  ORDER_CONFIRMED: 'Order Confirmed!',
+  TREE_MADE_IT_HAPPEN: 'The Wish Tree made it happen',
+};
+
+const si: Translations = {
+  WISH_TREE_TITLE: 'ප්‍රාර්ථනා ගස',
+  KAPRUKA: 'කප්රුක',
+  TREE_SUBTITLE: 'ඔබේ ප්‍රාර්ථනාව තේරුම් ගන්නා විට AI ගස වර්ධනය කරයි',
+  PLACEHOLDER: 'ඔබ අද ප්‍රාර්ථනා කරන්නේ කුමක්ද?',
+  SEARCHING: 'කප්රුක සොයමින්...',
+  LOAD_MORE: 'තවත් අයිතම පෙන්වන්න',
+  PREVIOUS: 'පෙර අයිතම',
+  RANDOMIZE: 'මට වෙනත් දෙයක් පෙන්වන්න',
+  YOUR_CART: 'ඔබේ කරත්තය',
+  SUBTOTAL: 'අතුරු එකතුව',
+  DELIVERY: 'බෙදා හැරීම',
+  FREE: 'නොමිලේ',
+  CHECKOUT: 'මිලදී ගන්න',
+  CHECKOUT_DETAILS: 'මිලදී ගැනීමේ විස්තර',
+  DELIVERY_INFO: 'බෙදා හැරීමේ තොරතුරු',
+  CONFIRM_PAY: 'තහවුරු කර ගෙවන්න',
+  TOTAL: 'එකතුව',
+  ADD_TO_CART: 'කරත්තයට එක් කරන්න',
+  OUT_OF_STOCK: 'තොග අවසන්',
+  ORDER_CONFIRMED: 'ඇණවුම තහවුරු විය!',
+  TREE_MADE_IT_HAPPEN: 'ප්‍රාර්ථනා ගස එය ඉටු කළේය',
+};
+
+const ta: Translations = {
+  WISH_TREE_TITLE: 'விருப்ப மரம்',
+  KAPRUKA: 'கப்ருகா',
+  TREE_SUBTITLE: 'உங்கள் விருப்பத்தை AI புரிந்துகொண்டு மரத்தை வளர்க்கிறது',
+  PLACEHOLDER: 'இன்று நீங்கள் என்ன விரும்புகிறீர்கள்?',
+  SEARCHING: 'கப்ருகாவைத் தேடுகிறது...',
+  LOAD_MORE: 'மேலும் பொருட்களை காட்டு',
+  PREVIOUS: 'முந்தைய பொருட்கள்',
+  RANDOMIZE: 'எனக்கு வேறு ஏதாவது காட்டு',
+  YOUR_CART: 'உங்கள் வண்டி',
+  SUBTOTAL: 'துணை மொத்தம்',
+  DELIVERY: 'டெலிவரி',
+  FREE: 'இலவசம்',
+  CHECKOUT: 'செக்அவுட்',
+  CHECKOUT_DETAILS: 'செக்அவுட் விவரங்கள்',
+  DELIVERY_INFO: 'டெலிவரி தகவல்',
+  CONFIRM_PAY: 'உறுதிசெய்து செலுத்துங்கள்',
+  TOTAL: 'மொத்தம்',
+  ADD_TO_CART: 'வண்டியில் சேர்க்கவும்',
+  OUT_OF_STOCK: 'ஸ்டாக் இல்லை',
+  ORDER_CONFIRMED: 'ஆர்டர் உறுதி செய்யப்பட்டது!',
+  TREE_MADE_IT_HAPPEN: 'விருப்ப மரம் அதை சாத்தியமாக்கியது',
+};
+
+export const dict: Record<Locale, Translations> = {
+  'en-US': en,
+  'si-LK': si,
+  'ta-LK': ta,
+};

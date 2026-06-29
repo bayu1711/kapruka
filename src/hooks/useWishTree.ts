@@ -4,6 +4,7 @@ import type { Product } from '../data/scenario';
 import { useScreenInit } from '../useScreenInit.js';
 import { searchProducts, listCategories } from '../lib/kapruka-mcp';
 import { parseUserQuery } from './useKaprukaAgent';
+import { useLanguage } from '../contexts/LanguageContext';
 
 export interface HistorySnapshot {
   query: string;
@@ -60,6 +61,7 @@ function loadHistory(): HistorySnapshot[] {
 }
 
 export function useWishTree() {
+  const { locale, t } = useLanguage();
   const screenInit = useScreenInit() as Partial<{
     stage: number;
     showCart: boolean;
@@ -143,7 +145,7 @@ export function useWishTree() {
    * - First call: sets stage 3 and kicks off real product search via MCP.
    * - Subsequent calls: re-searches with the full accumulated query.
    */
-  const handleSubmit = useCallback(async (query: string) => {
+  const handleSubmit = useCallback(async (query: string, enablePostFilter: boolean = false) => {
     if (!query.trim()) return;
 
     setState((prev) => ({
@@ -151,7 +153,7 @@ export function useWishTree() {
       stage: 3,
       visibleBlocks: scenarioBlocks.filter((b) => b.stage <= 3),
       isSearching: true,
-      aiStatus: 'Searching Kapruka...',
+      aiStatus: t('SEARCHING'),
       searchQuery: query,
       inputValue: '',
       productSeed: prev.productSeed + 1,
@@ -161,7 +163,7 @@ export function useWishTree() {
 
     try {
       // 1. Analyze with AI backend (which executes MCP autonomously)
-      const agentResult = await parseUserQuery(query);
+      const agentResult = await parseUserQuery(query, enablePostFilter, locale);
       setState((prev) => ({ ...prev, aiStatus: agentResult.aiStatusMessage }));
 
       if (agentResult.suggestedCategories && agentResult.suggestedCategories.length > 0) {
@@ -248,7 +250,7 @@ export function useWishTree() {
         setState((prev) => ({ ...prev, aiStatus: '' }));
       }, 3000);
     }
-  }, []);
+  }, [locale, t]);
 
   const refineProducts = useCallback(async (query?: string) => {
     setState((prev) => {

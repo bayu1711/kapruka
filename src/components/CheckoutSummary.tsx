@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import type { Product } from '../data/scenario';
 import { createOrder } from '../lib/kapruka-mcp';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface CheckoutSummaryProps {
   items: Product[];
@@ -13,6 +14,7 @@ interface CheckoutSummaryProps {
 }
 
 export function CheckoutSummary({ items, onConfirm }: CheckoutSummaryProps) {
+  const { t } = useLanguage();
   // Form state
   const [recipientName, setRecipientName] = useState('');
   const [recipientPhone, setRecipientPhone] = useState('');
@@ -39,10 +41,9 @@ export function CheckoutSummary({ items, onConfirm }: CheckoutSummaryProps) {
     setError(null);
 
     try {
-      // Use the first cart item as the primary product
-      const primaryProduct = items[0];
+      // Pass all cart items to the checkout endpoint
       const result = await createOrder({
-        productId: primaryProduct.id,
+        cart: items.map(item => ({ productId: item.id, quantity: 1 })),
         recipientName: recipientName.trim(),
         recipientPhone: recipientPhone.trim(),
         city: city.trim(),
@@ -78,8 +79,8 @@ export function CheckoutSummary({ items, onConfirm }: CheckoutSummaryProps) {
         className="w-full max-w-2xl bg-slate-900/95 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden my-4"
       >
         <div className="p-6 sm:p-8">
-          <h2 className="text-2xl sm:text-3xl font-heading font-bold text-white mb-6">
-            Complete Your Order
+          <h2 className="text-2xl font-heading font-bold text-white mb-6">
+            {t('CHECKOUT_DETAILS')}
           </h2>
 
           {/* Recipient details */}
@@ -111,8 +112,8 @@ export function CheckoutSummary({ items, onConfirm }: CheckoutSummaryProps) {
 
           {/* Delivery details */}
           <div className="bg-white/5 rounded-xl p-5 border border-white/10 mb-4 space-y-3">
-            <h3 className="font-heading font-semibold text-white flex items-center gap-2">
-              <MapPin className="w-4 h-4 text-emerald-400" /> Delivery
+            <h3 className="font-heading font-semibold text-white flex items-center gap-2 mb-3">
+              <MapPin className="w-4 h-4 text-emerald-400" /> {t('DELIVERY_INFO')}
             </h3>
             <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5">
               <MapPin className="w-3.5 h-3.5 text-white/40 flex-shrink-0" />
@@ -160,7 +161,7 @@ export function CheckoutSummary({ items, onConfirm }: CheckoutSummaryProps) {
             ))}
             <div className="h-px bg-white/10 my-3" />
             <div className="flex justify-between items-center">
-              <span className="text-lg font-heading font-semibold text-white">Total</span>
+              <span className="text-lg font-heading font-semibold text-white">{t('TOTAL')}</span>
               <span className="text-2xl font-mono font-bold text-emerald-400">LKR {subtotal.toLocaleString()}</span>
             </div>
             <p className="text-xs text-white/40 font-mono mt-2">
@@ -187,7 +188,7 @@ export function CheckoutSummary({ items, onConfirm }: CheckoutSummaryProps) {
             ) : (
               <>
                 <ExternalLink className="w-5 h-5" />
-                Place Order & Pay on Kapruka
+                {t('CONFIRM_PAY')}
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </>
             )}

@@ -12,7 +12,7 @@ export interface AgentResult {
 
 const chatHistory: string[] = [];
 
-export async function parseUserQuery(userMessage: string, enablePostFilter: boolean = false): Promise<AgentResult> {
+export async function parseUserQuery(userMessage: string, enablePostFilter: boolean = false, language: string = 'en-US'): Promise<AgentResult> {
   // Keep last 6 messages for context
   chatHistory.push(`User: ${userMessage}`);
   if (chatHistory.length > 6) chatHistory.shift();
@@ -21,7 +21,7 @@ export async function parseUserQuery(userMessage: string, enablePostFilter: bool
     const res = await fetch('/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: userMessage, history: chatHistory.slice(0, -1), enablePostFilter })
+      body: JSON.stringify({ message: userMessage, history: chatHistory.slice(0, -1), enablePostFilter, language })
     });
     
     if (!res.ok) {

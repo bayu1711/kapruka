@@ -2,6 +2,7 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ShoppingCart, ArrowRight } from 'lucide-react';
 import type { Product } from '../data/scenario';
+import { useLanguage } from '../contexts/LanguageContext';
 interface CartDrawerProps {
   isOpen: boolean;
   onClose: () => void;
@@ -14,6 +15,7 @@ export function CartDrawer({
   items,
   onCheckout
 }: CartDrawerProps) {
+  const { t } = useLanguage();
   const subtotal = items.reduce((sum, item) => sum + item.price, 0);
   return (
     <AnimatePresence>
@@ -58,7 +60,7 @@ export function CartDrawer({
                 <div className="flex items-center gap-3">
                   <ShoppingCart className="w-6 h-6 text-emerald-400" />
                   <h2 className="text-2xl font-heading font-bold text-white">
-                    Your Cart
+                    {t('YOUR_CART')}
                   </h2>
                 </div>
                 <button
@@ -110,19 +112,19 @@ export function CartDrawer({
               {/* Summary */}
               <div className="bg-white/5 rounded-xl p-4 border border-white/10 mb-6">
                 <div className="flex justify-between items-center mb-2">
-                  <span className="text-white/70 font-heading">Subtotal</span>
+                  <span className="text-white/70 font-heading">{t('SUBTOTAL')}</span>
                   <span className="font-mono text-white">
                     LKR {subtotal.toLocaleString()}
                   </span>
                 </div>
                 <div className="flex justify-between items-center mb-2">
-                  <span className="text-white/70 font-heading">Delivery</span>
-                  <span className="font-mono text-emerald-400">Free</span>
+                  <span className="text-white/70 font-heading">{t('DELIVERY')}</span>
+                  <span className="font-mono text-emerald-400">{t('FREE')}</span>
                 </div>
                 <div className="h-px bg-white/10 my-3" />
                 <div className="flex justify-between items-center">
                   <span className="text-lg font-heading font-semibold text-white">
-                    Total
+                    {t('TOTAL')}
                   </span>
                   <span className="text-2xl font-mono font-bold text-emerald-400">
                     LKR {subtotal.toLocaleString()}
@@ -135,7 +137,7 @@ export function CartDrawer({
               onClick={onCheckout}
               className="w-full py-4 px-6 bg-emerald-500 hover:bg-emerald-600 text-white font-heading font-semibold rounded-xl transition-colors flex items-center justify-center gap-2 group">
               
-                Proceed to Checkout
+                {t('CHECKOUT')}
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </button>
             </div>
