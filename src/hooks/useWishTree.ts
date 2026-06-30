@@ -305,13 +305,7 @@ export function useWishTree() {
     handleSubmit(q);
   }, [sessions, currentSessionIndex, updateSession, handleSubmit]);
 
-  const addToCart = useCallback((product: Product) => {
-    setGlobalState(prev => {
-      const isAlreadyInCart = prev.cartItems.some(item => item.id === product.id);
-      if (isAlreadyInCart) return prev;
-      return { ...prev, cartItems: [...prev.cartItems, product] };
-    });
-  }, []);
+
 
   const removeFromCart = useCallback((productId: string) => {
     setGlobalState(prev => {

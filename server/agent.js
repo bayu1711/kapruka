@@ -217,6 +217,7 @@ async function processChat(message, history, enablePostFilter = false, language 
   let finalReasoning = "";
   let finalRecipient = "";
   let finalSearchQuery = "";
+  let finalOriginalSearchQuery = "";
   let finalPostFilterReasoning = "";
   let finalFollowUpQuestions = [];
   let finalSearchParameters = [];
@@ -272,6 +273,7 @@ CRITICAL RULES FOR SEARCH QUERY:
     suggestedCategories = categories || [];
     finalReasoning = reasoning || '';
     finalRecipient = recipient || '';
+    finalOriginalSearchQuery = searchQuery || '';
     finalSearchQuery = searchQuery || '';
     finalFollowUpQuestions = followUpQuestions || [];
     finalSearchParameters = searchParameters || [];
@@ -353,7 +355,7 @@ CRITICAL RULES FOR SEARCH QUERY:
     reasoning: finalReasoning,
     recipient: finalRecipient,
     searchQuery: finalSearchQuery,
-    originalSearchQuery: parsed ? parsed.searchQuery : finalSearchQuery,
+    originalSearchQuery: finalOriginalSearchQuery,
     postFilterReasoning: finalPostFilterReasoning,
     followUpQuestions: finalFollowUpQuestions,
     searchParameters: finalSearchParameters
