@@ -200,7 +200,11 @@ export function App() {
               prevPage();
             }}
             onRandomize={() => {
-              const randomQueries = ["Surprise me with completely different gift ideas!", "Show me random best sellers", "I'm not sure, inspire me!"];
+              const randomQueries = [
+                "Please suggest completely different gift ideas, but keep all my previous constraints (like occasion, recipient, budget) in mind.",
+                "Show me some alternative options for the same person and occasion.",
+                "I want something else, but still fitting the same context we discussed."
+              ];
               const q = randomQueries[Math.floor(Math.random() * randomQueries.length)];
               handleSubmit(q);
             }}
