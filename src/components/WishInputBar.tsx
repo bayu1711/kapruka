@@ -105,16 +105,14 @@ export function WishInputBar({
 
   const langLabel = ['EN', 'SI', 'TA'][['en-US', 'si-LK', 'ta-LK'].indexOf(locale)];
 
-  const [selectedQuestion, setSelectedQuestion] = useState<string | null>(null);
-
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!value.trim() && !listening) return;
 
     let finalVal = value;
-    if (selectedQuestion) {
-      finalVal = `Q: ${selectedQuestion}\nA: ${value}`;
-      setSelectedQuestion(null);
+    const activeQuestion = followUpQuestions && followUpQuestions.length > 0 ? followUpQuestions[0] : null;
+    if (activeQuestion) {
+      finalVal = `Q: ${activeQuestion}\nA: ${value}`;
     }
 
     setLoading(true);
@@ -155,21 +153,8 @@ export function WishInputBar({
         )}
 
         {/* Action Chips */}
-        {(hasPrevPages || hasMorePages || onRandomize || (followUpQuestions && followUpQuestions.length > 0)) && (
-          <div className="w-full flex flex-wrap justify-between items-end gap-2 px-2 mb-3">
-            <div className="flex flex-wrap gap-2 justify-start max-w-[50%]">
-              {followUpQuestions?.map((q, idx) => (
-                <button
-                  key={idx}
-                  type="button"
-                  onClick={() => setSelectedQuestion(selectedQuestion === q ? null : q)}
-                  className={`flex items-center gap-1.5 text-xs font-semibold backdrop-blur-md rounded-full px-3 py-1.5 transition-colors text-left ${selectedQuestion === q ? 'bg-emerald-500 text-white border-emerald-400 border shadow-[0_0_12px_rgba(16,185,129,0.8)]' : 'text-emerald-100 bg-emerald-500/20 hover:bg-emerald-500/40 border-emerald-500/30 border'}`}
-                >
-                  <MessageCircleQuestion className="w-3.5 h-3.5 shrink-0" />
-                  <span className="truncate">{q}</span>
-                </button>
-              ))}
-            </div>
+        {(hasPrevPages || hasMorePages || onRandomize) && (
+          <div className="w-full flex flex-wrap justify-end items-end gap-2 px-2 mb-3">
             <div className="flex flex-wrap gap-2 justify-end">
               {hasPrevPages && (
                 <button
@@ -211,7 +196,7 @@ export function WishInputBar({
               type="text"
               value={value}
               onChange={(e) => onChange(e.target.value)}
-              placeholder={t('PLACEHOLDER')}
+              placeholder={(followUpQuestions && followUpQuestions.length > 0) ? followUpQuestions[0] : (placeholder || t('PLACEHOLDER'))}
               disabled={disabled}
               className={`w-full px-4 py-3 sm:px-6 sm:py-4 ${browserSupportsSpeechRecognition ? 'pr-28 sm:pr-32' : 'pr-12 sm:pr-14'} bg-transparent text-white placeholder:text-white/40 font-heading text-base sm:text-lg outline-none`}
             />
