@@ -135,8 +135,8 @@ export function WishInputBar({
           <div 
             className="absolute bottom-[calc(100%+0.5rem)] right-0 w-full flex flex-col items-end gap-2 px-2 max-h-[35vh] pt-4 overflow-y-auto mb-2 no-scrollbar pointer-events-auto"
             style={{
-              maskImage: 'linear-gradient(to bottom, transparent 0%, black 20%, black 100%)',
-              WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 20%, black 100%)'
+              maskImage: 'linear-gradient(to bottom, transparent 0%, transparent 14%, black 40%, black 100%)',
+              WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, transparent 14%, black 40%, black 100%)'
             }}
           >
             {history.map((snap, idx) => {
