@@ -61,23 +61,23 @@ export function ProductDetailsModal({
   const inStock = details ? details.inStock !== false : true;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <>
       {/* Backdrop */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         onClick={onClose}
-        className="absolute inset-0 bg-slate-950/75 backdrop-blur-sm"
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
       />
 
-      {/* Modal Container */}
+      {/* Drawer */}
       <motion.div
-        initial={{ scale: 0.95, opacity: 0, y: 20 }}
-        animate={{ scale: 1, opacity: 1, y: 0 }}
-        exit={{ scale: 0.95, opacity: 0, y: 20 }}
-        transition={{ type: 'spring', duration: 0.4 }}
-        className="relative bg-slate-900/90 border border-white/10 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-[0_0_50px_rgba(16,185,129,0.25)] backdrop-blur-xl z-10 overflow-hidden"
+        initial={{ x: '100%' }}
+        animate={{ x: 0 }}
+        exit={{ x: '100%' }}
+        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+        className="fixed right-0 top-0 bottom-0 w-full max-w-md bg-slate-900/95 backdrop-blur-xl border-l border-white/10 z-50 overflow-y-auto shadow-[0_0_50px_rgba(16,185,129,0.25)] p-6 sm:p-8 flex flex-col"
       >
         {/* Soft glowing ambient */}
         <div className="absolute -top-20 -right-20 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
@@ -192,6 +192,6 @@ export function ProductDetailsModal({
         {/* Delivery Checker */}
         <DeliveryChecker productId={product.id} />
       </motion.div>
-    </div>
+    </>
   );
 }

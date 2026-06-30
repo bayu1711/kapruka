@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import { useWishTree } from './hooks/useWishTree';
-import { BrandLockup } from './components/BrandLockup';
 import { AiStatus } from './components/AiStatus';
 import { WishTree } from './components/WishTree';
 import { DevToolsDrawer } from './components/DevToolsDrawer';
@@ -91,7 +90,6 @@ export function App() {
       </div>
 
       {/* UI Components */}
-      <BrandLockup />
       <AiStatus status={state.aiStatus} show={!!state.aiStatus} />
       <CartBadge count={state.cartItems.length} onClick={toggleCart} />
 
