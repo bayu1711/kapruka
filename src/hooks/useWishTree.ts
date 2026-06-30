@@ -185,7 +185,7 @@ export function useWishTree() {
     });
   }, [updateSession]);
 
-  const handleSubmit = useCallback(async (query: string, enablePostFilter: boolean = false, isFallback: boolean = false) => {
+  const handleSubmit = useCallback(async (query: string, enablePostFilter: boolean = false, isFallback: boolean = false, originalQuery?: string) => {
     if (!query.trim()) return;
 
     if (!isFallback) {
@@ -241,7 +241,7 @@ export function useWishTree() {
         }
         
         // Trigger fallback search and return
-        handleSubmit(fallbackQuery, enablePostFilter, true);
+        handleSubmit(fallbackQuery, enablePostFilter, true, originalQuery || query);
         return;
       }
 
@@ -294,7 +294,7 @@ export function useWishTree() {
           history: [
             ...prev.history,
             {
-              query: query,
+              query: originalQuery || query,
               aiStatus: statusMsg,
               products: mapped,
               categories: cats.length > 0 ? cats : prev.liveCategories,
