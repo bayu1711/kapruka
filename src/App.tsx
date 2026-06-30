@@ -148,34 +148,34 @@ export function App() {
         </AnimatePresence>
 
         {/* Navigation Arrows */}
-        <div className="absolute inset-y-0 left-0 w-16 sm:w-24 pointer-events-none flex items-center justify-start z-40">
-          {currentSessionIndex > 0 && (
+        {currentSessionIndex > 0 && (
+          <div className="absolute top-28 sm:top-1/2 sm:-translate-y-1/2 left-4 sm:left-6 z-40 pointer-events-none">
             <button
               onClick={goToPrevSession}
-              className="pointer-events-auto ml-2 sm:ml-6 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 flex items-center justify-center text-white/80 hover:text-white transition-all hover:scale-110 shadow-xl"
+              className="pointer-events-auto w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 flex items-center justify-center text-white/80 hover:text-white transition-all hover:scale-110 shadow-xl"
             >
-              <ChevronLeft className="w-6 h-6" />
+              <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
             </button>
-          )}
-        </div>
+          </div>
+        )}
 
-        <div className="absolute inset-y-0 right-0 w-32 pointer-events-none flex items-center justify-end z-40">
+        <div className="absolute top-28 sm:top-1/2 sm:-translate-y-1/2 right-4 sm:right-6 z-40 pointer-events-none flex items-center justify-end">
           {currentSessionIndex === sessions.length - 1 ? (
             <button
               onClick={goToNextSession}
-              className="pointer-events-auto mr-2 sm:mr-6 px-4 py-3 rounded-full bg-emerald-500 hover:bg-emerald-400 backdrop-blur-md flex items-center gap-2 justify-center text-white font-heading transition-all hover:scale-105 shadow-[0_4px_20px_rgba(16,185,129,0.3)]"
+              className="pointer-events-auto px-3 py-2 sm:px-4 sm:py-3 rounded-full bg-emerald-500 hover:bg-emerald-400 backdrop-blur-md flex items-center gap-1.5 sm:gap-2 justify-center text-white font-heading transition-all hover:scale-105 shadow-[0_4px_20px_rgba(16,185,129,0.3)]"
               title="Start New Wish Tree"
             >
-              <Plus className="w-5 h-5" />
-              <span className="font-semibold text-sm">New Wish Tree</span>
+              <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span className="font-semibold text-xs sm:text-sm">New Tree</span>
             </button>
           ) : (
             <button
               onClick={goToNextSession}
-              className="pointer-events-auto mr-2 sm:mr-6 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 flex items-center justify-center text-white/80 hover:text-white transition-all hover:scale-110 shadow-xl"
+              className="pointer-events-auto w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 flex items-center justify-center text-white/80 hover:text-white transition-all hover:scale-110 shadow-xl"
               title="Next Session"
             >
-              <ChevronRight className="w-6 h-6" />
+              <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
             </button>
           )}
         </div>

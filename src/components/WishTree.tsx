@@ -451,9 +451,13 @@ export function WishTree({
       const slot = finalProductSlots[i];
       const coordKey = `${slot.col},${slot.row}`;
       const isLargeOverride = ['9,2', '2,1', '7,6', '3,5', '9,4', '7,3'].includes(coordKey);
+      const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
       let multiplier = slot.colSpan === 2 ? 0.85 : 0.75; // Provide padding
       if (isLargeOverride) {
         multiplier = 0.95; // Increase size for these specific green tiles
+      }
+      if (isMobile) {
+        multiplier *= 1.35; // Increase product scale on mobile
       }
       const pWidth = cellWidth * slot.colSpan * multiplier;
       const pHeight = cellHeight * slot.rowSpan * multiplier;
@@ -538,13 +542,10 @@ export function WishTree({
   }, [products, liveCategories]);
   return (
     <div className="relative w-full h-full flex items-end justify-center overflow-hidden" style={{ containerType: 'size' }}>
-      {/* Responsive square container — strictly 1:1 aspect ratio using container queries */}
+      {/* Responsive square container — slightly scaled on mobile to avoid cutting sides, strict 1:1 on desktop */}
+      {/* Responsive square container — slightly scaled on mobile to avoid cutting sides, strict 1:1 on desktop */}
       <div 
-        className="relative flex-shrink-0 origin-bottom translate-y-8 sm:translate-y-12"
-        style={{ 
-          width: 'min(100cqmin, 1000px)',
-          height: 'min(100cqmin, 1000px)'
-        }}
+        className="relative flex-shrink-0 origin-bottom translate-y-4 sm:translate-y-12 w-[115vw] h-[115vw] sm:w-[min(100cqmin,1000px)] sm:h-[min(100cqmin,1000px)]"
       >
         {/* Soft glows behind the tree */}
         <div className="absolute inset-x-0 top-0 h-2/3 bg-emerald-500/15 blur-3xl rounded-full pointer-events-none" />
