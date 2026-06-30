@@ -534,7 +534,15 @@ export function WishTree({
   return (
     <div className="relative w-full h-full flex items-end justify-center overflow-hidden">
       {/* Responsive square container — kept strictly 1:1 so the % grid stays aligned to the canopy */}
-      <div className="relative w-[min(180vw,80vh)] h-[min(180vw,80vh)] sm:w-[min(140vw,90vh)] sm:h-[min(140vw,90vh)] md:w-[1000px] md:h-[1000px] max-w-[1000px] max-h-[1000px] flex-shrink-0 origin-center translate-y-8 sm:translate-y-12">
+      <div 
+        className="relative flex-shrink-0 origin-bottom translate-y-8 sm:translate-y-12"
+        style={{ 
+          aspectRatio: '1 / 1', 
+          maxWidth: '100%', 
+          maxHeight: '100%', 
+          width: '1000px'
+        }}
+      >
         {/* Soft glows behind the tree */}
         <div className="absolute inset-x-0 top-0 h-2/3 bg-emerald-500/15 blur-3xl rounded-full pointer-events-none" />
         <div className="absolute inset-0 bg-blue-500/10 blur-3xl rounded-full scale-90 pointer-events-none" />
