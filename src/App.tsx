@@ -107,7 +107,7 @@ export function App() {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -100 }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            className="flex-1 w-full h-full relative"
+            className="flex-1 w-full h-full relative min-h-0 overflow-hidden"
           >
             <WishTree
               stage={state.stage}

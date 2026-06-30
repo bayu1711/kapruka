@@ -532,15 +532,13 @@ export function WishTree({
     return allCells;
   }, [products, liveCategories]);
   return (
-    <div className="relative w-full h-full flex items-end justify-center overflow-hidden">
-      {/* Responsive square container — kept strictly 1:1 so the % grid stays aligned to the canopy */}
+    <div className="relative w-full h-full flex items-end justify-center overflow-hidden" style={{ containerType: 'size' }}>
+      {/* Responsive square container — strictly 1:1 aspect ratio using container queries */}
       <div 
         className="relative flex-shrink-0 origin-bottom translate-y-8 sm:translate-y-12"
         style={{ 
-          aspectRatio: '1 / 1', 
-          maxWidth: '100%', 
-          maxHeight: '100%', 
-          width: '1000px'
+          width: 'min(100cqmin, 1000px)',
+          height: 'min(100cqmin, 1000px)'
         }}
       >
         {/* Soft glows behind the tree */}
