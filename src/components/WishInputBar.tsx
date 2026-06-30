@@ -127,12 +127,12 @@ export function WishInputBar({
       initial={{ y: 100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ type: 'spring', stiffness: 200, damping: 30 }}
-      className="w-full z-50 flex justify-center px-4 relative flex-shrink-0 pb-4 sm:pb-8 pt-2"
+      className="absolute bottom-0 inset-x-0 w-full z-50 flex justify-center px-4 pb-4 sm:pb-8 pt-2 pointer-events-none"
     >
-      <div className="w-full max-w-2xl flex flex-col items-end">
+      <div className="w-full max-w-2xl flex flex-col items-end relative pointer-events-auto">
         {/* History Log */}
         {history && history.length > 0 && (
-          <div className="w-full flex flex-col items-end gap-2 px-2 max-h-40 overflow-y-auto mb-4 no-scrollbar">
+          <div className="absolute bottom-[calc(100%+0.5rem)] right-0 w-full flex flex-col items-end gap-2 px-2 max-h-[35vh] overflow-y-auto mb-2 no-scrollbar pointer-events-auto">
             {history.map((snap, idx) => {
               let displayQuery = snap.query;
               if (displayQuery.startsWith('Q: ') && displayQuery.includes('\nA: ')) {

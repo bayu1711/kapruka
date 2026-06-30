@@ -174,7 +174,6 @@ export function WishTree({
       if (cell.type !== 'label') return cell;
       const idx = labelCells.indexOf(cell);
       const texts = [];
-      if (aiActualSearchQuery) texts.push(aiActualSearchQuery);
       if (searchParameters && searchParameters.length > 0) {
         searchParameters.forEach(p => {
           const key = p.key.toLowerCase();
