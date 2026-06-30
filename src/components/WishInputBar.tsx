@@ -132,7 +132,13 @@ export function WishInputBar({
       <div className="w-full max-w-2xl flex flex-col items-end relative pointer-events-auto">
         {/* History Log */}
         {history && history.length > 0 && (
-          <div className="absolute bottom-[calc(100%+0.5rem)] right-0 w-full flex flex-col items-end gap-2 px-2 max-h-[35vh] overflow-y-auto mb-2 no-scrollbar pointer-events-auto">
+          <div 
+            className="absolute bottom-[calc(100%+0.5rem)] right-0 w-full flex flex-col items-end gap-2 px-2 max-h-[35vh] pt-4 overflow-y-auto mb-2 no-scrollbar pointer-events-auto"
+            style={{
+              maskImage: 'linear-gradient(to bottom, transparent 0%, black 20%, black 100%)',
+              WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 20%, black 100%)'
+            }}
+          >
             {history.map((snap, idx) => {
               let displayQuery = snap.query;
               if (displayQuery.startsWith('Q: ') && displayQuery.includes('\nA: ')) {
