@@ -18,6 +18,7 @@ export interface HistorySnapshot {
   aiPostFilterReasoning?: string;
   followUpQuestions?: string[];
   searchParameters?: {key: string, value: string}[];
+  errorMessage?: string;
 }
 
 export interface Session {
@@ -272,10 +273,23 @@ export function useWishTree() {
       
       updateSession((prev) => {
         if (mapped.length === 0) {
+          const hasPrevProducts = prev.liveProducts.length > 0;
           return {
             ...prev,
             isSearching: false,
             aiStatus: '',
+            history: [
+              ...prev.history,
+              {
+                query: originalQuery || query,
+                aiStatus: '',
+                products: prev.liveProducts,
+                categories: prev.liveCategories,
+                errorMessage: hasPrevProducts 
+                  ? '0 products found. Reverting to previous search.' 
+                  : (agentResult.reasoning || '0 products found. Try a different wish.'),
+              }
+            ]
           };
         }
         
@@ -315,6 +329,16 @@ export function useWishTree() {
         ...prev,
         isSearching: false,
         aiStatus: '',
+        history: [
+          ...prev.history,
+          {
+            query: originalQuery || query,
+            aiStatus: '',
+            products: prev.liveProducts,
+            categories: prev.liveCategories,
+            errorMessage: 'Search failed due to an API error (Rate limit exceeded). Please try again in a minute.',
+          }
+        ]
       }));
     }
   }, [updateSession, locale, t, sessions, currentSessionIndex]);
