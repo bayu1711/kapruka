@@ -21,7 +21,9 @@ export function App() {
     removeFromCart,
     toggleCart,
     proceedToCheckout,
+    cancelCheckout,
     confirmOrder,
+    closeConfirmation,
     updateInput,
     currentConfig,
     products,
@@ -234,12 +236,16 @@ export function App() {
       />
 
       {/* Checkout */}
-      {state.showCheckout &&
-      <CheckoutSummary items={cartProducts} onConfirm={confirmOrder} />
-      }
+      <AnimatePresence>
+        {state.showCheckout &&
+        <CheckoutSummary items={cartProducts} onConfirm={confirmOrder} onClose={cancelCheckout} />
+        }
+      </AnimatePresence>
 
       {/* Confirmation */}
-      {state.showConfirmation && <ConfirmationState />}
+      <AnimatePresence>
+        {state.showConfirmation && <ConfirmationState onClose={closeConfirmation} />}
+      </AnimatePresence>
 
       {/* Product Details Modal */}
       <AnimatePresence>

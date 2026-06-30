@@ -407,6 +407,14 @@ export function useWishTree() {
     }));
   }, []);
 
+  const cancelCheckout = useCallback(() => {
+    setGlobalState((prev) => ({ ...prev, showCheckout: false }));
+  }, []);
+
+  const closeConfirmation = useCallback(() => {
+    setGlobalState((prev) => ({ ...prev, showConfirmation: false }));
+  }, []);
+
   const updateInput = useCallback((value: string) => {
     updateSession((prev) => ({ ...prev, inputValue: value }));
   }, [updateSession]);
@@ -475,7 +483,9 @@ export function useWishTree() {
     removeFromCart,
     toggleCart,
     proceedToCheckout,
+    cancelCheckout,
     confirmOrder,
+    closeConfirmation,
     updateInput,
     nextPage,
     prevPage,

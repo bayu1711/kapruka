@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   MapPin, Calendar, Gift, User, Phone,
-  ArrowRight, Loader2, ExternalLink, AlertTriangle
+  ArrowRight, Loader2, ExternalLink, AlertTriangle, X
 } from 'lucide-react';
 import type { Product } from '../data/scenario';
 import { createOrder } from '../lib/kapruka-mcp';
@@ -11,9 +11,10 @@ import { useLanguage } from '../contexts/LanguageContext';
 interface CheckoutSummaryProps {
   items: Product[];
   onConfirm: () => void;
+  onClose: () => void;
 }
 
-export function CheckoutSummary({ items, onConfirm }: CheckoutSummaryProps) {
+export function CheckoutSummary({ items, onConfirm, onClose }: CheckoutSummaryProps) {
   const { t } = useLanguage();
   // Form state
   const [recipientName, setRecipientName] = useState('');
@@ -67,18 +68,36 @@ export function CheckoutSummary({ items, onConfirm }: CheckoutSummaryProps) {
     }
   };
 
-  return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-y-auto"
-    >
+    <>
+      {/* Backdrop */}
       <motion.div
-        initial={{ y: 20 }}
-        animate={{ y: 0 }}
-        className="w-full max-w-2xl bg-slate-900/95 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden my-4"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={onClose}
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
+      />
+
+      {/* Drawer */}
+      <motion.div
+        initial={{ x: '100%' }}
+        animate={{ x: 0 }}
+        exit={{ x: '100%' }}
+        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+        className="fixed right-0 top-0 bottom-0 w-full max-w-md bg-slate-900/95 backdrop-blur-xl border-l border-white/10 z-50 overflow-y-auto shadow-[0_0_50px_rgba(16,185,129,0.25)] p-6 sm:p-8 flex flex-col"
       >
-        <div className="p-6 sm:p-8">
+        {/* Soft glowing ambient */}
+        <div className="absolute -top-20 -right-20 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+
+        {/* Close */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-white/50 hover:text-white transition-colors bg-white/5 hover:bg-white/10 p-2 rounded-full z-20"
+        >
+          <X className="w-4 h-4" />
+        </button>
+
+        <div className="pt-2">
           <h2 className="text-2xl font-heading font-bold text-white mb-6">
             {t('CHECKOUT_DETAILS')}
           </h2>
@@ -198,6 +217,6 @@ export function CheckoutSummary({ items, onConfirm }: CheckoutSummaryProps) {
           </p>
         </div>
       </motion.div>
-    </motion.div>
+    </>
   );
 }

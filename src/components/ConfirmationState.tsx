@@ -1,23 +1,46 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { CheckCircle, Sparkles } from 'lucide-react';
+import { CheckCircle, Sparkles, X } from 'lucide-react';
 import { OrderTracker } from './OrderTracker';
 import { useLanguage } from '../contexts/LanguageContext';
 
-export function ConfirmationState() {
+interface ConfirmationStateProps {
+  onClose: () => void;
+}
+
+export function ConfirmationState({ onClose }: ConfirmationStateProps) {
   const { t } = useLanguage();
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 overflow-y-auto"
-    >
+    <>
+      {/* Backdrop */}
       <motion.div
-        initial={{ scale: 0.8, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ type: 'spring', stiffness: 200, damping: 20 }}
-        className="w-full max-w-md text-center"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={onClose}
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
+      />
+
+      {/* Drawer */}
+      <motion.div
+        initial={{ x: '100%' }}
+        animate={{ x: 0 }}
+        exit={{ x: '100%' }}
+        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+        className="fixed right-0 top-0 bottom-0 w-full max-w-md bg-slate-900/95 backdrop-blur-xl border-l border-white/10 z-50 overflow-y-auto shadow-[0_0_50px_rgba(16,185,129,0.25)] p-6 sm:p-8 flex flex-col justify-center items-center text-center"
       >
+        {/* Soft glowing ambient */}
+        <div className="absolute -top-20 -right-20 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+
+        {/* Close */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-white/50 hover:text-white transition-colors bg-white/5 hover:bg-white/10 p-2 rounded-full z-20"
+        >
+          <X className="w-4 h-4" />
+        </button>
+
+        <div className="w-full text-center flex flex-col items-center">
         {/* Success icon */}
         <motion.div
           initial={{ scale: 0 }}
@@ -68,7 +91,8 @@ export function ConfirmationState() {
           </p>
           <OrderTracker />
         </motion.div>
+        </div>
       </motion.div>
-    </motion.div>
+    </>
   );
 }
