@@ -228,8 +228,10 @@ export function App() {
         aiReasoning={state.aiReasoning}
         aiRecipient={state.aiRecipient}
         aiActualSearchQuery={state.aiActualSearchQuery}
+        aiOriginalSearchQuery={state.aiOriginalSearchQuery}
         aiPostFilterReasoning={state.aiPostFilterReasoning}
         searchParameters={state.searchParameters}
+        liveCategories={liveCategories}
       />
 
       {/* Checkout */}

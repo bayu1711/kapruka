@@ -115,17 +115,11 @@ export function DevToolsDrawer({
                     AI Agent Strategy
                   </h3>
                   <div className="bg-black/40 rounded-xl border border-purple-500/20 p-5 space-y-4">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 gap-4">
                       <div>
                         <span className="text-white/50 text-xs block mb-1">Search Query Sent</span>
                         <div className="font-mono bg-black/60 px-3 py-1.5 rounded border border-white/10 text-emerald-400 inline-block">
                           {aiActualSearchQuery || 'None'}
-                        </div>
-                      </div>
-                      <div>
-                        <span className="text-white/50 text-xs block mb-1">Detected Recipient</span>
-                        <div className="font-medium text-white/90 text-sm px-1">
-                          {aiRecipient || 'Unspecified'}
                         </div>
                       </div>
                     </div>
@@ -140,17 +134,17 @@ export function DevToolsDrawer({
                     <div className="pt-4 border-t border-white/10 mt-4">
                       <span className="text-white/50 text-xs block mb-2">Context & Search Parameters</span>
                       <div className="flex flex-wrap gap-2">
-                        {(aiOriginalSearchQuery || aiActualSearchQuery) && (
+                        {aiOriginalSearchQuery && (
                           <div className="bg-emerald-500/10 border border-emerald-500/30 px-2 py-1 rounded text-xs text-emerald-200">
-                            <span className="opacity-60">item:</span> <span className="font-semibold">{aiOriginalSearchQuery || aiActualSearchQuery}</span>
+                            <span className="opacity-60">Item:</span> <span className="font-semibold">{aiOriginalSearchQuery}</span>
                           </div>
                         )}
                         {searchParameters && searchParameters.map((p, i) => (
                           <div key={i} className="bg-purple-500/10 border border-purple-500/30 px-2 py-1 rounded text-xs text-purple-200">
-                            <span className="opacity-60">{p.key}:</span> <span className="font-semibold">{p.value}</span>
+                            <span className="opacity-60 capitalize">{p.key}:</span> <span className="font-semibold">{p.value}</span>
                           </div>
                         ))}
-                        {(!searchParameters || searchParameters.length === 0) && !aiOriginalSearchQuery && !aiActualSearchQuery && (
+                        {(!searchParameters || searchParameters.length === 0) && !aiOriginalSearchQuery && (
                           <div className="text-white/40 text-sm italic">No specific parameters extracted.</div>
                         )}
                       </div>
