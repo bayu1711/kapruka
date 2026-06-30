@@ -13,9 +13,9 @@ const OutputSchema = z.object({
   searchQuery: z.string().describe("The specific Kapruka search term (e.g. 'roses', 'birthday cake', 'saree')"),
   categories: z.array(z.string()).describe("4-6 matching categories"),
   searchParameters: z.array(z.object({
-    key: z.string().describe("The name of the filter, e.g. 'max_price', 'color', 'brand', 'model'"),
-    value: z.string().describe("The value of the filter, e.g. '200000', 'red', 'Apple', '12 Pro Max'")
-  })).optional().describe("Any additional dynamic constraints/filters the user specified"),
+    key: z.string().describe("The name of the parameter, e.g. 'occasion', 'recipient', 'max_price', 'color'"),
+    value: z.string().describe("The value of the parameter, e.g. 'Birthday', 'Mother', '200000', 'red'")
+  })).describe("An array of ALL extracted contextual facts and constraints (occasion, recipient, relationship, budget, style, etc). This MUST be populated if any context exists."),
   followUpQuestions: z.array(z.string()).describe("2 to 3 leading/follow-up questions to ask the user next, to help refine their wish. e.g. 'Under what budget?' or 'Is it for a boy or a girl?'")
 });
 

@@ -14,6 +14,7 @@ interface DevToolsDrawerProps {
   aiActualSearchQuery?: string;
   aiPostFilterReasoning?: string;
   searchParameters?: {key: string, value: string}[];
+  liveCategories?: string[];
 }
 
 export function DevToolsDrawer({
@@ -27,7 +28,8 @@ export function DevToolsDrawer({
   aiRecipient,
   aiActualSearchQuery,
   aiPostFilterReasoning,
-  searchParameters
+  searchParameters,
+  liveCategories
 }: DevToolsDrawerProps) {
   return (
     <AnimatePresence>
@@ -145,6 +147,21 @@ export function DevToolsDrawer({
                         </div>
                       ) : (
                         <div className="text-white/40 text-sm italic">No specific parameters extracted.</div>
+                      )}
+                    </div>
+
+                    <div className="pt-4 border-t border-white/10 mt-4">
+                      <span className="text-white/50 text-xs block mb-2">Suggested Categories</span>
+                      {liveCategories && liveCategories.length > 0 ? (
+                        <div className="flex flex-wrap gap-2">
+                          {liveCategories.map((c, i) => (
+                            <div key={i} className="bg-emerald-500/10 border border-emerald-500/30 px-2 py-1 rounded text-xs text-emerald-300">
+                              <span className="font-semibold">{c}</span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-white/40 text-sm italic">No categories suggested.</div>
                       )}
                     </div>
 

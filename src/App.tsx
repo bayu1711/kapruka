@@ -138,6 +138,7 @@ export function App() {
               aiRecipient={state.aiRecipient}
               aiActualSearchQuery={state.aiActualSearchQuery}
               searchParameters={state.searchParameters}
+              liveCategories={state.liveCategories}
               showDebugGrid={showDebugGrid}
             />
           </motion.div>
