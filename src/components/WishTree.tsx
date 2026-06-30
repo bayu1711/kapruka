@@ -16,6 +16,7 @@ interface WishTreeProps {
   aiActualSearchQuery?: string;
   searchParameters?: {key: string, value: string}[];
   showDebugGrid?: boolean;
+  isSearching?: boolean;
 }
 type CellType = 'foliage' | 'label' | 'product';
 interface GridCell {
@@ -113,7 +114,8 @@ export function WishTree({
   aiRecipient,
   aiActualSearchQuery,
   searchParameters,
-  showDebugGrid
+  showDebugGrid,
+  isSearching
 }: WishTreeProps) {
   const { t } = useLanguage();
   const showProducts = stage >= 3;
@@ -583,12 +585,24 @@ export function WishTree({
           
           {/* Kapruka 'u' smile (Yellow) */}
           <g filter="drop-shadow(0px 8px 16px rgba(0,0,0,0.2))">
-            <path
-              d="M 240 350 A 160 100 0 0 0 560 350"
-              stroke="#FDE047"
-              strokeWidth="54"
-              strokeLinecap="butt"
-              fill="none" />
+            {isSearching ? (
+              <motion.path
+                initial={{ pathLength: 0, opacity: 0.5 }}
+                animate={{ pathLength: [0, 1, 0], pathOffset: [0, 0, 1], opacity: [0.5, 1, 0.5] }}
+                transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+                d="M 240 350 A 160 100 0 0 0 560 350"
+                stroke="#FDE047"
+                strokeWidth="54"
+                strokeLinecap="round"
+                fill="none" />
+            ) : (
+              <path
+                d="M 240 350 A 160 100 0 0 0 560 350"
+                stroke="#FDE047"
+                strokeWidth="54"
+                strokeLinecap="butt"
+                fill="none" />
+            )}
           </g>
         </svg>
 
@@ -711,15 +725,15 @@ export function WishTree({
                 }}
                 animate={{
                   scale: isSelected ? 1.1 : 1,
-                  opacity: 1,
-                  filter: 'blur(0px)',
+                  opacity: isSearching ? 0.7 : 1,
+                  filter: isSearching ? 'blur(4px) grayscale(50%)' : 'blur(0px) grayscale(0%)',
                   rotate: isSelected ? 0 : ((cell as any).rotate || 0)
                 }}
                 transition={{
                   type: 'spring',
                   stiffness: 200,
                   damping: 20,
-                  delay: cell.delay
+                  delay: isSearching ? 0 : cell.delay
                 }}
                 className={`absolute rounded-xl overflow-hidden cursor-pointer group z-20 duration-300 border-2 ${isSelected ? 'border-emerald-400 shadow-[0_0_24px_rgba(16,185,129,0.8)] z-30' : 'border-emerald-500/30 shadow-[0_0_16px_rgba(16,185,129,0.4)] hover:scale-105 hover:shadow-[0_0_20px_rgba(16,185,129,0.6)]'}`}
                 style={{

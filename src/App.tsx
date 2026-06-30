@@ -142,6 +142,7 @@ export function App() {
               searchParameters={state.searchParameters}
               liveCategories={state.liveCategories}
               showDebugGrid={showDebugGrid}
+              isSearching={state.isSearching}
             />
           </motion.div>
         </AnimatePresence>
