@@ -377,14 +377,6 @@ export function useWishTree() {
     }
   }, [currentSessionIndex]);
 
-  const clearSession = useCallback(() => {
-    setSessions(prev => {
-      const updated = [...prev];
-      updated[currentSessionIndex] = createNewSession(0);
-      return updated;
-    });
-  }, [currentSessionIndex]);
-
   const currentSession = sessions[currentSessionIndex];
   const currentConfig = currentSession ? stageConfigs[currentSession.stage] : stageConfigs[0];
   const pageSize = 20;
@@ -420,6 +412,5 @@ export function useWishTree() {
     currentSessionIndex,
     goToNextSession,
     goToPrevSession,
-    clearSession,
   };
 }

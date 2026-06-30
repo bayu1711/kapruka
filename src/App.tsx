@@ -34,7 +34,6 @@ export function App() {
     currentSessionIndex,
     goToNextSession,
     goToPrevSession,
-    clearSession,
   } = useWishTree();
   // Enable dark mode
   useEffect(() => {
@@ -183,7 +182,6 @@ export function App() {
             handleSubmit(q);
           }}
           followUpQuestions={state.followUpQuestions}
-          onClearSession={clearSession}
         />
         }
       </div>
