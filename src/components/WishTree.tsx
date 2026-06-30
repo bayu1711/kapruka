@@ -593,7 +593,7 @@ export function WishTree({
                 d="M 240 350 A 160 100 0 0 0 560 350"
                 stroke="#FDE047"
                 strokeWidth="54"
-                strokeLinecap="round"
+                strokeLinecap="butt"
                 fill="none" />
             ) : (
               <path
