@@ -12,6 +12,7 @@ interface DevToolsDrawerProps {
   aiReasoning?: string;
   aiRecipient?: string;
   aiActualSearchQuery?: string;
+  aiOriginalSearchQuery?: string;
   aiPostFilterReasoning?: string;
   searchParameters?: {key: string, value: string}[];
   liveCategories?: string[];
@@ -27,6 +28,7 @@ export function DevToolsDrawer({
   aiReasoning,
   aiRecipient,
   aiActualSearchQuery,
+  aiOriginalSearchQuery,
   aiPostFilterReasoning,
   searchParameters,
   liveCategories
@@ -138,9 +140,9 @@ export function DevToolsDrawer({
                     <div className="pt-4 border-t border-white/10 mt-4">
                       <span className="text-white/50 text-xs block mb-2">Context & Search Parameters</span>
                       <div className="flex flex-wrap gap-2">
-                        {aiActualSearchQuery && (
+                        {(aiOriginalSearchQuery || aiActualSearchQuery) && (
                           <div className="bg-emerald-500/10 border border-emerald-500/30 px-2 py-1 rounded text-xs text-emerald-200">
-                            <span className="opacity-60">query:</span> <span className="font-semibold">{aiActualSearchQuery}</span>
+                            <span className="opacity-60">item:</span> <span className="font-semibold">{aiOriginalSearchQuery || aiActualSearchQuery}</span>
                           </div>
                         )}
                         {searchParameters && searchParameters.map((p, i) => (
@@ -148,7 +150,7 @@ export function DevToolsDrawer({
                             <span className="opacity-60">{p.key}:</span> <span className="font-semibold">{p.value}</span>
                           </div>
                         ))}
-                        {(!searchParameters || searchParameters.length === 0) && !aiActualSearchQuery && (
+                        {(!searchParameters || searchParameters.length === 0) && !aiOriginalSearchQuery && !aiActualSearchQuery && (
                           <div className="text-white/40 text-sm italic">No specific parameters extracted.</div>
                         )}
                       </div>

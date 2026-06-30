@@ -137,6 +137,7 @@ export function App() {
               aiReasoning={state.aiReasoning}
               aiRecipient={state.aiRecipient}
               aiActualSearchQuery={state.aiActualSearchQuery}
+              aiOriginalSearchQuery={state.aiOriginalSearchQuery}
               searchParameters={state.searchParameters}
               liveCategories={state.liveCategories}
               showDebugGrid={showDebugGrid}

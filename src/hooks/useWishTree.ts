@@ -14,6 +14,7 @@ export interface HistorySnapshot {
   aiReasoning?: string;
   aiRecipient?: string;
   aiActualSearchQuery?: string;
+  aiOriginalSearchQuery?: string;
   aiPostFilterReasoning?: string;
   followUpQuestions?: string[];
   searchParameters?: {key: string, value: string}[];
@@ -32,6 +33,7 @@ export interface Session {
   aiReasoning?: string;
   aiRecipient?: string;
   aiActualSearchQuery?: string;
+  aiOriginalSearchQuery?: string;
   aiPostFilterReasoning?: string;
   followUpQuestions?: string[];
   searchParameters?: {key: string, value: string}[];
@@ -257,6 +259,7 @@ export function useWishTree() {
         aiReasoning: agentResult.reasoning,
         aiRecipient: agentResult.recipient,
         aiActualSearchQuery: agentResult.actualSearchQuery,
+        aiOriginalSearchQuery: agentResult.originalSearchQuery,
         aiPostFilterReasoning: agentResult.postFilterReasoning,
         followUpQuestions: agentResult.followUpQuestions,
         searchParameters: agentResult.searchParameters,
@@ -270,6 +273,7 @@ export function useWishTree() {
             aiReasoning: agentResult.reasoning,
             aiRecipient: agentResult.recipient,
             aiActualSearchQuery: agentResult.actualSearchQuery,
+            aiOriginalSearchQuery: agentResult.originalSearchQuery,
             aiPostFilterReasoning: agentResult.postFilterReasoning,
             followUpQuestions: agentResult.followUpQuestions,
             searchParameters: agentResult.searchParameters,

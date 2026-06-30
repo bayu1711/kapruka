@@ -6,6 +6,7 @@ export interface AgentResult {
   reasoning?: string;
   recipient?: string;
   actualSearchQuery?: string;
+  originalSearchQuery?: string;
   postFilterReasoning?: string;
   followUpQuestions?: string[];
   searchParameters?: {key: string, value: string}[];
@@ -33,6 +34,7 @@ export async function parseUserQuery(
     return {
       searchQuery: userMessage, 
       actualSearchQuery: data.searchQuery, // The actual query Gemini used
+      originalSearchQuery: data.originalSearchQuery,
       suggestedCategories: data.categories || [],
       aiStatusMessage: `Found ${data.products ? data.products.length : 0} items`,
       products: data.products || [],
