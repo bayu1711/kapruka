@@ -205,6 +205,7 @@ export function App() {
         aiRecipient={state.aiRecipient}
         aiActualSearchQuery={state.aiActualSearchQuery}
         aiPostFilterReasoning={state.aiPostFilterReasoning}
+        searchParameters={state.searchParameters}
       />
 
       {/* Checkout */}

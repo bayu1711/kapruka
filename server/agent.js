@@ -241,7 +241,7 @@ CRITICAL RULES FOR SEARCH QUERY:
 1. NEVER output generic category names like 'toys', 'electronics', 'flowers', or 'gifts'. Kapruka's search engine works best with specific items.
 2. If the user intent is vague (e.g. "gift for 5 year old boy"), pick ONE highly specific, popular item type. E.g. use "remote control car" or "lego" instead of "toys".
 3. If the user intent is "gift for mom", pick "saree", "handbag", "perfume", or "mother's day cake" instead of "flowers".
-4. If the user specifies constraints like budget, brand, color, or model, put them in the searchParameters array with clear keys (e.g. "max_price", "brand", "color", "model") and DO NOT include them in the query itself.
+4. Extract ALL contextual facts and constraints (like occasion, recipient, budget, brand, style, color, relationship) into the searchParameters array as discrete key-value pairs (e.g. [{key: "occasion", value: "Birthday"}, {key: "recipient", value: "Father"}]). DO NOT write lengthy reasoning paragraphs explaining the context. DO NOT include these constraints in the query itself.
 5. The user's preferred language is ${language}. You MUST translate your 'reasoning', 'postFilterReasoning', and 'followUpQuestions' into ${language}. DO NOT translate the 'searchQuery' or 'categories' keys.`)
     ];
 

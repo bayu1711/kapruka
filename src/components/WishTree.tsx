@@ -171,16 +171,23 @@ export function WishTree({
     const liveLayout: GridCell[] = GRID_LAYOUT.map((cell) => {
       if (cell.type !== 'label') return cell;
       const idx = labelCells.indexOf(cell);
-      
       const texts = [];
-      if (aiRecipient) texts.push(`For: ${aiRecipient}`);
       if (aiActualSearchQuery) texts.push(aiActualSearchQuery);
       if (searchParameters && searchParameters.length > 0) {
         searchParameters.forEach(p => {
-          texts.push(`${p.key}: ${p.value}`);
+          const key = p.key.toLowerCase();
+          if (key === 'max_price' || key === 'budget') {
+            texts.push(`Maximum ${p.value} LKR`);
+          } else if (key === 'min_price') {
+            texts.push(`Minimum ${p.value} LKR`);
+          } else if (key === 'occasion' || key === 'recipient') {
+            texts.push(p.value.charAt(0).toUpperCase() + p.value.slice(1));
+          } else {
+            const displayKey = key.replace(/_/g, ' ');
+            texts.push(`${displayKey.charAt(0).toUpperCase() + displayKey.slice(1)}: ${p.value}`);
+          }
         });
       }
-      if (aiReasoning) texts.push(`Reason: ${aiReasoning.substring(0, 50)}...`);
       
       const remaining = liveCategories || [];
       const usedCategories = remaining.filter(c => !texts.includes(c));
