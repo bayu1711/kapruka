@@ -377,6 +377,25 @@ export function useWishTree() {
     }
   }, [currentSessionIndex]);
 
+  const deleteSession = useCallback(() => {
+    setSessions(prevSessions => {
+      const newSessions = [...prevSessions];
+      newSessions.splice(currentSessionIndex, 1);
+      if (newSessions.length === 0) {
+        newSessions.push(createNewSession(0));
+      }
+      
+      setCurrentSessionIndex(current => {
+        if (current >= newSessions.length) {
+          return Math.max(0, newSessions.length - 1);
+        }
+        return current;
+      });
+      
+      return newSessions;
+    });
+  }, [currentSessionIndex]);
+
   const currentSession = sessions[currentSessionIndex];
   const currentConfig = currentSession ? stageConfigs[currentSession.stage] : stageConfigs[0];
   const pageSize = 20;
@@ -412,5 +431,6 @@ export function useWishTree() {
     currentSessionIndex,
     goToNextSession,
     goToPrevSession,
+    deleteSession,
   };
 }

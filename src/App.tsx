@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, Trash2 } from 'lucide-react';
 import { useWishTree } from './hooks/useWishTree';
 import { AiStatus } from './components/AiStatus';
 import { WishTree } from './components/WishTree';
@@ -34,6 +34,7 @@ export function App() {
     currentSessionIndex,
     goToNextSession,
     goToPrevSession,
+    deleteSession,
   } = useWishTree();
   // Enable dark mode
   useEffect(() => {
@@ -91,7 +92,17 @@ export function App() {
 
       {/* UI Components */}
       <AiStatus status={state.aiStatus} show={!!state.aiStatus} />
-      <CartBadge count={state.cartItems.length} onClick={toggleCart} />
+      
+      <div className="fixed top-4 right-4 sm:top-6 sm:right-6 z-50 flex items-center gap-2 sm:gap-3">
+        <button
+          onClick={deleteSession}
+          className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-red-500/80 hover:bg-red-600 text-white rounded-full shadow-lg transition-colors backdrop-blur-md border border-red-500/20"
+          title="Delete current tree"
+        >
+          <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" />
+        </button>
+        <CartBadge count={state.cartItems.length} onClick={toggleCart} />
+      </div>
 
 
       
