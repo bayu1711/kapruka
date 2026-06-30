@@ -283,6 +283,7 @@ CRITICAL RULES FOR SEARCH QUERY:
           params[p.key] = p.value;
         } else {
           // Bundle unsupported parameters directly into the main query string
+          // Deduplication logic below will handle duplicates
           finalQueryStr += ` ${p.value}`;
         }
       });
