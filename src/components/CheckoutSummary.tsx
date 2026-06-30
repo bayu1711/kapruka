@@ -68,6 +68,7 @@ export function CheckoutSummary({ items, onConfirm, onClose }: CheckoutSummaryPr
     }
   };
 
+  return (
     <>
       {/* Backdrop */}
       <motion.div

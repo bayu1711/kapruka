@@ -74,12 +74,12 @@ export function App() {
 
   // products is already sliced by useWishTree based on state.page
   const visibleProducts = shuffledProducts;
-  
+
   const showPager =
-  state.stage >= 3 &&
-  !state.showCart &&
-  !state.showCheckout &&
-  !state.showConfirmation;
+    state.stage >= 3 &&
+    !state.showCart &&
+    !state.showCheckout &&
+    !state.showConfirmation;
 
   const hasMorePages = (state.page + 1) * PRODUCT_PAGE_SIZE < totalProducts;
   const hasPrevPages = state.page > 0;
@@ -94,7 +94,7 @@ export function App() {
       </div>
 
       {/* UI Components */}
-      
+
       <div className="fixed top-4 right-4 sm:top-6 sm:right-6 z-50 flex items-center gap-2 sm:gap-3">
         <button
           onClick={() => setIsDevToolsOpen(true)}
@@ -116,7 +116,7 @@ export function App() {
       </div>
 
 
-      
+
 
       {/* Main tree visualization */}
       <div className="flex-1 relative w-full flex flex-col pt-16 sm:pt-0 min-h-0">
@@ -158,7 +158,7 @@ export function App() {
             </button>
           )}
         </div>
-        
+
         <div className="absolute inset-y-0 right-0 w-32 pointer-events-none flex items-center justify-end z-40">
           {currentSessionIndex === sessions.length - 1 ? (
             <button
@@ -167,7 +167,7 @@ export function App() {
               title="Start New Wish Tree"
             >
               <Plus className="w-5 h-5" />
-              <span className="font-semibold text-sm">+ New Wish Tree</span>
+              <span className="font-semibold text-sm">New Wish Tree</span>
             </button>
           ) : (
             <button
@@ -179,33 +179,33 @@ export function App() {
             </button>
           )}
         </div>
-        
+
         {!state.showCheckout && !state.showConfirmation &&
-        <WishInputBar
-          value={state.inputValue}
-          onChange={updateInput}
-          onSubmit={onSubmit}
-          placeholder={currentConfig?.prompt || 'What are you wishing for today?'}
-          disabled={state.showCheckout || state.showConfirmation || state.isSearching}
-          history={history}
-          onHistoryClick={restoreHistory}
-          hasMorePages={hasMorePages}
-          hasPrevPages={hasPrevPages}
-          onNextPage={() => {
-            setIsPaging(true);
-            nextPage();
-          }}
-          onPrevPage={() => {
-            setIsPaging(true);
-            prevPage();
-          }}
-          onRandomize={() => {
-            const randomQueries = ["Surprise me with completely different gift ideas!", "Show me random best sellers", "I'm not sure, inspire me!"];
-            const q = randomQueries[Math.floor(Math.random() * randomQueries.length)];
-            handleSubmit(q);
-          }}
-          followUpQuestions={state.followUpQuestions}
-        />
+          <WishInputBar
+            value={state.inputValue}
+            onChange={updateInput}
+            onSubmit={onSubmit}
+            placeholder={currentConfig?.prompt || 'What are you wishing for today?'}
+            disabled={state.showCheckout || state.showConfirmation || state.isSearching}
+            history={history}
+            onHistoryClick={restoreHistory}
+            hasMorePages={hasMorePages}
+            hasPrevPages={hasPrevPages}
+            onNextPage={() => {
+              setIsPaging(true);
+              nextPage();
+            }}
+            onPrevPage={() => {
+              setIsPaging(true);
+              prevPage();
+            }}
+            onRandomize={() => {
+              const randomQueries = ["Surprise me with completely different gift ideas!", "Show me random best sellers", "I'm not sure, inspire me!"];
+              const q = randomQueries[Math.floor(Math.random() * randomQueries.length)];
+              handleSubmit(q);
+            }}
+            followUpQuestions={state.followUpQuestions}
+          />
         }
       </div>
 
@@ -217,7 +217,7 @@ export function App() {
         onCheckout={proceedToCheckout}
         onRemoveItem={removeFromCart}
       />
-      
+
       {/* Dev Tools drawer */}
       <DevToolsDrawer
         isOpen={isDevToolsOpen}
@@ -238,7 +238,7 @@ export function App() {
       {/* Checkout */}
       <AnimatePresence>
         {state.showCheckout &&
-        <CheckoutSummary items={cartProducts} onConfirm={confirmOrder} onClose={cancelCheckout} />
+          <CheckoutSummary items={cartProducts} onConfirm={confirmOrder} onClose={cancelCheckout} />
         }
       </AnimatePresence>
 
