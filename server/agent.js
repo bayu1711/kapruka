@@ -288,7 +288,20 @@ CRITICAL RULES FOR SEARCH QUERY:
       });
     }
     
-    finalQueryStr = finalQueryStr.trim();
+    
+    // Deduplicate words case-insensitively
+    const words = finalQueryStr.trim().split(/\s+/);
+    const uniqueWords = [];
+    const seen = new Set();
+    for (const w of words) {
+      const lower = w.toLowerCase();
+      if (!seen.has(lower)) {
+        seen.add(lower);
+        uniqueWords.push(w);
+      }
+    }
+    finalQueryStr = uniqueWords.join(' ');
+    
     finalSearchQuery = finalQueryStr;
 
     console.log(`[Agent Attempt ${attempt}] Searching Kapruka for: "${finalQueryStr}" with params:`, params);
