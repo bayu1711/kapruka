@@ -194,7 +194,7 @@ export function WishTree({
       if (idx >= 0 && idx < allTexts.length) {
         return { ...cell, contentId: allTexts[idx] };
       }
-      return cell;
+      return { ...cell, contentId: '' };
     });
 
     const baseCells = liveLayout.map((cell) => {

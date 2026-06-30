@@ -164,10 +164,10 @@ export function App() {
             <button
               onClick={goToNextSession}
               className="pointer-events-auto mr-2 sm:mr-6 px-4 py-3 rounded-full bg-emerald-500 hover:bg-emerald-400 backdrop-blur-md flex items-center gap-2 justify-center text-white font-heading transition-all hover:scale-105 shadow-[0_4px_20px_rgba(16,185,129,0.3)]"
-              title="Start New Wish"
+              title="Start New Wish Tree"
             >
               <Plus className="w-5 h-5" />
-              <span className="font-semibold text-sm">New Wish</span>
+              <span className="font-semibold text-sm">+ New Wish Tree</span>
             </button>
           ) : (
             <button
