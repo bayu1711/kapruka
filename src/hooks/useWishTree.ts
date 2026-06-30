@@ -18,6 +18,7 @@ export interface HistorySnapshot {
   aiPostFilterReasoning?: string;
   followUpQuestions?: string[];
   searchParameters?: {key: string, value: string}[];
+  errorMsg?: string;
 }
 
 export interface Session {
@@ -37,6 +38,7 @@ export interface Session {
   aiPostFilterReasoning?: string;
   followUpQuestions?: string[];
   searchParameters?: {key: string, value: string}[];
+  errorMsg?: string;
   page: number;
   liveProducts: Product[];
   liveCategories: string[];
@@ -104,6 +106,7 @@ export function useWishTree() {
     productSeed: 0,
     aiStatus: '',
     isSearching: false,
+    errorMsg: '',
     searchQuery: '',
     page: 0,
     liveProducts: [],
@@ -196,6 +199,7 @@ export function useWishTree() {
       aiStatus: t('SEARCHING'),
       searchQuery: query,
       inputValue: '',
+      errorMsg: '',
       productSeed: prev.productSeed + 1,
       selectedProduct: null,
       page: 0,
@@ -254,7 +258,8 @@ export function useWishTree() {
       updateSession((prev) => ({
         ...prev,
         isSearching: false,
-        aiStatus: statusMsg,
+        aiStatus: '',
+        errorMsg: mapped.length === 0 ? 'No products found. Try a different wish.' : '',
         productSeed: prev.productSeed + 1,
         aiReasoning: agentResult.reasoning,
         aiRecipient: agentResult.recipient,
@@ -277,23 +282,18 @@ export function useWishTree() {
             aiPostFilterReasoning: agentResult.postFilterReasoning,
             followUpQuestions: agentResult.followUpQuestions,
             searchParameters: agentResult.searchParameters,
+            errorMsg: mapped.length === 0 ? 'No products found.' : '',
           }
         ]
       }));
-
-      setTimeout(() => {
-        updateSession((prev) => ({ ...prev, aiStatus: '' }));
-      }, 3000);
     } catch (err) {
       console.error('[Kapruka MCP] search failed:', err);
       updateSession((prev) => ({
         ...prev,
         isSearching: false,
-        aiStatus: 'Search failed — showing cached products',
+        errorMsg: 'Search failed. Please try again.',
+        aiStatus: '',
       }));
-      setTimeout(() => {
-        updateSession((prev) => ({ ...prev, aiStatus: '' }));
-      }, 3000);
     }
   }, [updateSession, locale, t, sessions, currentSessionIndex]);
 

@@ -92,7 +92,6 @@ export function App() {
       </div>
 
       {/* UI Components */}
-      <AiStatus status={state.aiStatus} show={!!state.aiStatus} />
       
       <div className="fixed top-4 right-4 sm:top-6 sm:right-6 z-50 flex items-center gap-2 sm:gap-3">
         <button
@@ -143,6 +142,7 @@ export function App() {
               liveCategories={state.liveCategories}
               showDebugGrid={showDebugGrid}
               isSearching={state.isSearching}
+              errorMsg={state.errorMsg}
             />
           </motion.div>
         </AnimatePresence>

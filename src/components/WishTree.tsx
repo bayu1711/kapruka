@@ -17,6 +17,7 @@ interface WishTreeProps {
   searchParameters?: {key: string, value: string}[];
   showDebugGrid?: boolean;
   isSearching?: boolean;
+  errorMsg?: string;
 }
 type CellType = 'foliage' | 'label' | 'product';
 interface GridCell {
@@ -115,7 +116,8 @@ export function WishTree({
   aiActualSearchQuery,
   searchParameters,
   showDebugGrid,
-  isSearching
+  isSearching,
+  errorMsg
 }: WishTreeProps) {
   const { t } = useLanguage();
   const showProducts = stage >= 3;
@@ -604,6 +606,24 @@ export function WishTree({
                 fill="none" />
             )}
           </g>
+
+          {/* Error / Empty state message placed over the U */}
+          {errorMsg && !isSearching && (
+            <g>
+              <foreignObject x="240" y="150" width="320" height="200">
+                <div className="w-full h-full flex items-center justify-center text-center p-4">
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-black/40 backdrop-blur-md rounded-xl border border-white/20 p-4 text-white shadow-xl max-w-xs"
+                  >
+                    <p className="font-semibold text-lg text-emerald-300">Oops!</p>
+                    <p className="text-sm mt-1">{errorMsg}</p>
+                  </motion.div>
+                </div>
+              </foreignObject>
+            </g>
+          )}
         </svg>
 
         {/* Debug Grid Overlay */}
