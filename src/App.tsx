@@ -139,10 +139,8 @@ export function App() {
               aiActualSearchQuery={state.aiActualSearchQuery}
               aiOriginalSearchQuery={state.aiOriginalSearchQuery}
               searchParameters={state.searchParameters}
-              liveCategories={state.liveCategories}
               showDebugGrid={showDebugGrid}
               isSearching={state.isSearching}
-              errorMsg={state.errorMsg}
             />
           </motion.div>
         </AnimatePresence>

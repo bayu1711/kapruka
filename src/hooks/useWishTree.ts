@@ -18,7 +18,6 @@ export interface HistorySnapshot {
   aiPostFilterReasoning?: string;
   followUpQuestions?: string[];
   searchParameters?: {key: string, value: string}[];
-  errorMsg?: string;
 }
 
 export interface Session {
@@ -38,7 +37,6 @@ export interface Session {
   aiPostFilterReasoning?: string;
   followUpQuestions?: string[];
   searchParameters?: {key: string, value: string}[];
-  errorMsg?: string;
   page: number;
   liveProducts: Product[];
   liveCategories: string[];
@@ -106,7 +104,6 @@ export function useWishTree() {
     productSeed: 0,
     aiStatus: '',
     isSearching: false,
-    errorMsg: '',
     searchQuery: '',
     page: 0,
     liveProducts: [],
@@ -200,7 +197,6 @@ export function useWishTree() {
         aiStatus: t('SEARCHING'),
         searchQuery: query,
         inputValue: '',
-        errorMsg: '',
         productSeed: prev.productSeed + 1,
         selectedProduct: null,
         page: 0,
@@ -276,28 +272,17 @@ export function useWishTree() {
       
       updateSession((prev) => {
         if (mapped.length === 0) {
-          if (prev.liveProducts.length > 0) {
-            return {
-              ...prev,
-              isSearching: false,
-              aiStatus: '',
-              errorMsg: '',
-            };
-          } else {
-            return {
-              ...prev,
-              isSearching: false,
-              aiStatus: '',
-              errorMsg: agentResult.reasoning || 'No products found.',
-            };
-          }
+          return {
+            ...prev,
+            isSearching: false,
+            aiStatus: '',
+          };
         }
         
         return {
           ...prev,
           isSearching: false,
           aiStatus: '',
-          errorMsg: '',
           productSeed: prev.productSeed + 1,
           aiReasoning: agentResult.reasoning,
           aiRecipient: agentResult.recipient,
@@ -320,7 +305,6 @@ export function useWishTree() {
               aiPostFilterReasoning: agentResult.postFilterReasoning,
               followUpQuestions: agentResult.followUpQuestions,
               searchParameters: agentResult.searchParameters,
-              errorMsg: '',
             }
           ]
         };
@@ -330,7 +314,6 @@ export function useWishTree() {
       updateSession((prev) => ({
         ...prev,
         isSearching: false,
-        errorMsg: 'Search failed. Please try again.',
         aiStatus: '',
       }));
     }
