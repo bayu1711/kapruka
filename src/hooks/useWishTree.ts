@@ -188,22 +188,24 @@ export function useWishTree() {
     });
   }, [updateSession]);
 
-  const handleSubmit = useCallback(async (query: string, enablePostFilter: boolean = false) => {
+  const handleSubmit = useCallback(async (query: string, enablePostFilter: boolean = false, isFallback: boolean = false) => {
     if (!query.trim()) return;
 
-    updateSession((prev) => ({
-      ...prev,
-      stage: 3,
-      visibleBlocks: scenarioBlocks.filter((b) => b.stage <= 3),
-      isSearching: true,
-      aiStatus: t('SEARCHING'),
-      searchQuery: query,
-      inputValue: '',
-      errorMsg: '',
-      productSeed: prev.productSeed + 1,
-      selectedProduct: null,
-      page: 0,
-    }));
+    if (!isFallback) {
+      updateSession((prev) => ({
+        ...prev,
+        stage: 3,
+        visibleBlocks: scenarioBlocks.filter((b) => b.stage <= 3),
+        isSearching: true,
+        aiStatus: t('SEARCHING'),
+        searchQuery: query,
+        inputValue: '',
+        errorMsg: '',
+        productSeed: prev.productSeed + 1,
+        selectedProduct: null,
+        page: 0,
+      }));
+    }
 
     const session = sessions[currentSessionIndex];
     const formattedHistory = session?.history.flatMap(h => [
@@ -232,7 +234,24 @@ export function useWishTree() {
         position: { x: 0, y: 0 },
       }));
 
-      updateSession(prev => ({ ...prev, liveProducts: mapped }));
+      if (mapped.length === 0 && !isFallback) {
+        const hasHistory = session && session.history.length > 0;
+        let fallbackQuery = '';
+        if (hasHistory) {
+            fallbackQuery = "The previous search returned 0 products. Based on our past conversation, please suggest a completely different alternative gift that is very popular and likely to be in stock.";
+        } else {
+            const randomQueries = ["Surprise me with completely different gift ideas!", "Show me random best sellers", "I'm not sure, inspire me!"];
+            fallbackQuery = randomQueries[Math.floor(Math.random() * randomQueries.length)];
+        }
+        
+        // Trigger fallback search and return
+        handleSubmit(fallbackQuery, enablePostFilter, true);
+        return;
+      }
+
+      if (mapped.length > 0) {
+        updateSession(prev => ({ ...prev, liveProducts: mapped }));
+      }
 
       // Background fetch
       (async () => {
@@ -255,37 +274,57 @@ export function useWishTree() {
       
       const statusMsg = `Found ${mapped.length} results for "${agentResult.searchQuery}"`;
       
-      updateSession((prev) => ({
-        ...prev,
-        isSearching: false,
-        aiStatus: '',
-        errorMsg: mapped.length === 0 ? 'No products found. Try a different wish.' : '',
-        productSeed: prev.productSeed + 1,
-        aiReasoning: agentResult.reasoning,
-        aiRecipient: agentResult.recipient,
-        aiActualSearchQuery: agentResult.actualSearchQuery,
-        aiOriginalSearchQuery: agentResult.originalSearchQuery,
-        aiPostFilterReasoning: agentResult.postFilterReasoning,
-        followUpQuestions: agentResult.followUpQuestions,
-        searchParameters: agentResult.searchParameters,
-        history: [
-          ...prev.history,
-          {
-            query: query,
-            aiStatus: statusMsg,
-            products: mapped,
-            categories: cats.length > 0 ? cats : prev.liveCategories,
-            aiReasoning: agentResult.reasoning,
-            aiRecipient: agentResult.recipient,
-            aiActualSearchQuery: agentResult.actualSearchQuery,
-            aiOriginalSearchQuery: agentResult.originalSearchQuery,
-            aiPostFilterReasoning: agentResult.postFilterReasoning,
-            followUpQuestions: agentResult.followUpQuestions,
-            searchParameters: agentResult.searchParameters,
-            errorMsg: mapped.length === 0 ? 'No products found.' : '',
+      updateSession((prev) => {
+        if (mapped.length === 0) {
+          if (prev.liveProducts.length > 0) {
+            return {
+              ...prev,
+              isSearching: false,
+              aiStatus: '',
+              errorMsg: '',
+            };
+          } else {
+            return {
+              ...prev,
+              isSearching: false,
+              aiStatus: '',
+              errorMsg: agentResult.reasoning || 'No products found.',
+            };
           }
-        ]
-      }));
+        }
+        
+        return {
+          ...prev,
+          isSearching: false,
+          aiStatus: '',
+          errorMsg: '',
+          productSeed: prev.productSeed + 1,
+          aiReasoning: agentResult.reasoning,
+          aiRecipient: agentResult.recipient,
+          aiActualSearchQuery: agentResult.actualSearchQuery,
+          aiOriginalSearchQuery: agentResult.originalSearchQuery,
+          aiPostFilterReasoning: agentResult.postFilterReasoning,
+          followUpQuestions: agentResult.followUpQuestions,
+          searchParameters: agentResult.searchParameters,
+          history: [
+            ...prev.history,
+            {
+              query: query,
+              aiStatus: statusMsg,
+              products: mapped,
+              categories: cats.length > 0 ? cats : prev.liveCategories,
+              aiReasoning: agentResult.reasoning,
+              aiRecipient: agentResult.recipient,
+              aiActualSearchQuery: agentResult.actualSearchQuery,
+              aiOriginalSearchQuery: agentResult.originalSearchQuery,
+              aiPostFilterReasoning: agentResult.postFilterReasoning,
+              followUpQuestions: agentResult.followUpQuestions,
+              searchParameters: agentResult.searchParameters,
+              errorMsg: '',
+            }
+          ]
+        };
+      });
     } catch (err) {
       console.error('[Kapruka MCP] search failed:', err);
       updateSession((prev) => ({
