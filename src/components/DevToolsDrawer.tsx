@@ -42,15 +42,15 @@ export function DevToolsDrawer({
             className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[70]"
           />
 
-          {/* Bottom Sheet Drawer */}
+          {/* Sidebar Drawer */}
           <motion.div
-            initial={{ y: '100%' }}
-            animate={{ y: 0 }}
-            exit={{ y: '100%' }}
+            initial={{ x: '100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '100%' }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            className="fixed left-0 right-0 bottom-0 max-h-[85vh] bg-slate-900/95 backdrop-blur-xl border-t border-purple-500/30 z-[70] overflow-y-auto rounded-t-3xl shadow-[0_-10px_40px_rgba(168,85,247,0.2)]"
+            className="fixed right-0 top-0 bottom-0 w-full max-w-md bg-slate-900/95 backdrop-blur-xl border-l border-purple-500/30 z-[70] overflow-y-auto shadow-[0_0_50px_rgba(168,85,247,0.2)]"
           >
-            <div className="p-6 max-w-3xl mx-auto">
+            <div className="p-6 flex flex-col h-full">
               {/* Header */}
               <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center gap-3">

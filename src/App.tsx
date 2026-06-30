@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Plus, Trash2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, Trash2, Settings } from 'lucide-react';
 import { useWishTree } from './hooks/useWishTree';
 import { AiStatus } from './components/AiStatus';
 import { WishTree } from './components/WishTree';
@@ -95,6 +95,13 @@ export function App() {
       
       <div className="fixed top-4 right-4 sm:top-6 sm:right-6 z-50 flex items-center gap-2 sm:gap-3">
         <button
+          onClick={() => setIsDevToolsOpen(true)}
+          className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-purple-500/20 hover:bg-purple-500/40 text-purple-200 rounded-full shadow-lg transition-colors backdrop-blur-md border border-purple-500/30"
+          title="Developer Tools"
+        >
+          <Settings className="w-4 h-4 sm:w-5 sm:h-5" />
+        </button>
+        <button
           onClick={deleteSession}
           className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-red-500/80 hover:bg-red-600 text-white rounded-full shadow-lg transition-colors backdrop-blur-md border border-red-500/20"
           title="Delete current tree"
@@ -129,7 +136,6 @@ export function App() {
               aiRecipient={state.aiRecipient}
               aiActualSearchQuery={state.aiActualSearchQuery}
               searchParameters={state.searchParameters}
-              onOpenDevTools={() => setIsDevToolsOpen(true)}
               showDebugGrid={showDebugGrid}
             />
           </motion.div>

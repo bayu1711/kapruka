@@ -15,8 +15,7 @@ interface WishTreeProps {
   aiRecipient?: string;
   aiActualSearchQuery?: string;
   searchParameters?: {key: string, value: string}[];
-  onOpenDevTools: () => void;
-  showDebugGrid: boolean;
+  showDebugGrid?: boolean;
 }
 type CellType = 'foliage' | 'label' | 'product';
 interface GridCell {
@@ -114,7 +113,6 @@ export function WishTree({
   aiRecipient,
   aiActualSearchQuery,
   searchParameters,
-  onOpenDevTools,
   showDebugGrid
 }: WishTreeProps) {
   const { t } = useLanguage();
