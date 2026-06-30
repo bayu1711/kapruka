@@ -650,8 +650,8 @@ export function WishTree({
                 }}
                 animate={{
                   scale: 1,
-                  opacity: 0.95,
-                  filter: 'blur(0px)',
+                  opacity: isSearching ? 0.7 : 0.95,
+                  filter: isSearching ? 'blur(4px) grayscale(50%)' : 'blur(0px) grayscale(0%)',
                   rotate: (cell as any).rotate || 0
                 }}
                 transition={{
@@ -683,8 +683,8 @@ export function WishTree({
                 }}
                 animate={{
                   scale: 1,
-                  opacity: 1,
-                  filter: 'blur(0px)',
+                  opacity: isSearching ? 0.7 : 1,
+                  filter: isSearching ? 'blur(4px) grayscale(50%)' : 'blur(0px) grayscale(0%)',
                   rotate: (cell as any).rotate || 0
                 }}
                 transition={{
