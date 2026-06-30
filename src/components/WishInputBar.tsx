@@ -1,7 +1,7 @@
 import 'regenerator-runtime/runtime';
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowUp, RefreshCw, ChevronRight, ChevronLeft, Mic, MicOff, MessageCircleQuestion } from 'lucide-react';
+import { ArrowUp, RefreshCw, ChevronRight, ChevronLeft, Mic, MicOff, MessageCircleQuestion, Trash2 } from 'lucide-react';
 import type { HistorySnapshot } from '../hooks/useWishTree';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -21,6 +21,7 @@ interface WishInputBarProps {
   hasMorePages?: boolean;
   hasPrevPages?: boolean;
   followUpQuestions?: string[];
+  onClearSession?: () => void;
 }
 
 /** A small tree SVG used as the loading indicator on the send button */
@@ -69,6 +70,7 @@ export function WishInputBar({
   hasPrevPages,
   followUpQuestions,
   onFollowUpClick,
+  onClearSession,
 }: WishInputBarProps) {
   const [loading, setLoading] = useState(false);
   const { locale, setLocale, t } = useLanguage();
@@ -153,8 +155,20 @@ export function WishInputBar({
         )}
 
         {/* Action Chips */}
-        {(hasPrevPages || hasMorePages || onRandomize) && (
-          <div className="w-full flex flex-wrap justify-end items-end gap-2 px-2 mb-3">
+        {(hasPrevPages || hasMorePages || onRandomize || onClearSession) && (
+          <div className="w-full flex flex-wrap justify-between items-end gap-2 px-2 mb-3">
+            <div className="flex flex-wrap gap-2 justify-start max-w-[50%]">
+              {onClearSession && (
+                <button
+                  type="button"
+                  onClick={onClearSession}
+                  className="flex items-center gap-1.5 text-xs font-semibold text-red-200 bg-red-500/20 hover:bg-red-500/40 backdrop-blur-md border border-red-500/30 rounded-full px-3 py-1.5 transition-colors"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  {t('CLEAR_SESSION') || 'Start Over'}
+                </button>
+              )}
+            </div>
             <div className="flex flex-wrap gap-2 justify-end">
               {hasPrevPages && (
                 <button
