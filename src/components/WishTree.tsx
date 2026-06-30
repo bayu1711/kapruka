@@ -592,16 +592,6 @@ export function WishTree({
           </g>
         </svg>
 
-        <button
-          type="button"
-          onClick={onOpenDevTools}
-          aria-label="Open Developer Tools"
-          className="absolute top-2 right-2 z-[60] flex items-center gap-1.5 rounded-full border px-2.5 py-1.5 text-[10px] sm:text-xs font-mono font-semibold transition-colors border-white/30 bg-black/40 text-white hover:bg-black/60 backdrop-blur-sm"
-        >
-          <Settings className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-purple-400" />
-          Dev Tools
-        </button>
-
         {/* Debug Grid Overlay */}
         {showDebugGrid &&
         Array.from({ length: 8 * 11 }).map((_, i) => {
