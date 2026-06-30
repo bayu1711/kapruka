@@ -1,19 +1,22 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ShoppingCart, ArrowRight } from 'lucide-react';
+import { X, ShoppingCart, ArrowRight, Trash2 } from 'lucide-react';
 import type { Product } from '../data/scenario';
 import { useLanguage } from '../contexts/LanguageContext';
+
 interface CartDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   items: Product[];
   onCheckout: () => void;
+  onRemoveItem: (id: string) => void;
 }
 export function CartDrawer({
   isOpen,
   onClose,
   items,
-  onCheckout
+  onCheckout,
+  onRemoveItem
 }: CartDrawerProps) {
   const { t } = useLanguage();
   const subtotal = items.reduce((sum, item) => sum + item.price, 0);
@@ -101,9 +104,18 @@ export function CartDrawer({
                       <p className="text-sm font-mono text-white/60 mb-2">
                         {item.category}
                       </p>
-                      <p className="text-lg font-mono font-semibold text-emerald-400">
-                        LKR {item.price.toLocaleString()}
-                      </p>
+                      <div className="flex items-center justify-between">
+                        <p className="text-lg font-mono font-semibold text-emerald-400">
+                          LKR {item.price.toLocaleString()}
+                        </p>
+                        <button
+                          onClick={() => onRemoveItem(item.id)}
+                          className="p-2 text-white/40 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-colors"
+                          title={t('REMOVE_ITEM')}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
                   </motion.div>
               )}

@@ -305,6 +305,20 @@ export function useWishTree() {
     handleSubmit(q);
   }, [sessions, currentSessionIndex, updateSession, handleSubmit]);
 
+  const addToCart = useCallback((product: Product) => {
+    setGlobalState(prev => {
+      const isAlreadyInCart = prev.cartItems.some(item => item.id === product.id);
+      if (isAlreadyInCart) return prev;
+      return { ...prev, cartItems: [...prev.cartItems, product] };
+    });
+  }, []);
+
+  const removeFromCart = useCallback((productId: string) => {
+    setGlobalState(prev => {
+      return { ...prev, cartItems: prev.cartItems.filter(item => item.id !== productId) };
+    });
+  }, []);
+
   const restoreHistory = useCallback((index: number) => {
     updateSession(prev => {
       const snap = prev.history[index];
@@ -418,6 +432,7 @@ export function useWishTree() {
     handleSubmit,
     selectProduct,
     addToCart,
+    removeFromCart,
     toggleCart,
     proceedToCheckout,
     confirmOrder,

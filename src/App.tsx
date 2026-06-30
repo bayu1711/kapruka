@@ -18,6 +18,7 @@ export function App() {
     handleSubmit,
     selectProduct,
     addToCart,
+    removeFromCart,
     toggleCart,
     proceedToCheckout,
     confirmOrder,
@@ -212,7 +213,9 @@ export function App() {
         isOpen={state.showCart}
         onClose={toggleCart}
         items={cartProducts}
-        onCheckout={proceedToCheckout} />
+        onCheckout={proceedToCheckout}
+        onRemoveItem={removeFromCart}
+      />
       
       {/* Dev Tools drawer */}
       <DevToolsDrawer
