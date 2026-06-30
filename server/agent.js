@@ -353,6 +353,7 @@ CRITICAL RULES FOR SEARCH QUERY:
     reasoning: finalReasoning,
     recipient: finalRecipient,
     searchQuery: finalSearchQuery,
+    originalSearchQuery: parsed ? parsed.searchQuery : finalSearchQuery,
     postFilterReasoning: finalPostFilterReasoning,
     followUpQuestions: finalFollowUpQuestions,
     searchParameters: finalSearchParameters

@@ -137,17 +137,21 @@ export function DevToolsDrawer({
 
                     <div className="pt-4 border-t border-white/10 mt-4">
                       <span className="text-white/50 text-xs block mb-2">Context & Search Parameters</span>
-                      {searchParameters && searchParameters.length > 0 ? (
-                        <div className="flex flex-wrap gap-2">
-                          {searchParameters.map((p, i) => (
-                            <div key={i} className="bg-purple-500/10 border border-purple-500/30 px-2 py-1 rounded text-xs text-purple-200">
-                              <span className="opacity-60">{p.key}:</span> <span className="font-semibold">{p.value}</span>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="text-white/40 text-sm italic">No specific parameters extracted.</div>
-                      )}
+                      <div className="flex flex-wrap gap-2">
+                        {aiActualSearchQuery && (
+                          <div className="bg-emerald-500/10 border border-emerald-500/30 px-2 py-1 rounded text-xs text-emerald-200">
+                            <span className="opacity-60">query:</span> <span className="font-semibold">{aiActualSearchQuery}</span>
+                          </div>
+                        )}
+                        {searchParameters && searchParameters.map((p, i) => (
+                          <div key={i} className="bg-purple-500/10 border border-purple-500/30 px-2 py-1 rounded text-xs text-purple-200">
+                            <span className="opacity-60">{p.key}:</span> <span className="font-semibold">{p.value}</span>
+                          </div>
+                        ))}
+                        {(!searchParameters || searchParameters.length === 0) && !aiActualSearchQuery && (
+                          <div className="text-white/40 text-sm italic">No specific parameters extracted.</div>
+                        )}
+                      </div>
                     </div>
 
                     <div className="pt-4 border-t border-white/10 mt-4">
