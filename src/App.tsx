@@ -67,6 +67,7 @@ export function App() {
   const [isDevToolsOpen, setIsDevToolsOpen] = useState(false);
   const [enablePostFilter, setEnablePostFilter] = useState(false);
   const [showDebugGrid, setShowDebugGrid] = useState(false);
+  const [showCanopy, setShowCanopy] = useState(true);
 
   useEffect(() => {
     setIsPaging(false);
@@ -142,6 +143,7 @@ export function App() {
               aiOriginalSearchQuery={state.aiOriginalSearchQuery}
               searchParameters={state.searchParameters}
               showDebugGrid={showDebugGrid}
+              showCanopy={showCanopy}
               isSearching={state.isSearching}
             />
           </motion.div>
@@ -230,6 +232,8 @@ export function App() {
         onToggleDebugGrid={() => setShowDebugGrid(!showDebugGrid)}
         enablePostFilter={enablePostFilter}
         onTogglePostFilter={() => setEnablePostFilter(!enablePostFilter)}
+        showCanopy={showCanopy}
+        onToggleCanopy={() => setShowCanopy(!showCanopy)}
         aiReasoning={state.aiReasoning}
         aiRecipient={state.aiRecipient}
         aiActualSearchQuery={state.aiActualSearchQuery}

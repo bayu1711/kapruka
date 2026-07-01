@@ -9,6 +9,8 @@ interface DevToolsDrawerProps {
   onToggleDebugGrid: () => void;
   enablePostFilter: boolean;
   onTogglePostFilter: () => void;
+  showCanopy: boolean;
+  onToggleCanopy: () => void;
   aiReasoning?: string;
   aiRecipient?: string;
   aiActualSearchQuery?: string;
@@ -25,6 +27,8 @@ export function DevToolsDrawer({
   onToggleDebugGrid,
   enablePostFilter,
   onTogglePostFilter,
+  showCanopy,
+  onToggleCanopy,
   aiReasoning,
   aiRecipient,
   aiActualSearchQuery,
@@ -104,6 +108,19 @@ export function DevToolsDrawer({
                       </div>
                       <div className="text-purple-400 ml-4">
                         {enablePostFilter ? <CheckSquare className="w-6 h-6" /> : <Square className="w-6 h-6" />}
+                      </div>
+                    </button>
+
+                    <button
+                      onClick={onToggleCanopy}
+                      className="w-full flex items-center justify-between p-4 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-colors text-left"
+                    >
+                      <div>
+                        <div className="text-white font-medium mb-1">Show Tree Canopy</div>
+                        <div className="text-white/50 text-sm">Toggle the visibility of the tree trunk and green canopy background.</div>
+                      </div>
+                      <div className="text-purple-400 ml-4">
+                        {showCanopy ? <CheckSquare className="w-6 h-6" /> : <Square className="w-6 h-6" />}
                       </div>
                     </button>
                   </div>

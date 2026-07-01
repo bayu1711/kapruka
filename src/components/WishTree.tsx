@@ -15,6 +15,7 @@ interface WishTreeProps {
   aiRecipient?: string;
   aiActualSearchQuery?: string;
   showDebugGrid?: boolean;
+  showCanopy?: boolean;
   isSearching?: boolean;
 }
 type CellType = 'foliage' | 'label' | 'product';
@@ -114,6 +115,7 @@ export function WishTree({
   aiActualSearchQuery,
   searchParameters,
   showDebugGrid: showDebugGridProp,
+  showCanopy = true,
   isSearching
 }: WishTreeProps) {
   const { t } = useLanguage();
@@ -537,7 +539,7 @@ export function WishTree({
     const allCells = [...baseCells, ...emptyBlueCells, ...productCells];
 
     return allCells;
-  }, [products, liveCategories]);
+  }, [products, liveCategories, searchParameters]);
   return (
     <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
       {/* Responsive square container — kept strictly 1:1 so the % grid stays aligned to the canopy */}
@@ -558,32 +560,34 @@ export function WishTree({
               <stop offset="100%" stopColor="#451a03" />
             </linearGradient>
             <radialGradient id="canopyGrad" cx="50%" cy="40%" r="60%">
-              <stop offset="0%" stopColor="#10b981" stopOpacity="0.85" />
-              <stop offset="100%" stopColor="#064e3b" stopOpacity="0.5" />
+              <stop offset="0%" stopColor="#10b981" stopOpacity="0.70" />
+              <stop offset="100%" stopColor="#064e3b" stopOpacity="0.30" />
             </radialGradient>
           </defs>
 
-          {/* Trunk */}
-          <rect
-            x="360"
-            y="500"
-            width="80"
-            height="300"
-            fill="url(#trunkGrad)" />
+          {showCanopy && (
+            <>
+              {/* Trunk */}
+              <rect
+                x="360"
+                y="420"
+                width="80"
+                height="380"
+                fill="url(#trunkGrad)" />
 
-          {/* Canopy */}
-          <rect
-            x="40"
-            y="40"
-            width="720"
-            height="480"
-            rx="80"
-            ry="80"
-            fill="url(#canopyGrad)"
-          />
+              {/* Canopy */}
+              <rect
+                x="40"
+                y="40"
+                width="720"
+                height="480"
+                rx="80"
+                ry="80"
+                fill="url(#canopyGrad)"
+              />
+            </>
+          )}
 
-
-          
           {/* Kapruka 'u' smile (Yellow) */}
           <g filter="drop-shadow(0px 8px 16px rgba(0,0,0,0.2))">
             {isSearching ? (
