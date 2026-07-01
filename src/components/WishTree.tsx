@@ -558,23 +558,29 @@ export function WishTree({
               <stop offset="100%" stopColor="#451a03" />
             </linearGradient>
             <radialGradient id="canopyGrad" cx="50%" cy="40%" r="60%">
-              <stop offset="0%" stopColor="#10b981" stopOpacity="0.55" />
-              <stop offset="100%" stopColor="#064e3b" stopOpacity="0.15" />
+              <stop offset="0%" stopColor="#10b981" stopOpacity="0.85" />
+              <stop offset="100%" stopColor="#064e3b" stopOpacity="0.5" />
             </radialGradient>
           </defs>
 
-          {/* Soft canopy backing (enlarged so product tiles stay inside) */}
-          <ellipse
-            cx="400"
-            cy="280"
-            rx="360"
-            ry="270"
-            fill="url(#canopyGrad)" />
-
           {/* Trunk */}
-          <path
-            d="M370 750 C 370 650, 352 560, 380 480 L 420 480 C 448 560, 430 650, 430 750 Z"
+          <rect
+            x="360"
+            y="500"
+            width="80"
+            height="300"
             fill="url(#trunkGrad)" />
+
+          {/* Canopy */}
+          <rect
+            x="40"
+            y="40"
+            width="720"
+            height="480"
+            rx="80"
+            ry="80"
+            fill="url(#canopyGrad)"
+          />
 
 
           
@@ -758,7 +764,7 @@ export function WishTree({
                 <img
                   src={product.image || `https://placehold.co/400x400/1e293b/6ee7b7?text=${encodeURIComponent(product.name)}`}
                   alt={product.name}
-                  className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity [image-rendering:pixelated]"
+                  className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
                   onError={(e) => {
                     (e.target as HTMLImageElement).src = 'https://placehold.co/400x400/1e293b/6ee7b7?text=Kapruka';
                   }}
