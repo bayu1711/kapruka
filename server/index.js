@@ -10,14 +10,14 @@ app.get('/', (req, res) => {
 });
 
 app.post('/chat', async (req, res) => {
-  const { message, history, enablePostFilter, language } = req.body;
+  const { message, history, enablePostFilter, language, visibleProducts, cartItems } = req.body;
   if (!message) {
     return res.status(400).json({ error: 'Message is required' });
   }
 
   try {
     console.log(`[Server] Received message: "${message}"`);
-    const result = await processChat(message, history || [], enablePostFilter, language || 'en-US');
+    const result = await processChat(message, history || [], enablePostFilter, language || 'en-US', visibleProducts || [], cartItems || []);
     res.json(result);
   } catch (error) {
     console.error('[Server] Error processing chat:', error);

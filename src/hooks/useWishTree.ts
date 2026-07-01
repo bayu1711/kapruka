@@ -211,7 +211,42 @@ export function useWishTree() {
     ]) || [];
 
     try {
-      const agentResult = await parseUserQuery(query, formattedHistory, enablePostFilter, locale);
+      const agentResult = await parseUserQuery(query, formattedHistory, enablePostFilter, locale, session?.liveProducts || [], globalState.cartItems || []);
+      
+      if (agentResult.intent && agentResult.intent !== 'search') {
+        updateSession((prev) => ({ ...prev, isSearching: false, aiStatus: '' }));
+        
+        let actionMessage = '';
+        if (agentResult.intent === 'add_to_cart') {
+          setGlobalState((prev) => {
+            const product = (session?.liveProducts || []).find(p => p.id === agentResult.targetProductId);
+            if (!product) return prev;
+            return { ...prev, cartItems: [...prev.cartItems, product], showCart: true };
+          });
+          actionMessage = 'Item added to cart.';
+        } else if (agentResult.intent === 'remove_from_cart') {
+          setGlobalState(prev => ({ ...prev, cartItems: prev.cartItems.filter(item => item.id !== agentResult.targetProductId) }));
+          actionMessage = 'Item removed from cart.';
+        } else if (agentResult.intent === 'checkout') {
+          setGlobalState(prev => ({ ...prev, showCheckout: true }));
+          actionMessage = 'Proceeding to checkout.';
+        }
+
+        updateSession(prev => ({
+          ...prev,
+          history: [
+            ...prev.history,
+            {
+              query: originalQuery || query,
+              aiStatus: actionMessage,
+              products: prev.liveProducts,
+              categories: prev.liveCategories
+            }
+          ]
+        }));
+        return;
+      }
+
       updateSession((prev) => ({ ...prev, aiStatus: agentResult.aiStatusMessage }));
 
       const cats = agentResult.suggestedCategories && agentResult.suggestedCategories.length > 0
