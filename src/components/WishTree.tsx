@@ -28,6 +28,7 @@ interface GridCell {
   colSpan: number;
   rowSpan: number;
   contentId?: string; // block.label or product.id
+  roundingClass?: string;
 }
 // Unified grid layout for the canopy (11 cols x 8 rows)
 // This explicitly places labeled cells and fills the rest with foliage
@@ -197,6 +198,38 @@ export function WishTree({
       return { ...cell, contentId: '' };
     });
 
+    const treeMask = [
+      [3, 7],   // row 0
+      [2, 8],   // row 1
+      [1, 9],   // row 2
+      [0, 10],  // row 3
+      [0, 10],  // row 4
+      [1, 9],   // row 5
+      [2, 8],   // row 6
+      [3, 7]    // row 7
+    ];
+
+    const isInCanopy = (c: number, r: number) => {
+      if (r < 0 || r > 7) return false;
+      const [minC, maxC] = treeMask[r] || [0, 10];
+      return c >= minC && c <= maxC;
+    };
+
+    const getRoundingClass = (col: number, row: number, colSpan: number, rowSpan: number) => {
+      const isTopExposed = Array.from({length: colSpan}).some((_, i) => !isInCanopy(col + i, row - 1));
+      const isBottomExposed = Array.from({length: colSpan}).some((_, i) => !isInCanopy(col + i, row + rowSpan));
+      const isLeftExposed = Array.from({length: rowSpan}).some((_, i) => !isInCanopy(col - 1, row + i));
+      const isRightExposed = Array.from({length: rowSpan}).some((_, i) => !isInCanopy(col + colSpan, row + i));
+
+      const classes = [];
+      if (isTopExposed || isLeftExposed) classes.push('rounded-tl-3xl');
+      if (isTopExposed || isRightExposed) classes.push('rounded-tr-3xl');
+      if (isBottomExposed || isLeftExposed) classes.push('rounded-bl-3xl');
+      if (isBottomExposed || isRightExposed) classes.push('rounded-br-3xl');
+      
+      return classes.length > 0 ? classes.join(' ') : 'rounded-none';
+    };
+
     const baseCells = liveLayout.map((cell) => {
       const multiplier = 0.98; // Almost full width, tiny gap
       const width = cellWidth * cell.colSpan * multiplier;
@@ -212,22 +245,12 @@ export function WishTree({
         width: `${width}%`,
         height: `${height}%`,
         rotate: 0,
-        delay: delayById[cell.id]
+        delay: delayById[cell.id],
+        roundingClass: getRoundingClass(cell.col, cell.row, cell.colSpan, cell.rowSpan)
       };
     });
     const usedCoords = new Set(liveLayout.map(c => `${c.col},${c.row}`));
     const validProductCoords: { col: number; row: number }[] = [];
-
-    const treeMask = [
-      [3, 7],   // row 0
-      [2, 8],   // row 1
-      [1, 9],   // row 2
-      [0, 10],  // row 3
-      [0, 10],  // row 4
-      [1, 9],   // row 5
-      [2, 8],   // row 6
-      [3, 7]    // row 7
-    ];
 
     for (let c = 0; c < cols; c++) {
       for (let r = 0; r < rows; r++) {
@@ -323,7 +346,8 @@ export function WishTree({
         width: `${pWidth}%`,
         height: `${pHeight}%`,
         rotate: 0,
-        delay: dist * 0.1
+        delay: dist * 0.1,
+        roundingClass: getRoundingClass(slot.col, slot.row, slot.colSpan, slot.rowSpan)
       } as (typeof baseCells)[number]);
     });
 
@@ -360,7 +384,8 @@ export function WishTree({
         width: `${width}%`,
         height: `${height}%`,
         rotate: 0,
-        delay: dist * 0.1
+        delay: dist * 0.1,
+        roundingClass: getRoundingClass(slot.col, slot.row, 1, 1)
       } as (typeof baseCells)[number];
     });
 
@@ -486,7 +511,7 @@ export function WishTree({
                   damping: 22,
                   delay: cell.delay
                 }}
-                className={`absolute rounded-none ${cell.color === 'white' ? 'bg-[#10b981]' : cell.color === 'blue' ? 'bg-[#059669]' : 'bg-[#064e3b]'}`}
+                className={`absolute ${cell.roundingClass || 'rounded-none'} ${cell.color === 'white' ? 'bg-[#10b981]' : cell.color === 'blue' ? 'bg-[#059669]' : 'bg-[#064e3b]'}`}
                 style={{
                   left: cell.left,
                   top: cell.top,
@@ -519,7 +544,7 @@ export function WishTree({
                   damping: 25,
                   delay: cell.delay
                 }}
-                className={`absolute rounded-none flex items-center justify-center px-1 border backdrop-blur-md z-10 ${isWhite ? 'bg-white text-[#402970] shadow-[0_0_16px_rgba(255,255,255,0.6)] border-white' : 'bg-blue-600 text-white shadow-[0_0_16px_rgba(37,99,235,0.6)] border-blue-400/50'}`}
+                className={`absolute ${cell.roundingClass || 'rounded-none'} flex items-center justify-center px-1 border backdrop-blur-md z-10 ${isWhite ? 'bg-white text-[#402970] shadow-[0_0_16px_rgba(255,255,255,0.6)] border-white' : 'bg-blue-600 text-white shadow-[0_0_16px_rgba(37,99,235,0.6)] border-blue-400/50'}`}
                 style={{
                   left: cell.left,
                   top: cell.top,
@@ -559,7 +584,7 @@ export function WishTree({
                   damping: 20,
                   delay: isSearching ? 0 : cell.delay
                 }}
-                className={`absolute rounded-none overflow-hidden cursor-pointer group z-20 duration-300 border-2 ${isSelected ? 'border-emerald-400 shadow-[0_0_24px_rgba(16,185,129,0.8)] z-30' : 'border-emerald-500/30 shadow-[0_0_16px_rgba(16,185,129,0.4)] hover:scale-105 hover:shadow-[0_0_20px_rgba(16,185,129,0.6)]'}`}
+                className={`absolute ${cell.roundingClass || 'rounded-none'} overflow-hidden cursor-pointer group z-20 duration-300 border-2 ${isSelected ? 'border-emerald-400 shadow-[0_0_24px_rgba(16,185,129,0.8)] z-30' : 'border-emerald-500/30 shadow-[0_0_16px_rgba(16,185,129,0.4)] hover:scale-105 hover:shadow-[0_0_20px_rgba(16,185,129,0.6)]'}`}
                 style={{
                   left: cell.left,
                   top: cell.top,
