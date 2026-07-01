@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Grid3x3, Settings } from 'lucide-react';
+import { Grid3x3 } from 'lucide-react';
 import type { Product } from '../data/scenario';
 import { useLanguage } from '../contexts/LanguageContext';
 
@@ -28,7 +28,6 @@ interface GridCell {
   colSpan: number;
   rowSpan: number;
   contentId?: string; // block.label or product.id
-  roundingClass?: string;
 }
 // Unified grid layout for the canopy (11 cols x 8 rows)
 // This explicitly places labeled cells and fills the rest with foliage
@@ -114,10 +113,12 @@ export function WishTree({
   aiRecipient,
   aiActualSearchQuery,
   searchParameters,
-  showDebugGrid,
+  showDebugGrid: showDebugGridProp,
   isSearching
 }: WishTreeProps) {
   const { t } = useLanguage();
+  const [showDebugGrid, setShowDebugGrid] = useState(false);
+  const effectiveShowDebugGrid = showDebugGridProp ?? showDebugGrid;
   const showProducts = stage >= 3;
   // Calculate cell positions based on the 11x8 grid
   const gridCells = useMemo(() => {
@@ -198,67 +199,98 @@ export function WishTree({
       return { ...cell, contentId: '' };
     });
 
-    const treeMask = [
-      [3, 7],   // row 0
-      [2, 8],   // row 1
-      [1, 9],   // row 2
-      [0, 10],  // row 3
-      [0, 10],  // row 4
-      [1, 9],   // row 5
-      [2, 8],   // row 6
-      [3, 7]    // row 7
-    ];
-
-    const isInCanopy = (c: number, r: number) => {
-      if (r < 0 || r > 7) return false;
-      const [minC, maxC] = treeMask[r] || [0, 10];
-      return c >= minC && c <= maxC;
-    };
-
-    const getRoundingClass = (col: number, row: number, colSpan: number, rowSpan: number) => {
-      const isTopExposed = Array.from({length: colSpan}).some((_, i) => !isInCanopy(col + i, row - 1));
-      const isBottomExposed = Array.from({length: colSpan}).some((_, i) => !isInCanopy(col + i, row + rowSpan));
-      const isLeftExposed = Array.from({length: rowSpan}).some((_, i) => !isInCanopy(col - 1, row + i));
-      const isRightExposed = Array.from({length: rowSpan}).some((_, i) => !isInCanopy(col + colSpan, row + i));
-
-      const classes = [];
-      if (isTopExposed || isLeftExposed) classes.push('rounded-tl-3xl');
-      if (isTopExposed || isRightExposed) classes.push('rounded-tr-3xl');
-      if (isBottomExposed || isLeftExposed) classes.push('rounded-bl-3xl');
-      if (isBottomExposed || isRightExposed) classes.push('rounded-br-3xl');
-      
-      return classes.length > 0 ? classes.join(' ') : 'rounded-none';
-    };
-
     const baseCells = liveLayout.map((cell) => {
-      const multiplier = 0.98; // Almost full width, tiny gap
+      const multiplier = 0.70; // Shrunk to add organic spacing
       const width = cellWidth * cell.colSpan * multiplier;
       const height = cellHeight * cell.rowSpan * multiplier;
-      
+      // Center the resized tile inside its allocated grid slot
       const baseLeft = gridLeft + cell.col * cellWidth + (cellWidth * cell.colSpan * (1 - multiplier)) / 2;
       const baseTop = gridTop + cell.row * cellHeight + (cellHeight * cell.rowSpan * (1 - multiplier)) / 2;
       
+      const rot = (seededRandom() - 0.5) * 12; // Random rotation between -6 and 6 deg
+      const jx = (seededRandom() - 0.5) * 2; // Random X jitter %
+      const jy = (seededRandom() - 0.5) * 2; // Random Y jitter %
+
       return {
         ...cell,
-        left: `${baseLeft}%`,
-        top: `${baseTop}%`,
+        left: `${baseLeft + jx}%`,
+        top: `${baseTop + jy}%`,
         width: `${width}%`,
         height: `${height}%`,
-        rotate: 0,
-        delay: delayById[cell.id],
-        roundingClass: getRoundingClass(cell.col, cell.row, cell.colSpan, cell.rowSpan)
+        rotate: rot,
+        delay: delayById[cell.id]
       };
     });
     const usedCoords = new Set(liveLayout.map(c => `${c.col},${c.row}`));
+    const canopyCx = 50;
+    const canopyCy = 35;
+    const canopyRx = 45;
+    const canopyRy = 33.75;
     const validProductCoords: { col: number; row: number }[] = [];
+    const validFoliageCoords: { col: number; row: number; m: number; px: number; py: number }[] = [];
 
     for (let c = 0; c < cols; c++) {
       for (let r = 0; r < rows; r++) {
         if (usedCoords.has(`${c},${r}`)) continue;
+        const left = gridLeft + c * cellWidth;
+        const top = gridTop + r * cellHeight;
         
-        const [minC, maxC] = treeMask[r] || [0, cols - 1];
-        if (c >= minC && c <= maxC) {
+        const cellCorners = [
+          { x: left, y: top },
+          { x: left + cellWidth, y: top },
+          { x: left, y: top + cellHeight },
+          { x: left + cellWidth, y: top + cellHeight }
+        ];
+
+        const cellFullyInside = cellCorners.every((corner) => {
+          const dx = (corner.x - canopyCx) / canopyRx;
+          const dy = (corner.y - canopyCy) / canopyRy;
+          return (dx * dx + dy * dy) <= 1;
+        });
+
+        if (cellFullyInside) {
           validProductCoords.push({ col: c, row: r });
+          validFoliageCoords.push({ col: c, row: r, m: 0.85, px: left + cellWidth / 2, py: top + cellHeight / 2 });
+        } else {
+          let maxM = 0;
+          let bestPx = left + cellWidth / 2;
+          let bestPy = top + cellHeight / 2;
+
+          for (let m = 0.85; m >= 0.35; m -= 0.05) {
+            const hw = (cellWidth * m) / 2;
+            const hh = (cellHeight * m) / 2;
+            const minPx = left + hw;
+            const maxPx = left + cellWidth - hw;
+            const minPy = top + hh;
+            const maxPy = top + cellHeight - hh;
+            
+            const px = Math.max(minPx, Math.min(canopyCx, maxPx));
+            const py = Math.max(minPy, Math.min(canopyCy, maxPy));
+
+            const corners = [
+              { x: px - hw, y: py - hh },
+              { x: px + hw, y: py - hh },
+              { x: px - hw, y: py + hh },
+              { x: px + hw, y: py + hh }
+            ];
+
+            const allInside = corners.every((corner) => {
+              const dx = (corner.x - canopyCx) / canopyRx;
+              const dy = (corner.y - canopyCy) / canopyRy;
+              return (dx * dx + dy * dy) <= 1;
+            });
+
+            if (allInside) {
+              maxM = m;
+              bestPx = px;
+              bestPy = py;
+              break;
+            }
+          }
+
+          if (maxM > 0) {
+            validFoliageCoords.push({ col: c, row: r, m: maxM, px: bestPx, py: bestPy });
+          }
         }
       }
     }
@@ -287,7 +319,7 @@ export function WishTree({
     // Assign 4 slots as 2x2 large products
     let largeCount = 0;
     for (const anchor of shuffledAnchors) {
-      if (largeCount >= 4) break;
+      if (largeCount >= 4 || selectedProductSlots.length >= products.length) break;
       const { col, row } = anchor;
       if (
         !usedByProducts.has(`${col},${row}`) &&
@@ -304,23 +336,127 @@ export function WishTree({
       }
     }
 
-    // Assign remaining slots as 1x1 products up to 20 total products
+    // Assign remaining slots as 1x1 products up to products.length total
     const shuffled1x1 = shuffleArray(validProductCoords);
     for (const cell of shuffled1x1) {
-      if (selectedProductSlots.length >= 20) break;
+      if (selectedProductSlots.length >= products.length) break;
       if (!usedByProducts.has(`${cell.col},${cell.row}`)) {
         selectedProductSlots.push({ col: cell.col, row: cell.row, colSpan: 1, rowSpan: 1 });
         usedByProducts.add(`${cell.col},${cell.row}`);
       }
     }
 
-    // If user wants products to mostly take 4 spaces (2x2), we can just try to assign as many 2x2 as possible
+    const foliageSlots = validFoliageCoords.filter(s => !usedByProducts.has(`${s.col},${s.row}`));
+
+    // Keep only a few blue tiles adjacent to products — they frame the cluster
+    const productGridCoords = new Set<string>();
+    for (const slot of selectedProductSlots) {
+      for (let dc = 0; dc < slot.colSpan; dc++) {
+        for (let dr = 0; dr < slot.rowSpan; dr++) {
+          productGridCoords.add(`${slot.col + dc},${slot.row + dr}`);
+        }
+      }
+    }
+    const countProductNeighbors = (col: number, row: number) => {
+      let count = 0;
+      for (let dc = -1; dc <= 1; dc++) {
+        for (let dr = -1; dr <= 1; dr++) {
+          if (dc === 0 && dr === 0) continue;
+          if (productGridCoords.has(`${col + dc},${row + dr}`)) count++;
+        }
+      }
+      return count;
+    };
+    const MAX_FRAME_TILES = 10;
+    let frameFoliageSlots = foliageSlots
+      .filter((s) => countProductNeighbors(s.col, s.row) > 0)
+      .sort(
+        (a, b) =>
+          countProductNeighbors(b.col, b.row) -
+          countProductNeighbors(a.col, a.row)
+      )
+      .slice(0, MAX_FRAME_TILES);
+
+    // Manual layout tuning (debug grid coordinates)
+    const FOLIAGE_SIZE_OVERRIDES: Record<string, number> = {
+      '0,3': 0.55
+    };
+    let finalProductSlots = [...selectedProductSlots];
+
+    // Move product 2,6 → 5,1
+    const moveIdx = finalProductSlots.findIndex(
+      (s) => s.col === 2 && s.row === 6 && s.colSpan === 1
+    );
+    if (moveIdx >= 0) {
+      finalProductSlots[moveIdx] = { ...finalProductSlots[moveIdx], col: 5, row: 1 };
+    }
+
+    // Swap product 6,3 ↔ blue frame tile 9,4
+    const prod63Idx = finalProductSlots.findIndex(
+      (s) => s.col === 6 && s.row === 3 && s.colSpan === 1
+    );
+    const fol94Idx = frameFoliageSlots.findIndex(
+      (s) => s.col === 9 && s.row === 4
+    );
+    if (prod63Idx >= 0 && fol94Idx >= 0) {
+      const fol = frameFoliageSlots[fol94Idx];
+      finalProductSlots[prod63Idx] = { col: 9, row: 4, colSpan: 1, rowSpan: 1 };
+      frameFoliageSlots[fol94Idx] = { ...fol, col: 6, row: 3 };
+    }
+
+    // Swap blue frame tiles 9,6 ↔ 3,1
+    const swapFrameFoliage = (ac: number, ar: number, bc: number, br: number) => {
+      const findSlot = (c: number, r: number) =>
+        frameFoliageSlots.find((s) => s.col === c && s.row === r) ??
+        foliageSlots.find((s) => s.col === c && s.row === r);
+      const slotA = findSlot(ac, ar);
+      const slotB = findSlot(bc, br);
+      if (!slotA || !slotB) return;
+      frameFoliageSlots = frameFoliageSlots.filter(
+        (s) => !(s.col === ac && s.row === ar) && !(s.col === bc && s.row === br)
+      );
+      const mk = (col: number, row: number, src: typeof slotA) => {
+        const left = gridLeft + col * cellWidth;
+        const top = gridTop + row * cellHeight;
+        return { col, row, m: src.m, px: left + cellWidth / 2, py: top + cellHeight / 2 };
+      };
+      frameFoliageSlots.push(mk(ac, ar, slotB));
+      frameFoliageSlots.push(mk(bc, br, slotA));
+    };
+    swapFrameFoliage(9, 6, 3, 1);
+
+    // Move white tile 9,6 -> 8,6
+    const tile96Idx = frameFoliageSlots.findIndex(s => s.col === 9 && s.row === 6);
+    if (tile96Idx >= 0) {
+      const s = frameFoliageSlots[tile96Idx];
+      const left = gridLeft + 8 * cellWidth;
+      const top = gridTop + 6 * cellHeight;
+      frameFoliageSlots[tile96Idx] = { ...s, col: 8, row: 6, px: left + cellWidth / 2, py: top + cellHeight / 2 };
+    }
+
+    // Move tile 1,5 -> 9,5
+    const tile15FolIdx = frameFoliageSlots.findIndex(s => s.col === 1 && s.row === 5);
+    if (tile15FolIdx >= 0) {
+      const s = frameFoliageSlots[tile15FolIdx];
+      const left = gridLeft + 9 * cellWidth;
+      const top = gridTop + 5 * cellHeight;
+      frameFoliageSlots[tile15FolIdx] = { ...s, col: 9, row: 5, px: left + cellWidth / 2, py: top + cellHeight / 2 };
+    }
+    const tile15ProdIdx = finalProductSlots.findIndex(s => s.col === 1 && s.row === 5);
+    if (tile15ProdIdx >= 0) {
+      finalProductSlots[tile15ProdIdx] = { ...finalProductSlots[tile15ProdIdx], col: 9, row: 5 };
+    }
+
     const productCells: typeof baseCells = [];
     products.forEach((product, i) => {
-      if (i >= selectedProductSlots.length) return;
-      const slot = selectedProductSlots[i];
-      
-      const multiplier = 0.98; // Full width with tiny gap
+      if (i >= finalProductSlots.length) return;
+      const slot = finalProductSlots[i];
+      const coordKey = `${slot.col},${slot.row}`;
+      const isLargeOverride = ['9,2', '2,1', '7,6', '3,5', '9,4', '7,3'].includes(coordKey);
+      let multiplier = slot.colSpan === 2 ? 0.85 : 0.75; // Provide padding
+      if (isLargeOverride) {
+        multiplier = 0.95; // Increase size for these specific green tiles
+      }
       const pWidth = cellWidth * slot.colSpan * multiplier;
       const pHeight = cellHeight * slot.rowSpan * multiplier;
 
@@ -330,6 +466,11 @@ export function WishTree({
       const dx = slot.col - originCol;
       const dy = slot.row - originRow;
       const dist = Math.sqrt(dx * dx + dy * dy);
+
+      const isCentered = coordKey === '3,5' || coordKey === '9,3';
+      const rot = isCentered ? 0 : (seededRandom() - 0.5) * 16; // Random rotation
+      const jx = isCentered ? 0 : (seededRandom() - 0.5) * 2.5;
+      const jy = isCentered ? 0 : (seededRandom() - 0.5) * 2.5;
 
       productCells.push({
         id: product.id,
@@ -341,65 +482,66 @@ export function WishTree({
         colSpan: slot.colSpan,
         rowSpan: slot.rowSpan,
         contentId: product.id,
-        left: `${baseLeft}%`,
-        top: `${baseTop}%`,
+        left: `${baseLeft + jx}%`,
+        top: `${baseTop + jy}%`,
         width: `${pWidth}%`,
         height: `${pHeight}%`,
-        rotate: 0,
-        delay: dist * 0.1,
-        roundingClass: getRoundingClass(slot.col, slot.row, slot.colSpan, slot.rowSpan)
+        rotate: rot,
+        delay: dist * 0.1
       } as (typeof baseCells)[number]);
     });
 
-    const unusedSlots = validProductCoords.filter(s => !usedByProducts.has(`${s.col},${s.row}`));
-    
-    const depthCells: typeof baseCells = unusedSlots.map((slot, i) => {
-      const multiplier = 0.98; // Full width with tiny gap
-      const width = cellWidth * 1 * multiplier;
-      const height = cellHeight * 1 * multiplier;
-      const baseLeft = gridLeft + slot.col * cellWidth + (cellWidth * (1 - multiplier)) / 2;
-      const baseTop = gridTop + slot.row * cellHeight + (cellHeight * (1 - multiplier)) / 2;
-      
+    const emptyBlueCells: typeof baseCells = frameFoliageSlots.map((slot, i) => {
+      const coordKey = `${slot.col},${slot.row}`;
+      const baseMultiplier = FOLIAGE_SIZE_OVERRIDES[coordKey] ?? slot.m;
+      const multiplier = baseMultiplier * 0.8; // Shrink foliage slightly too
+      const w = cellWidth * multiplier;
+      const h = cellHeight * multiplier;
+      let l: number;
+      let t: number;
+      if (coordKey === '0,3') {
+        // Smaller tile, centered in grid space
+        const cellLeft = gridLeft + slot.col * cellWidth;
+        l = cellLeft + (cellWidth - w) / 2;
+        t = slot.py - h / 2;
+      } else {
+        l = slot.px - w / 2;
+        t = slot.py - h / 2;
+      }
       const dx = slot.col - originCol;
       const dy = slot.row - originRow;
       const dist = Math.sqrt(dx * dx + dy * dy);
 
-      const rand = seededRandom();
-      let shade: 'white' | 'blue' | 'green' = 'white';
-      if (rand > 0.66) shade = 'blue';
-      else if (rand > 0.33) shade = 'green';
+      const rot = (seededRandom() - 0.5) * 18;
+      const jx = (seededRandom() - 0.5) * 2;
+      const jy = (seededRandom() - 0.5) * 2;
 
       return {
         id: `f_dyn_${i}`,
         type: 'foliage',
-        color: shade, // We'll map these to 3 shades of green in rendering
+        color: 'white',
         stage: 2,
         col: slot.col,
         row: slot.row,
         colSpan: 1,
         rowSpan: 1,
-        contentId: '',
-        left: `${baseLeft}%`,
-        top: `${baseTop}%`,
-        width: `${width}%`,
-        height: `${height}%`,
-        rotate: 0,
-        delay: dist * 0.1,
-        roundingClass: getRoundingClass(slot.col, slot.row, 1, 1)
+        left: `${l + jx}%`,
+        top: `${t + jy}%`,
+        width: `${w}%`,
+        height: `${h}%`,
+        rotate: rot,
+        delay: dist * 0.1
       } as (typeof baseCells)[number];
     });
 
-    const allCells = [...baseCells, ...depthCells, ...productCells];
+    const allCells = [...baseCells, ...emptyBlueCells, ...productCells];
 
     return allCells;
   }, [products, liveCategories]);
   return (
-    <div className="relative w-full h-full flex items-end justify-center overflow-hidden" style={{ containerType: 'size' }}>
-      {/* Responsive square container — slightly scaled on mobile to avoid cutting sides, strict 1:1 on desktop */}
-      {/* Responsive square container — slightly scaled on mobile to avoid cutting sides, strict 1:1 on desktop */}
-      <div 
-        className="relative flex-shrink-0 origin-bottom translate-y-4 sm:translate-y-12 w-[115vw] h-[115vw] sm:w-[min(100cqmin,1000px)] sm:h-[min(100cqmin,1000px)]"
-      >
+    <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
+      {/* Responsive square container — kept strictly 1:1 so the % grid stays aligned to the canopy */}
+      <div className="relative w-[min(150vw,68vh)] h-[min(150vw,68vh)] sm:w-[min(115vw,78vh)] sm:h-[min(115vw,78vh)] md:w-[800px] md:h-[800px] max-w-[800px] max-h-[800px] flex-shrink-0 origin-center">
         {/* Soft glows behind the tree */}
         <div className="absolute inset-x-0 top-0 h-2/3 bg-emerald-500/15 blur-3xl rounded-full pointer-events-none" />
         <div className="absolute inset-0 bg-blue-500/10 blur-3xl rounded-full scale-90 pointer-events-none" />
@@ -416,13 +558,18 @@ export function WishTree({
               <stop offset="100%" stopColor="#451a03" />
             </linearGradient>
             <radialGradient id="canopyGrad" cx="50%" cy="40%" r="60%">
-              <stop offset="0%" stopColor="#10b981" />
-              <stop offset="100%" stopColor="#059669" />
+              <stop offset="0%" stopColor="#10b981" stopOpacity="0.55" />
+              <stop offset="100%" stopColor="#064e3b" stopOpacity="0.15" />
             </radialGradient>
           </defs>
 
-          {/* No solid canopy backing, letting grid blocks show the shape */}
-          
+          {/* Soft canopy backing (enlarged so product tiles stay inside) */}
+          <ellipse
+            cx="400"
+            cy="280"
+            rx="360"
+            ry="270"
+            fill="url(#canopyGrad)" />
 
           {/* Trunk (squared for a Minecraft look) */}
           <rect
@@ -455,8 +602,23 @@ export function WishTree({
           </g>
         </svg>
 
+        <button
+          type="button"
+          onClick={() => setShowDebugGrid((v) => !v)}
+          aria-pressed={effectiveShowDebugGrid}
+          aria-label={effectiveShowDebugGrid ? 'Hide debug grid' : 'Show debug grid'}
+          className={`absolute top-2 right-2 z-[60] flex items-center gap-1.5 rounded-full border px-2.5 py-1.5 text-[10px] sm:text-xs font-mono font-semibold transition-colors ${
+            effectiveShowDebugGrid
+              ? 'border-white/30 bg-white/15 text-white hover:bg-white/25'
+              : 'border-white/10 bg-slate-950/50 text-white/60 hover:bg-slate-950/70 hover:text-white/80'
+          }`}
+        >
+          <Grid3x3 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+          {effectiveShowDebugGrid ? 'Hide Grid' : 'Show Grid'}
+        </button>
+
         {/* Debug Grid Overlay */}
-        {showDebugGrid &&
+        {effectiveShowDebugGrid &&
         Array.from({ length: 8 * 11 }).map((_, i) => {
           const col = i % 11;
           const row = Math.floor(i / 11);
@@ -511,7 +673,7 @@ export function WishTree({
                   damping: 22,
                   delay: cell.delay
                 }}
-                className={`absolute ${cell.roundingClass || 'rounded-none'} ${cell.color === 'white' ? 'bg-[#10b981]' : cell.color === 'blue' ? 'bg-[#059669]' : 'bg-[#064e3b]'}`}
+                className={`absolute rounded-xl ${isWhite ? 'bg-white shadow-[0_0_8px_rgba(255,255,255,0.7)]' : isBlue ? 'bg-blue-600 shadow-[0_0_10px_rgba(37,99,235,0.8)]' : 'bg-emerald-500 shadow-[0_0_14px_rgba(16,185,129,0.9)]'}`}
                 style={{
                   left: cell.left,
                   top: cell.top,
@@ -544,7 +706,7 @@ export function WishTree({
                   damping: 25,
                   delay: cell.delay
                 }}
-                className={`absolute ${cell.roundingClass || 'rounded-none'} flex items-center justify-center px-1 border backdrop-blur-md z-10 ${isWhite ? 'bg-white text-[#402970] shadow-[0_0_16px_rgba(255,255,255,0.6)] border-white' : 'bg-blue-600 text-white shadow-[0_0_16px_rgba(37,99,235,0.6)] border-blue-400/50'}`}
+                className={`absolute rounded-lg sm:rounded-xl flex items-center justify-center px-1 border backdrop-blur-md z-10 ${isWhite ? 'bg-white text-[#402970] shadow-[0_0_16px_rgba(255,255,255,0.6)] border-white' : 'bg-blue-600 text-white shadow-[0_0_16px_rgba(37,99,235,0.6)] border-blue-400/50'}`}
                 style={{
                   left: cell.left,
                   top: cell.top,
@@ -584,7 +746,7 @@ export function WishTree({
                   damping: 20,
                   delay: isSearching ? 0 : cell.delay
                 }}
-                className={`absolute ${cell.roundingClass || 'rounded-none'} overflow-hidden cursor-pointer group z-20 duration-300 border-2 ${isSelected ? 'border-emerald-400 shadow-[0_0_24px_rgba(16,185,129,0.8)] z-30' : 'border-emerald-500/30 shadow-[0_0_16px_rgba(16,185,129,0.4)] hover:scale-105 hover:shadow-[0_0_20px_rgba(16,185,129,0.6)]'}`}
+                className={`absolute rounded-xl overflow-hidden cursor-pointer group z-20 duration-300 border-2 ${isSelected ? 'border-emerald-400 shadow-[0_0_24px_rgba(16,185,129,0.8)] z-30' : 'border-emerald-500/30 shadow-[0_0_16px_rgba(16,185,129,0.4)] hover:scale-105 hover:shadow-[0_0_20px_rgba(16,185,129,0.6)]'}`}
                 style={{
                   left: cell.left,
                   top: cell.top,
