@@ -571,13 +571,12 @@ export function WishTree({
             ry="270"
             fill="url(#canopyGrad)" />
 
-          {/* Trunk (squared for a Minecraft look) */}
-          <rect
-            x="350"
-            y="550"
-            width="100"
-            height="250"
+          {/* Trunk */}
+          <path
+            d="M370 750 C 370 650, 352 560, 380 480 L 420 480 C 448 560, 430 650, 430 750 Z"
             fill="url(#trunkGrad)" />
+
+
           
           {/* Kapruka 'u' smile (Yellow) */}
           <g filter="drop-shadow(0px 8px 16px rgba(0,0,0,0.2))">
