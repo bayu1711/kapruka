@@ -611,21 +611,6 @@ export function WishTree({
           </g>
         </svg>
 
-        <button
-          type="button"
-          onClick={() => setShowDebugGrid((v) => !v)}
-          aria-pressed={effectiveShowDebugGrid}
-          aria-label={effectiveShowDebugGrid ? 'Hide debug grid' : 'Show debug grid'}
-          className={`absolute top-2 right-2 z-[60] flex items-center gap-1.5 rounded-full border px-2.5 py-1.5 text-[10px] sm:text-xs font-mono font-semibold transition-colors ${
-            effectiveShowDebugGrid
-              ? 'border-white/30 bg-white/15 text-white hover:bg-white/25'
-              : 'border-white/10 bg-slate-950/50 text-white/60 hover:bg-slate-950/70 hover:text-white/80'
-          }`}
-        >
-          <Grid3x3 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-          {effectiveShowDebugGrid ? 'Hide Grid' : 'Show Grid'}
-        </button>
-
         {/* Debug Grid Overlay */}
         {effectiveShowDebugGrid &&
         Array.from({ length: 8 * 11 }).map((_, i) => {
