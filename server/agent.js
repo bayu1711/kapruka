@@ -28,29 +28,35 @@ const PostFilterSchema = z.object({
 
 const KAPRUKA_MCP_URL = 'https://mcp.kapruka.com/mcp';
 
-async function executeKaprukaSearch(args) {
+async function executeKaprukaSearch(args, debugLogs = []) {
   try {
     // 1. Initialize session
+    const initBody = {
+      jsonrpc: '2.0',
+      id: 1,
+      method: 'initialize',
+      params: { protocolVersion: '2024-11-05', capabilities: {}, clientInfo: { name: 'agent', version: '1.0' } }
+    };
+    debugLogs.push({ timestamp: new Date().toLocaleTimeString(), type: 'request', tool: 'initialize', payload: initBody });
+
     const initRes = await fetch(KAPRUKA_MCP_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json, text/event-stream'
       },
-      body: JSON.stringify({
-        jsonrpc: '2.0',
-        id: 1,
-        method: 'initialize',
-        params: { protocolVersion: '2024-11-05', capabilities: {}, clientInfo: { name: 'agent', version: '1.0' } }
-      })
+      body: JSON.stringify(initBody)
     });
     
     if (!initRes.ok) throw new Error('Init failed');
     const sessionId = initRes.headers.get('mcp-session-id');
-    await initRes.text(); // drain
+    const initText = await initRes.text();
+    debugLogs.push({ timestamp: new Date().toLocaleTimeString(), type: 'response', tool: 'initialize', payload: { sessionId, rawSSE: initText } });
 
     // 2. Initialized notification
     if (sessionId) {
+      const notifyBody = { jsonrpc: '2.0', method: 'notifications/initialized', params: {} };
+      debugLogs.push({ timestamp: new Date().toLocaleTimeString(), type: 'request', tool: 'notifications/initialized', payload: notifyBody });
       await fetch(KAPRUKA_MCP_URL, {
         method: 'POST',
         headers: {
@@ -58,7 +64,7 @@ async function executeKaprukaSearch(args) {
           'Accept': 'application/json, text/event-stream',
           'mcp-session-id': sessionId
         },
-        body: JSON.stringify({ jsonrpc: '2.0', method: 'notifications/initialized', params: {} })
+        body: JSON.stringify(notifyBody)
       }).catch(() => {});
     }
 
@@ -69,22 +75,27 @@ async function executeKaprukaSearch(args) {
     };
     if (sessionId) headers['mcp-session-id'] = sessionId;
 
+    const callBody = {
+      jsonrpc: '2.0',
+      id: 2,
+      method: 'tools/call',
+      params: {
+        name: 'kapruka_search_products',
+        arguments: { params: { currency: 'LKR', limit: 40, ...args } }
+      }
+    };
+    debugLogs.push({ timestamp: new Date().toLocaleTimeString(), type: 'request', tool: 'kapruka_search_products', payload: callBody });
+
     const callRes = await fetch(KAPRUKA_MCP_URL, {
       method: 'POST',
       headers,
-      body: JSON.stringify({
-        jsonrpc: '2.0',
-        id: 2,
-        method: 'tools/call',
-        params: {
-          name: 'kapruka_search_products',
-          arguments: { params: { currency: 'LKR', limit: 40, ...args } }
-        }
-      })
+      body: JSON.stringify(callBody)
     });
     
     if (!callRes.ok) {
         if (callRes.status === 429 || callRes.status === 400) {
+            const errText = `Rate limit or Bad Request from Kapruka API. Status: ${callRes.status}`;
+            debugLogs.push({ timestamp: new Date().toLocaleTimeString(), type: 'error', tool: 'kapruka_search_products', payload: { message: errText } });
             return `Rate limit or Bad Request from Kapruka API. Status: ${callRes.status}. Please try a broader query or wait a moment.`;
         }
         throw new Error(`MCP HTTP error ${callRes.status}`);
@@ -93,6 +104,7 @@ async function executeKaprukaSearch(args) {
     const contentType = callRes.headers.get('content-type') || '';
     if (contentType.includes('text/event-stream')) {
       const text = await callRes.text();
+      debugLogs.push({ timestamp: new Date().toLocaleTimeString(), type: 'response', tool: 'kapruka_search_products', payload: { rawSSE: text } });
       const lines = text.split('\n');
       let finalResult = null;
       for (const line of lines) {
@@ -113,6 +125,7 @@ async function executeKaprukaSearch(args) {
 
     const json = await callRes.json();
     console.log('[Kapruka API]', JSON.stringify(json).substring(0, 500));
+    debugLogs.push({ timestamp: new Date().toLocaleTimeString(), type: 'response', tool: 'kapruka_search_products', payload: json });
     if (json.error) {
       throw new Error(`MCP error: ${json.error.message}`);
     }
@@ -123,6 +136,7 @@ async function executeKaprukaSearch(args) {
     return 'No products found.';
   } catch (error) {
     console.error('Kapruka MCP execution failed:', error);
+    debugLogs.push({ timestamp: new Date().toLocaleTimeString(), type: 'error', tool: 'kapruka_search_products', payload: { message: error.message } });
     return `Search failed: ${error.message}`;
   }
 }
@@ -260,6 +274,7 @@ async function processChat(message, history, enablePostFilter = false, language 
   let finalFollowUpQuestions = [];
   let finalSearchParameters = [];
   let attempt = 0;
+  const debugLogs = [];
 
   while (attempt < 3 && finalProducts.length === 0) {
     attempt++;
@@ -369,7 +384,7 @@ CRITICAL RULES FOR SEARCH QUERY:
     finalSearchQuery = finalQueryStr;
 
     console.log(`[Agent Attempt ${attempt}] Searching Kapruka for: "${finalQueryStr}" with params:`, params);
-    const mcpRawText = await executeKaprukaSearch({ q: finalQueryStr, ...params });
+    const mcpRawText = await executeKaprukaSearch({ q: finalQueryStr, ...params }, debugLogs);
 
     if (mcpRawText === 'No products found.') {
       console.log(`[Agent Attempt ${attempt}] 0 products. Retrying...`);
@@ -420,7 +435,8 @@ CRITICAL RULES FOR SEARCH QUERY:
     originalSearchQuery: finalOriginalSearchQuery,
     postFilterReasoning: finalPostFilterReasoning,
     followUpQuestions: finalFollowUpQuestions,
-    searchParameters: finalSearchParameters
+    searchParameters: finalSearchParameters,
+    debugLogs
   };
 }
 

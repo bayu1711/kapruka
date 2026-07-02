@@ -88,6 +88,35 @@ async function ensureSession(): Promise<void> {
   return _initPromise;
 }
 
+export interface DebugLog {
+  timestamp: string;
+  type: 'request' | 'response' | 'error';
+  tool: string;
+  payload: any;
+}
+export const mcpDebugLogs: DebugLog[] = [];
+const logListeners = new Set<(logs: DebugLog[]) => void>();
+
+export function addDebugLog(type: 'request' | 'response' | 'error', tool: string, payload: any) {
+  const log: DebugLog = {
+    timestamp: new Date().toLocaleTimeString(),
+    type,
+    tool,
+    payload
+  };
+  mcpDebugLogs.push(log);
+  if (mcpDebugLogs.length > 50) mcpDebugLogs.shift();
+  logListeners.forEach(listener => listener([...mcpDebugLogs]));
+}
+
+export function subscribeToDebugLogs(listener: (logs: DebugLog[]) => void) {
+  logListeners.add(listener);
+  listener([...mcpDebugLogs]);
+  return () => {
+    logListeners.delete(listener);
+  };
+}
+
 // ---------------------------------------------------------------------------
 // Core JSON-RPC tool call
 // ---------------------------------------------------------------------------
@@ -105,7 +134,6 @@ async function callTool<T = unknown>(
     method: 'tools/call',
     params: {
       name: toolName,
-      // The Kapruka MCP server expects arguments.params to contain the actual args
       arguments: { params: toolArgs },
     },
   };
@@ -116,27 +144,36 @@ async function callTool<T = unknown>(
   };
   if (_sessionId) headers['mcp-session-id'] = _sessionId;
 
-  const res = await fetch(MCP_ENDPOINT, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify(body),
-  });
+  addDebugLog('request', toolName, body);
+
+  let res;
+  try {
+    res = await fetch(MCP_ENDPOINT, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(body),
+    });
+  } catch (err: any) {
+    addDebugLog('error', toolName, { message: err.message });
+    throw err;
+  }
 
   if (!res.ok) {
-    // If session expired (404), reset and retry once
     if (res.status === 404 && _sessionId) {
       _sessionId = null;
       _initPromise = null;
       return callTool<T>(toolName, toolArgs);
     }
-    throw new Error(`MCP HTTP error ${res.status}: ${res.statusText}`);
+    const errText = `MCP HTTP error ${res.status}: ${res.statusText}`;
+    addDebugLog('error', toolName, { message: errText });
+    throw new Error(errText);
   }
 
   const contentType = res.headers.get('content-type') ?? '';
 
-  // Handle SSE streaming responses (text/event-stream)
   if (contentType.includes('text/event-stream')) {
     const text = await res.text();
+    addDebugLog('response', toolName, { rawSSE: text });
     const lines = text.split('\n');
     let lastResult: T | null = null;
     for (const line of lines) {
@@ -153,8 +190,9 @@ async function callTool<T = unknown>(
     return lastResult;
   }
 
-  // Standard JSON response
   const json = await res.json();
+  addDebugLog('response', toolName, json);
+  
   if (json.error) {
     throw new Error(`MCP error [${json.error.code}]: ${json.error.message}`);
   }

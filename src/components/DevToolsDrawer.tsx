@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Settings, Bug, CheckSquare, Square } from 'lucide-react';
+import { X, Settings, Bug, CheckSquare, Square, Terminal } from 'lucide-react';
+import { subscribeToDebugLogs, mcpDebugLogs, type DebugLog } from '../lib/kapruka-mcp';
 
 interface DevToolsDrawerProps {
   isOpen: boolean;
@@ -37,6 +38,14 @@ export function DevToolsDrawer({
   searchParameters,
   liveCategories
 }: DevToolsDrawerProps) {
+  const [logs, setLogs] = useState<DebugLog[]>([]);
+
+  useEffect(() => {
+    return subscribeToDebugLogs((newLogs) => {
+      setLogs(newLogs);
+    });
+  }, []);
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -192,6 +201,50 @@ export function DevToolsDrawer({
                         </div>
                       </div>
                     )}
+                  </div>
+                </section>
+
+                {/* MCP Live Console */}
+                <section>
+                  <h3 className="text-xs font-bold text-white/50 uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <Terminal className="w-4 h-4 text-purple-400" /> MCP Live Console
+                  </h3>
+                  <div className="bg-black/60 rounded-xl border border-purple-500/20 flex flex-col overflow-hidden">
+                    <div className="bg-white/5 border-b border-white/10 px-4 py-2 flex items-center justify-between text-[10px] text-white/40 font-mono">
+                      <span>JSON-RPC Traffic</span>
+                      <button 
+                        onClick={() => {
+                          mcpDebugLogs.length = 0;
+                          // Trigger update
+                          subscribeToDebugLogs((newLogs) => setLogs(newLogs))();
+                        }}
+                        className="hover:text-white transition-colors"
+                      >
+                        Clear
+                      </button>
+                    </div>
+                    <div className="p-3 font-mono text-[10px] sm:text-xs max-h-[350px] overflow-y-auto space-y-3 select-text custom-scrollbar">
+                      {logs.length === 0 ? (
+                        <div className="text-white/30 italic text-center py-8">Awaiting MCP traffic...</div>
+                      ) : (
+                        [...logs].reverse().map((log, i) => (
+                          <div key={i} className="border-b border-white/5 pb-2 last:border-0">
+                            <div className="flex items-center justify-between text-[9px] text-white/40 mb-1">
+                              <span>{log.timestamp}</span>
+                              <span className={`px-1.5 py-0.5 rounded font-bold uppercase text-[8px] ${
+                                log.type === 'request' ? 'bg-blue-500/20 text-blue-300' :
+                                log.type === 'response' ? 'bg-emerald-500/20 text-emerald-300' :
+                                'bg-red-500/20 text-red-300'
+                              }`}>{log.type}</span>
+                            </div>
+                            <div className="text-white/60 font-semibold mb-1">Tool: {log.tool}</div>
+                            <pre className="bg-black/40 p-2 rounded text-white/80 overflow-x-auto text-[9px] sm:text-[10px] max-h-[150px] custom-scrollbar">
+                              {JSON.stringify(log.payload, null, 2)}
+                            </pre>
+                          </div>
+                        ))
+                      )}
+                    </div>
                   </div>
                 </section>
               </div>

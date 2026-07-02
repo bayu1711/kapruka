@@ -12,6 +12,7 @@ export interface AgentResult {
   postFilterReasoning?: string;
   followUpQuestions?: string[];
   searchParameters?: {key: string, value: string}[];
+  debugLogs?: any[];
 }
 
 export async function parseUserQuery(
@@ -48,7 +49,8 @@ export async function parseUserQuery(
       recipient: data.recipient,
       postFilterReasoning: data.postFilterReasoning,
       followUpQuestions: data.followUpQuestions || [],
-      searchParameters: data.searchParameters || []
+      searchParameters: data.searchParameters || [],
+      debugLogs: data.debugLogs || []
     };
 
   } catch (err) {
@@ -59,7 +61,8 @@ export async function parseUserQuery(
       searchQuery: userMessage,
       suggestedCategories: [],
       aiStatusMessage: 'Search failed',
-      products: []
+      products: [],
+      debugLogs: []
     };
   }
 }

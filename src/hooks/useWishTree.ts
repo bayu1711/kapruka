@@ -213,6 +213,13 @@ export function useWishTree() {
     try {
       const agentResult = await parseUserQuery(query, formattedHistory, enablePostFilter, locale, session?.liveProducts || [], globalState.cartItems || []);
       
+      if (agentResult.debugLogs && agentResult.debugLogs.length > 0) {
+        const mcpModule = await import('../lib/kapruka-mcp');
+        agentResult.debugLogs.forEach((log: any) => {
+          mcpModule.addDebugLog(log.type, log.tool, log.payload);
+        });
+      }
+
       if (agentResult.intent && agentResult.intent !== 'search') {
         updateSession((prev) => ({ ...prev, isSearching: false, aiStatus: '' }));
         
