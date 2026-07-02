@@ -212,6 +212,42 @@ async function enrichProductsWithImages(products) {
   }));
 }
 
+let currentKeyIndex = 0;
+
+async function invokeWithFallback(schema, outputName, messages) {
+  let apiKeys = [];
+  if (process.env.VITE_GEMINI_API_KEYS) {
+    apiKeys = process.env.VITE_GEMINI_API_KEYS.split(',').map(k => k.trim()).filter(Boolean);
+  } else if (process.env.VITE_GEMINI_API_KEY) {
+    apiKeys = [process.env.VITE_GEMINI_API_KEY];
+  }
+  
+  if (apiKeys.length === 0) throw new Error('No API keys found');
+
+  let attempts = 0;
+  while (attempts < apiKeys.length) {
+    try {
+      const llm = new ChatGoogleGenerativeAI({
+        model: "gemini-2.5-flash",
+        temperature: 0.3,
+        apiKey: apiKeys[currentKeyIndex]
+      });
+      const structuredLlm = llm.withStructuredOutput(schema, { name: outputName });
+      return await structuredLlm.invoke(messages);
+    } catch (e) {
+      console.error(`[Agent] Error with API key index ${currentKeyIndex}:`, e.message);
+      if (e.message && e.message.includes('429')) {
+        console.log('[Agent] Rate limit hit (429). Switching to next API key...');
+        currentKeyIndex = (currentKeyIndex + 1) % apiKeys.length;
+        attempts++;
+      } else {
+        throw e;
+      }
+    }
+  }
+  throw new Error('All available API keys have hit their rate limits.');
+}
+
 async function processChat(message, history, enablePostFilter = false, language = 'en-US', visibleProducts = [], cartItems = []) {
   let internalSystemLog = "";
   let finalProducts = [];
@@ -224,14 +260,6 @@ async function processChat(message, history, enablePostFilter = false, language 
   let finalFollowUpQuestions = [];
   let finalSearchParameters = [];
   let attempt = 0;
-
-  const llm = new ChatGoogleGenerativeAI({
-    model: "gemini-2.5-flash",
-    temperature: 0.3,
-    apiKey: process.env.VITE_GEMINI_API_KEY
-  });
-  
-  const structuredLlm = llm.withStructuredOutput(OutputSchema, { name: "ShoppingPlan" });
 
   while (attempt < 3 && finalProducts.length === 0) {
     attempt++;
@@ -275,7 +303,7 @@ CRITICAL RULES FOR SEARCH QUERY:
 
     let parsed;
     try {
-      parsed = await structuredLlm.invoke(messages);
+      parsed = await invokeWithFallback(OutputSchema, "ShoppingPlan", messages);
     } catch (e) {
       console.error("Failed to parse Gemini output via LangChain:", e);
       return { products: [], categories: [], reasoning: '', recipient: '', searchQuery: '' };
@@ -359,13 +387,12 @@ CRITICAL RULES FOR SEARCH QUERY:
           console.log(`[Agent Attempt ${attempt}] Executing Post-Filter...`);
           try {
             const productListForAi = finalProducts.map(p => ({ id: p.id, name: p.name }));
-            const postFilterLlm = llm.withStructuredOutput(PostFilterSchema, { name: "PostFilter" });
             const filterMessages = [
               new SystemMessage(`The user explicitly asked for: "${message}". You must strictly filter the following Kapruka products. Remove any products that are completely irrelevant or the wrong model (e.g., remove iPhone 17 if they asked for iPhone 13). ONLY remove items that are definitely wrong.`),
               new HumanMessage(JSON.stringify(productListForAi))
             ];
             
-            const filterResult = await postFilterLlm.invoke(filterMessages);
+            const filterResult = await invokeWithFallback(PostFilterSchema, "PostFilter", filterMessages);
             finalPostFilterReasoning = filterResult.postFilterReasoning || '';
             const invalidIds = new Set(filterResult.invalidProductIds || []);
             
