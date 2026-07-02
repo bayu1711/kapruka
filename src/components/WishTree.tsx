@@ -744,7 +744,7 @@ export function WishTree({
                   damping: 20,
                   delay: isSearching ? 0 : cell.delay
                 }}
-                className={`absolute overflow-hidden cursor-pointer group z-20 transition-all duration-300 ${isSelected ? 'rounded-[2rem] border border-emerald-400/30 shadow-[0_8px_32px_rgba(16,185,129,0.4)] z-50 bg-emerald-950/70 backdrop-blur-2xl' : 'rounded-xl border-2 border-emerald-500/30 shadow-[0_0_16px_rgba(16,185,129,0.4)] hover:scale-105 hover:shadow-[0_0_20px_rgba(16,185,129,0.6)]'}`}
+                className={`absolute overflow-hidden cursor-pointer group z-20 transition-all duration-300 ${isSelected ? 'z-50 bg-transparent' : 'rounded-xl border-2 border-emerald-500/30 shadow-[0_0_16px_rgba(16,185,129,0.4)] hover:scale-105 hover:shadow-[0_0_20px_rgba(16,185,129,0.6)]'}`}
                 style={{
                   left: isSelected ? '12%' : cell.left,
                   top: isSelected ? '8%' : cell.top,
@@ -780,11 +780,11 @@ export function WishTree({
                       className="absolute inset-0 flex flex-col sm:flex-row p-4 sm:p-6 text-left z-10 gap-4 sm:gap-6"
                     >
                       {/* Left: Image */}
-                      <div className="w-full sm:w-1/2 h-1/2 sm:h-full rounded-2xl overflow-hidden flex-shrink-0 bg-black/10 shadow-inner">
+                      <div className="w-full sm:w-1/2 h-1/2 sm:h-full rounded-2xl overflow-hidden flex-shrink-0 shadow-[0_8px_32px_rgba(0,0,0,0.3)] bg-black/10">
                         <img 
                           src={product.image || `https://placehold.co/400x400/1e293b/6ee7b7?text=${encodeURIComponent(product.name)}`} 
                           alt={product.name}
-                          className="w-full h-full object-cover" 
+                          className="w-full h-full object-cover shadow-2xl" 
                           onError={(e) => {
                             (e.target as HTMLImageElement).src = 'https://placehold.co/400x400/1e293b/6ee7b7?text=Kapruka';
                           }}
@@ -796,27 +796,27 @@ export function WishTree({
                         <div className="flex flex-wrap items-center gap-2 mb-2">
                           {/* Category Badge */}
                           {(product.category || product.details?.category) && (
-                            <span className="text-[10px] sm:text-xs px-2.5 py-0.5 rounded-full bg-white/5 text-white/60 border border-white/10">
+                            <span className="text-[10px] sm:text-xs px-2.5 py-0.5 rounded-full bg-black/20 text-white/80 border border-white/10 backdrop-blur-md shadow-sm">
                               {product.category || product.details?.category}
                             </span>
                           )}
                           {/* Stock Badge */}
-                          <span className={`text-[10px] sm:text-xs font-semibold px-2.5 py-0.5 rounded-full border ${
+                          <span className={`text-[10px] sm:text-xs font-semibold px-2.5 py-0.5 rounded-full border backdrop-blur-md shadow-sm ${
                             product.details?.inStock !== false 
-                              ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20' 
-                              : 'bg-red-500/10 text-red-300 border-red-500/20'
+                              ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' 
+                              : 'bg-red-500/20 text-red-300 border-red-500/30'
                           }`}>
                             {product.details?.inStock !== false ? 'In Stock' : 'Out of Stock'}
                           </span>
                         </div>
 
-                        <h3 className="text-xl sm:text-3xl font-bold text-white mb-2 leading-tight">{product.name}</h3>
-                        <p className="text-emerald-300 font-semibold text-lg sm:text-2xl mb-4">LKR {product.price?.toLocaleString()}</p>
+                        <h3 className="text-xl sm:text-3xl font-bold text-white mb-2 leading-tight drop-shadow-md">{product.name}</h3>
+                        <p className="text-emerald-300 font-bold text-lg sm:text-2xl mb-4 drop-shadow-md">LKR {product.price?.toLocaleString()}</p>
                         
                         {/* Description */}
                         {product.details?.description && (
-                          <div className="text-white/80 text-sm sm:text-base mb-4 leading-relaxed">
-                            <p className="line-clamp-4 hover:line-clamp-none transition-all duration-300">{product.details.description}</p>
+                          <div className="text-white/90 text-sm sm:text-base mb-4 leading-relaxed font-medium bg-black/10 p-3 rounded-lg backdrop-blur-sm border border-white/5">
+                            <p>{product.details.description}</p>
                           </div>
                         )}
 

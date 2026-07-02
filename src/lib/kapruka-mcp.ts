@@ -505,7 +505,7 @@ function parseMarkdownProduct(text: string): KaprukaMCPProduct {
     descLines.push(t);
   }
   if (descLines.length > 0) {
-    description = descLines.join(' ').substring(0, 300).trim();
+    description = descLines.join(' ').trim();
   }
 
   return { id, name, price, image, category, url, inStock, description, variants };
