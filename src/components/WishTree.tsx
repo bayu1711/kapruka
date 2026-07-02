@@ -660,9 +660,10 @@ export function WishTree({
                 }}
                 animate={{
                   scale: 1,
-                  opacity: isSearching ? 0.7 : (hasSelection ? 0.2 : 0.95),
+                  opacity: isSearching ? 0.7 : (hasSelection ? 0 : 0.95),
                   filter: isSearching ? 'blur(4px) grayscale(50%)' : 'blur(0px) grayscale(0%)',
-                  rotate: (cell as any).rotate || 0
+                  rotate: (cell as any).rotate || 0,
+                  pointerEvents: hasSelection ? 'none' : 'auto'
                 }}
                 transition={{
                   type: 'spring',
@@ -693,9 +694,10 @@ export function WishTree({
                 }}
                 animate={{
                   scale: 1,
-                  opacity: isSearching ? 0.7 : (hasSelection ? 0.2 : 1),
+                  opacity: isSearching ? 0.7 : (hasSelection ? 0 : 1),
                   filter: isSearching ? 'blur(4px) grayscale(50%)' : 'blur(0px) grayscale(0%)',
-                  rotate: (cell as any).rotate || 0
+                  rotate: (cell as any).rotate || 0,
+                  pointerEvents: hasSelection ? 'none' : 'auto'
                 }}
                 transition={{
                   type: 'spring',
@@ -733,10 +735,11 @@ export function WishTree({
                 }}
                 animate={{
                   scale: isSelected ? 1 : 1,
-                  opacity: isSearching ? 0.7 : (hasSelection && !isSelected ? 0.2 : 1),
+                  opacity: isSearching ? 0.7 : (hasSelection && !isSelected ? 0 : 1),
                   filter: isSearching ? 'blur(4px) grayscale(50%)' : 'blur(0px) grayscale(0%)',
                   rotate: isSelected ? 0 : ((cell as any).rotate || 0),
-                  zIndex: isSelected ? 50 : 20
+                  zIndex: isSelected ? 50 : 20,
+                  pointerEvents: hasSelection && !isSelected ? 'none' : 'auto'
                 }}
                 transition={{
                   type: 'spring',
@@ -779,6 +782,16 @@ export function WishTree({
                       exit={{ opacity: 0, scale: 0.95 }}
                       className="absolute inset-0 flex flex-col sm:flex-row p-4 sm:p-6 text-left z-10 gap-4 sm:gap-6"
                     >
+                      <button
+                        className="absolute top-2 right-2 sm:top-4 sm:right-4 z-50 p-2 bg-black/40 hover:bg-black/60 rounded-full text-white/80 hover:text-white transition-colors"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onSelectProduct('');
+                        }}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                      </button>
+                      
                       {/* Left: Image */}
                       <div className="w-full sm:w-1/2 h-1/2 sm:h-full rounded-2xl overflow-hidden flex-shrink-0 shadow-[0_8px_32px_rgba(0,0,0,0.3)] bg-black/10">
                         <img 
