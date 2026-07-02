@@ -793,13 +793,60 @@ export function WishTree({
                       
                       {/* Right: Details (Scrollable on small screens) */}
                       <div className="flex flex-col flex-1 min-w-0 h-1/2 sm:h-full overflow-y-auto pr-2 custom-scrollbar">
+                        <div className="flex flex-wrap items-center gap-2 mb-2">
+                          {/* Category Badge */}
+                          {(product.category || product.details?.category) && (
+                            <span className="text-[10px] sm:text-xs px-2.5 py-0.5 rounded-full bg-white/5 text-white/60 border border-white/10">
+                              {product.category || product.details?.category}
+                            </span>
+                          )}
+                          {/* Stock Badge */}
+                          <span className={`text-[10px] sm:text-xs font-semibold px-2.5 py-0.5 rounded-full border ${
+                            product.details?.inStock !== false 
+                              ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20' 
+                              : 'bg-red-500/10 text-red-300 border-red-500/20'
+                          }`}>
+                            {product.details?.inStock !== false ? 'In Stock' : 'Out of Stock'}
+                          </span>
+                        </div>
+
                         <h3 className="text-xl sm:text-3xl font-bold text-white mb-2 leading-tight">{product.name}</h3>
                         <p className="text-emerald-300 font-semibold text-lg sm:text-2xl mb-4">LKR {product.price?.toLocaleString()}</p>
                         
+                        {/* Description */}
                         {product.details?.description && (
-                          <div className="text-white/80 text-sm sm:text-base mb-6 leading-relaxed">
+                          <div className="text-white/80 text-sm sm:text-base mb-4 leading-relaxed">
                             <p className="line-clamp-4 hover:line-clamp-none transition-all duration-300">{product.details.description}</p>
                           </div>
+                        )}
+
+                        {/* Variants / Attributes */}
+                        {product.details?.variants && product.details.variants.length > 0 && (
+                          <div className="mb-4 bg-white/5 border border-white/10 rounded-xl p-3 sm:p-4">
+                            <h4 className="text-xs sm:text-sm font-semibold text-white/60 mb-2">Product Specifications:</h4>
+                            <div className="grid grid-cols-2 gap-2 text-xs sm:text-sm">
+                              {product.details.variants.map((v, i) => (
+                                <div key={i} className="flex flex-col bg-white/5 p-2 rounded-lg border border-white/5">
+                                  <span className="text-white/40 text-[10px] sm:text-xs uppercase tracking-wider">{v.name}</span>
+                                  <span className="text-white/90 font-medium">{v.value}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* View on Kapruka URL */}
+                        {product.url && (
+                          <a 
+                            href={product.url} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-xs sm:text-sm text-emerald-400 hover:text-emerald-300 hover:underline flex items-center gap-1.5 mb-6 w-fit transition-colors"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <span>View details on Kapruka website</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+                          </a>
                         )}
                         
                         <div className="mt-auto pt-4 flex gap-3">
