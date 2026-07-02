@@ -746,10 +746,10 @@ export function WishTree({
                 }}
                 className={`absolute overflow-hidden cursor-pointer group z-20 transition-all duration-300 ${isSelected ? 'rounded-[2rem] border border-emerald-400/30 shadow-[0_8px_32px_rgba(16,185,129,0.4)] z-50 bg-emerald-950/70 backdrop-blur-2xl' : 'rounded-xl border-2 border-emerald-500/30 shadow-[0_0_16px_rgba(16,185,129,0.4)] hover:scale-105 hover:shadow-[0_0_20px_rgba(16,185,129,0.6)]'}`}
                 style={{
-                  left: isSelected ? '10%' : cell.left,
-                  top: isSelected ? '10%' : cell.top,
-                  width: isSelected ? '80%' : cell.width,
-                  height: isSelected ? '70%' : cell.height,
+                  left: isSelected ? '12%' : cell.left,
+                  top: isSelected ? '8%' : cell.top,
+                  width: isSelected ? '76%' : cell.width,
+                  height: isSelected ? '52%' : cell.height,
                   transitionProperty: isPaging ? 'all' : 'box-shadow, border-color, opacity, left, top, width, height'
                 }}
                 onClick={() => {
