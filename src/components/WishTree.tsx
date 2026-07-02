@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Grid3x3 } from 'lucide-react';
 import type { Product } from '../data/scenario';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -17,6 +17,7 @@ interface WishTreeProps {
   showDebugGrid?: boolean;
   showCanopy?: boolean;
   isSearching?: boolean;
+  onAddToCart?: (id: string) => void;
 }
 type CellType = 'foliage' | 'label' | 'product';
 interface GridCell {
@@ -116,7 +117,8 @@ export function WishTree({
   searchParameters,
   showDebugGrid: showDebugGridProp,
   showCanopy = true,
-  isSearching
+  isSearching,
+  onAddToCart
 }: WishTreeProps) {
   const { t } = useLanguage();
   const [showDebugGrid, setShowDebugGrid] = useState(false);
@@ -644,6 +646,7 @@ export function WishTree({
         map((cell) => {
           const isWhite = cell.color === 'white';
           const isBlue = cell.color === 'blue';
+          const hasSelection = selectedProduct !== null;
           // Render Foliage Cell
           if (cell.type === 'foliage') {
             return (
@@ -657,7 +660,7 @@ export function WishTree({
                 }}
                 animate={{
                   scale: 1,
-                  opacity: isSearching ? 0.7 : 0.95,
+                  opacity: isSearching ? 0.7 : (hasSelection ? 0.2 : 0.95),
                   filter: isSearching ? 'blur(4px) grayscale(50%)' : 'blur(0px) grayscale(0%)',
                   rotate: (cell as any).rotate || 0
                 }}
@@ -690,7 +693,7 @@ export function WishTree({
                 }}
                 animate={{
                   scale: 1,
-                  opacity: isSearching ? 0.7 : 1,
+                  opacity: isSearching ? 0.7 : (hasSelection ? 0.2 : 1),
                   filter: isSearching ? 'blur(4px) grayscale(50%)' : 'blur(0px) grayscale(0%)',
                   rotate: (cell as any).rotate || 0
                 }}
@@ -729,10 +732,11 @@ export function WishTree({
                   rotate: (cell as any).rotate || 0
                 }}
                 animate={{
-                  scale: isSelected ? 1.1 : 1,
-                  opacity: isSearching ? 0.7 : 1,
+                  scale: isSelected ? 1 : 1,
+                  opacity: isSearching ? 0.7 : (hasSelection && !isSelected ? 0.2 : 1),
                   filter: isSearching ? 'blur(4px) grayscale(50%)' : 'blur(0px) grayscale(0%)',
-                  rotate: isSelected ? 0 : ((cell as any).rotate || 0)
+                  rotate: isSelected ? 0 : ((cell as any).rotate || 0),
+                  zIndex: isSelected ? 50 : 20
                 }}
                 transition={{
                   type: 'spring',
@@ -740,24 +744,80 @@ export function WishTree({
                   damping: 20,
                   delay: isSearching ? 0 : cell.delay
                 }}
-                className={`absolute rounded-xl overflow-hidden cursor-pointer group z-20 duration-300 border-2 ${isSelected ? 'border-emerald-400 shadow-[0_0_24px_rgba(16,185,129,0.8)] z-30' : 'border-emerald-500/30 shadow-[0_0_16px_rgba(16,185,129,0.4)] hover:scale-105 hover:shadow-[0_0_20px_rgba(16,185,129,0.6)]'}`}
+                className={`absolute overflow-hidden cursor-pointer group z-20 transition-all duration-300 ${isSelected ? 'rounded-[2rem] border border-emerald-400/30 shadow-[0_8px_32px_rgba(16,185,129,0.4)] z-50 bg-emerald-950/70 backdrop-blur-2xl' : 'rounded-xl border-2 border-emerald-500/30 shadow-[0_0_16px_rgba(16,185,129,0.4)] hover:scale-105 hover:shadow-[0_0_20px_rgba(16,185,129,0.6)]'}`}
                 style={{
-                  left: cell.left,
-                  top: cell.top,
-                  width: cell.width,
-                  height: cell.height,
-                  transitionProperty: isPaging ? 'all' : 'box-shadow, transform, border-color, opacity'
+                  left: isSelected ? '10%' : cell.left,
+                  top: isSelected ? '10%' : cell.top,
+                  width: isSelected ? '80%' : cell.width,
+                  height: isSelected ? '70%' : cell.height,
+                  transitionProperty: isPaging ? 'all' : 'box-shadow, border-color, opacity, left, top, width, height'
                 }}
-                onClick={() => onSelectProduct(product.id)}>
+                onClick={() => {
+                  if (isSelected) {
+                    onSelectProduct(''); // Deselect
+                  } else {
+                    onSelectProduct(product.id);
+                  }
+                }}>
                 
-                <img
-                  src={product.image || `https://placehold.co/400x400/1e293b/6ee7b7?text=${encodeURIComponent(product.name)}`}
-                  alt={product.name}
-                  className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = 'https://placehold.co/400x400/1e293b/6ee7b7?text=Kapruka';
-                  }}
-                />
+                {!isSelected && (
+                  <img
+                    src={product.image || `https://placehold.co/400x400/1e293b/6ee7b7?text=${encodeURIComponent(product.name)}`}
+                    alt={product.name}
+                    className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = 'https://placehold.co/400x400/1e293b/6ee7b7?text=Kapruka';
+                    }}
+                  />
+                )}
+                
+                <AnimatePresence>
+                  {isSelected && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      className="absolute inset-0 flex flex-col sm:flex-row p-4 sm:p-6 text-left z-10 gap-4 sm:gap-6"
+                    >
+                      {/* Left: Image */}
+                      <div className="w-full sm:w-1/2 h-1/2 sm:h-full rounded-2xl overflow-hidden flex-shrink-0 bg-black/10 shadow-inner">
+                        <img 
+                          src={product.image || `https://placehold.co/400x400/1e293b/6ee7b7?text=${encodeURIComponent(product.name)}`} 
+                          alt={product.name}
+                          className="w-full h-full object-cover" 
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = 'https://placehold.co/400x400/1e293b/6ee7b7?text=Kapruka';
+                          }}
+                        />
+                      </div>
+                      
+                      {/* Right: Details (Scrollable on small screens) */}
+                      <div className="flex flex-col flex-1 min-w-0 h-1/2 sm:h-full overflow-y-auto pr-2 custom-scrollbar">
+                        <h3 className="text-xl sm:text-3xl font-bold text-white mb-2 leading-tight">{product.name}</h3>
+                        <p className="text-emerald-300 font-semibold text-lg sm:text-2xl mb-4">LKR {product.price?.toLocaleString()}</p>
+                        
+                        {product.details?.description && (
+                          <div className="text-white/80 text-sm sm:text-base mb-6 leading-relaxed">
+                            <p className="line-clamp-4 hover:line-clamp-none transition-all duration-300">{product.details.description}</p>
+                          </div>
+                        )}
+                        
+                        <div className="mt-auto pt-4 flex gap-3">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (onAddToCart) onAddToCart(product.id);
+                            }}
+                            className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-3 rounded-full font-bold shadow-lg transition-transform hover:scale-105 active:scale-95 flex items-center justify-center gap-2"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
+                            Buy Now
+                          </button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
                 </motion.div>);
 
           }

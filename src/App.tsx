@@ -145,6 +145,7 @@ export function App() {
               showDebugGrid={showDebugGrid}
               showCanopy={showCanopy}
               isSearching={state.isSearching}
+              onAddToCart={addToCart}
             />
           </motion.div>
         </AnimatePresence>
@@ -211,6 +212,7 @@ export function App() {
               handleSubmit(q);
             }}
             followUpQuestions={state.followUpQuestions}
+            selectedProduct={selectedProductObj}
           />
         }
       </div>
@@ -253,17 +255,6 @@ export function App() {
       {/* Confirmation */}
       <AnimatePresence>
         {state.showConfirmation && <ConfirmationState onClose={closeConfirmation} />}
-      </AnimatePresence>
-
-      {/* Product Details Modal */}
-      <AnimatePresence>
-        {selectedProductObj && (
-          <ProductDetailsModal
-            product={selectedProductObj}
-            onClose={() => selectProduct(null)}
-            onAddToCart={addToCart}
-          />
-        )}
       </AnimatePresence>
     </div>);
 }

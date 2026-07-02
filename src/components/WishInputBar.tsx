@@ -21,6 +21,7 @@ interface WishInputBarProps {
   hasMorePages?: boolean;
   hasPrevPages?: boolean;
   followUpQuestions?: string[];
+  selectedProduct?: any; // We'll type this properly if Product is available
 }
 
 /** A small tree SVG used as the loading indicator on the send button */
@@ -69,6 +70,7 @@ export function WishInputBar({
   hasPrevPages,
   followUpQuestions,
   onFollowUpClick,
+  selectedProduct,
 }: WishInputBarProps) {
   const [loading, setLoading] = useState(false);
   const { locale, setLocale, t } = useLanguage();
@@ -202,7 +204,23 @@ export function WishInputBar({
           </div>
         )}
 
-        <form onSubmit={handleFormSubmit} className="w-full">
+        <form onSubmit={handleFormSubmit} className="w-full relative mt-2">
+          <AnimatePresence>
+            {selectedProduct && (
+              <motion.div
+                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                className="absolute -top-12 left-4 sm:left-6 z-10"
+              >
+                <div className="bg-emerald-500 text-white text-xs sm:text-sm font-semibold px-3 py-1.5 rounded-full shadow-lg backdrop-blur-md border border-emerald-400 flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
+                  Chatting about: {selectedProduct.name}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           <div className="relative bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl sm:rounded-2xl shadow-2xl overflow-hidden">
             <input
               type="text"
