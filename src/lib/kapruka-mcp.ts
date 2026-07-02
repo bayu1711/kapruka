@@ -459,8 +459,8 @@ function parseMarkdownProduct(text: string): KaprukaMCPProduct {
   const name = nameMatch ? nameMatch[1].trim() : 'Product';
 
   // **ID**: `EF_PC_ELEC0V18POD00115P`
-  const idMatch = text.match(/\*\*ID\*\*:\s*`([^`]+)`/);
-  const id = idMatch ? idMatch[1] : String(Date.now());
+  const idMatch = text.match(/\*\*ID\*\*:\s*`?([^`\n]+)`?/);
+  const id = idMatch ? idMatch[1].trim() : String(Date.now());
 
   // **Price**: LKR 182,000
   const priceMatch = text.match(/\*\*Price\*\*:\s*LKR\s*([\d,]+)/);
@@ -482,11 +482,33 @@ function parseMarkdownProduct(text: string): KaprukaMCPProduct {
   const stockMatch = text.match(/\*\*Stock\*\*:\s*(.+)/);
   const inStock = !stockMatch || !stockMatch[1].toLowerCase().includes('out of stock');
 
-  // Description: text after the last table/bold line before Image
-  const descMatch = text.match(/\*\*International shipping\*\*:.*?\n+([^\n*\[#].+)/s);
-  const description = descMatch ? descMatch[1].substring(0, 200).trim() : undefined;
+  // Parse all bold keys as variants (e.g. Vendor, Weight, International shipping)
+  const variants: { name: string; value: string }[] = [];
+  const boldMatches = text.matchAll(/\*\*([^]+?)\*\*:\s*(.+)/g);
+  for (const match of boldMatches) {
+    const key = match[1].trim();
+    const value = match[2].trim();
+    if (!['ID', 'Price', 'Category', 'Image', 'Stock'].includes(key)) {
+      variants.push({ name: key, value });
+    }
+  }
 
-  return { id, name, price, image, category, url, inStock, description };
+  // Description: text paragraph before **Image**
+  let description = undefined;
+  const lines = text.split('\n');
+  const descLines = [];
+  for (const line of lines) {
+    const t = line.trim();
+    if (!t || t.startsWith('## ') || t.startsWith('**') || t.startsWith('[')) {
+      continue;
+    }
+    descLines.push(t);
+  }
+  if (descLines.length > 0) {
+    description = descLines.join(' ').substring(0, 300).trim();
+  }
+
+  return { id, name, price, image, category, url, inStock, description, variants };
 }
 
 function normaliseProduct(raw: unknown): KaprukaMCPProduct {
