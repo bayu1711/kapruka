@@ -84,6 +84,7 @@ export function App() {
 
   const hasMorePages = (state.page + 1) * PRODUCT_PAGE_SIZE < totalProducts;
   const hasPrevPages = state.page > 0;
+  const hasSelection = !!state.selectedProduct;
   return (
     <div className="relative w-full h-[100dvh] bg-[#402970] overflow-hidden flex flex-col">
       {/* Background effects */}
@@ -96,7 +97,7 @@ export function App() {
 
       {/* UI Components */}
 
-      <div className="fixed top-4 right-4 sm:top-6 sm:right-6 z-50 flex items-center gap-2 sm:gap-3">
+      <div className={`fixed top-4 right-4 sm:top-6 sm:right-6 z-50 flex items-center gap-2 sm:gap-3 transition-opacity duration-300 ${hasSelection ? 'opacity-20 pointer-events-none' : 'opacity-100'}`}>
         <button
           onClick={() => setIsDevToolsOpen(true)}
           className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-purple-500/20 hover:bg-purple-500/40 text-purple-200 rounded-full shadow-lg transition-colors backdrop-blur-md border border-purple-500/30"
@@ -152,7 +153,7 @@ export function App() {
 
         {/* Navigation Arrows */}
         {currentSessionIndex > 0 && (
-          <div className="absolute top-28 sm:top-1/2 sm:-translate-y-1/2 left-4 sm:left-6 z-40 pointer-events-none">
+          <div className={`absolute top-28 sm:top-1/2 sm:-translate-y-1/2 left-4 sm:left-6 z-40 transition-opacity duration-300 pointer-events-none ${hasSelection ? 'opacity-20' : 'opacity-100'}`}>
             <button
               onClick={goToPrevSession}
               className="pointer-events-auto w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 flex items-center justify-center text-white/80 hover:text-white transition-all hover:scale-110 shadow-xl"
@@ -162,7 +163,7 @@ export function App() {
           </div>
         )}
 
-        <div className="absolute top-28 sm:top-1/2 sm:-translate-y-1/2 right-4 sm:right-6 z-40 pointer-events-none flex items-center justify-end">
+        <div className={`absolute top-28 sm:top-1/2 sm:-translate-y-1/2 right-4 sm:right-6 z-40 transition-opacity duration-300 pointer-events-none flex items-center justify-end ${hasSelection ? 'opacity-20' : 'opacity-100'}`}>
           {currentSessionIndex === sessions.length - 1 ? (
             <button
               onClick={goToNextSession}
@@ -184,36 +185,38 @@ export function App() {
         </div>
 
         {!state.showCheckout && !state.showConfirmation &&
-          <WishInputBar
-            value={state.inputValue}
-            onChange={updateInput}
-            onSubmit={onSubmit}
-            placeholder={currentConfig?.prompt || 'What are you wishing for today?'}
-            disabled={state.showCheckout || state.showConfirmation || state.isSearching}
-            history={history}
-            onHistoryClick={restoreHistory}
-            hasMorePages={hasMorePages}
-            hasPrevPages={hasPrevPages}
-            onNextPage={() => {
-              setIsPaging(true);
-              nextPage();
-            }}
-            onPrevPage={() => {
-              setIsPaging(true);
-              prevPage();
-            }}
-            onRandomize={() => {
-              const randomQueries = [
-                "Please suggest completely different gift ideas, but keep all my previous constraints (like occasion, recipient, budget) in mind.",
-                "Show me some alternative options for the same person and occasion.",
-                "I want something else, but still fitting the same context we discussed."
-              ];
-              const q = randomQueries[Math.floor(Math.random() * randomQueries.length)];
-              handleSubmit(q);
-            }}
-            followUpQuestions={state.followUpQuestions}
-            selectedProduct={selectedProductObj}
-          />
+          <div className={`w-full transition-opacity duration-300 ${hasSelection ? 'opacity-20 pointer-events-none' : 'opacity-100'}`}>
+            <WishInputBar
+              value={state.inputValue}
+              onChange={updateInput}
+              onSubmit={onSubmit}
+              placeholder={currentConfig?.prompt || 'What are you wishing for today?'}
+              disabled={state.showCheckout || state.showConfirmation || state.isSearching}
+              history={history}
+              onHistoryClick={restoreHistory}
+              hasMorePages={hasMorePages}
+              hasPrevPages={hasPrevPages}
+              onNextPage={() => {
+                setIsPaging(true);
+                nextPage();
+              }}
+              onPrevPage={() => {
+                setIsPaging(true);
+                prevPage();
+              }}
+              onRandomize={() => {
+                const randomQueries = [
+                  "Please suggest completely different gift ideas, but keep all my previous constraints (like occasion, recipient, budget) in mind.",
+                  "Show me some alternative options for the same person and occasion.",
+                  "I want something else, but still fitting the same context we discussed."
+                ];
+                const q = randomQueries[Math.floor(Math.random() * randomQueries.length)];
+                handleSubmit(q);
+              }}
+              followUpQuestions={state.followUpQuestions}
+              selectedProduct={selectedProductObj}
+            />
+          </div>
         }
       </div>
 
