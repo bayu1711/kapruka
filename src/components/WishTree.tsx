@@ -793,7 +793,7 @@ export function WishTree({
                       </button>
                       
                       {/* Left: Image */}
-                      <div className="w-full sm:w-1/2 h-1/2 sm:h-full rounded-2xl overflow-hidden flex-shrink-0 shadow-[0_8px_32px_rgba(0,0,0,0.3)] bg-black/[.98]">
+                      <div className="w-full sm:w-1/2 h-1/2 sm:h-full rounded-2xl overflow-hidden flex-shrink-0 shadow-[0_8px_32px_rgba(0,0,0,0.3)] bg-[#402970]/[.98]">
                         <img 
                           src={product.image || `https://placehold.co/400x400/1e293b/6ee7b7?text=${encodeURIComponent(product.name)}`} 
                           alt={product.name}
@@ -809,7 +809,7 @@ export function WishTree({
                         <div className="flex flex-wrap items-center gap-2 mb-2">
                           {/* Category Badge */}
                           {(product.category || product.details?.category) && (
-                            <span className="text-[10px] sm:text-xs px-2.5 py-0.5 rounded-full bg-black/[.98] text-white border border-white/10 backdrop-blur-md shadow-sm">
+                            <span className="text-[10px] sm:text-xs px-2.5 py-0.5 rounded-full bg-[#402970]/[.98] text-white border border-white/10 backdrop-blur-md shadow-sm">
                               {product.category || product.details?.category}
                             </span>
                           )}
@@ -828,14 +828,14 @@ export function WishTree({
                         
                         {/* Description */}
                         {product.details?.description && (
-                          <div className="text-white text-sm sm:text-base mb-4 leading-relaxed font-medium bg-black/[.98] p-3 rounded-lg backdrop-blur-sm border border-white/5">
+                          <div className="text-white text-sm sm:text-base mb-4 leading-relaxed font-medium bg-[#402970]/[.98] p-3 rounded-lg backdrop-blur-sm border border-white/5">
                             <p>{product.details.description}</p>
                           </div>
                         )}
 
                         {/* Variants / Attributes */}
                         {product.details?.variants && product.details.variants.length > 0 && (
-                          <div className="mb-4 bg-black/[.98] border border-white/10 rounded-xl p-3 sm:p-4">
+                          <div className="mb-4 bg-[#402970]/[.98] border border-white/10 rounded-xl p-3 sm:p-4">
                             <h4 className="text-xs sm:text-sm font-semibold text-white/90 mb-2">Product Specifications:</h4>
                             <div className="grid grid-cols-2 gap-2 text-xs sm:text-sm">
                               {product.details.variants.map((v, i) => (
