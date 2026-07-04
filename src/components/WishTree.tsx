@@ -828,8 +828,19 @@ export function WishTree({
                         
                         {/* Description */}
                         {product.details?.description && (
-                          <div className="text-white text-sm sm:text-base mb-4 leading-relaxed font-medium bg-[#402970]/[.98] p-3 rounded-lg backdrop-blur-sm border border-white/5">
-                            <p>{product.details.description}</p>
+                          <div className="text-white text-sm sm:text-base mb-4 leading-relaxed font-medium bg-[#402970]/[.98] p-3 sm:p-4 rounded-xl backdrop-blur-sm border border-white/10 shadow-inner">
+                            <p className="opacity-90">{product.details.description}</p>
+                            {product.details.description.endsWith('...') && product.url && (
+                              <a 
+                                href={product.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-block mt-2 text-emerald-400 hover:text-emerald-300 text-sm font-semibold transition-colors"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                Read full description &rarr;
+                              </a>
+                            )}
                           </div>
                         )}
 
@@ -837,11 +848,11 @@ export function WishTree({
                         {product.details?.variants && product.details.variants.length > 0 && (
                           <div className="mb-4 bg-[#402970]/[.98] border border-white/10 rounded-xl p-3 sm:p-4">
                             <h4 className="text-xs sm:text-sm font-semibold text-white/90 mb-2">Product Specifications:</h4>
-                            <div className="grid grid-cols-2 gap-2 text-xs sm:text-sm">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-auto-fit gap-3 text-xs sm:text-sm" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))' }}>
                               {product.details.variants.map((v, i) => (
-                                <div key={i} className="flex flex-col bg-white/10 p-2 rounded-lg border border-white/5">
-                                  <span className="text-white/70 text-[10px] sm:text-xs uppercase tracking-wider">{v.name}</span>
-                                  <span className="text-white/90 font-medium">{v.value}</span>
+                                <div key={i} className="flex flex-col bg-white/5 hover:bg-white/10 transition-colors p-3 rounded-lg border border-white/10 shadow-sm h-full">
+                                  <span className="text-white/60 text-[10px] sm:text-[11px] uppercase tracking-wider mb-1 font-semibold leading-tight">{v.name}</span>
+                                  <span className="text-white/95 font-medium break-words leading-snug">{v.value}</span>
                                 </div>
                               ))}
                             </div>
