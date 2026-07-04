@@ -924,7 +924,7 @@ export function WishTree({
           }}
           className="absolute inset-0 flex items-center justify-center pointer-events-none z-30">
           
-            <div className="text-center p-6 sm:p-12 mx-4 max-w-[90%] w-full max-w-4xl">
+            <div className="text-center p-6 sm:p-12 mx-4 max-w-[90%] w-full max-w-4xl -mt-32 md:-mt-48">
               <motion.h1
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -942,29 +942,6 @@ export function WishTree({
               >
                 {t('PLACEHOLDER')}
               </motion.h2>
-              
-              {/* Quick Suggestion Pills */}
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.8 }}
-                className="mt-6 sm:mt-10 flex flex-wrap justify-center gap-3 pointer-events-auto"
-              >
-                {[
-                  "Gift for my mother under 5000",
-                  "Birthday gift for a 5 year old boy",
-                  "Romantic anniversary dinner ideas",
-                  "Same day delivery cakes to Colombo"
-                ].map((suggestion, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => onQuickSearch && onQuickSearch(suggestion)}
-                    className="px-4 py-2 sm:px-5 sm:py-3 bg-black/20 hover:bg-black/40 border border-white/20 rounded-full text-white/95 text-xs sm:text-sm font-medium transition-all hover:scale-105 active:scale-95 shadow-xl backdrop-blur-md"
-                  >
-                    {suggestion}
-                  </button>
-                ))}
-              </motion.div>
             </div>
           </motion.div>
         }

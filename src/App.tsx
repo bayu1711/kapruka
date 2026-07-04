@@ -349,7 +349,7 @@ export function App() {
               setIsPaging(true);
               prevPage();
             }}
-            onRandomize={isCartContext ? undefined : () => {
+            onRandomize={(isCartContext || state.stage === 0) ? undefined : () => {
               const randomQueries = [
                 "Please suggest completely different gift ideas, but keep all my previous constraints (like occasion, recipient, budget) in mind.",
                 "Show me some alternative options for the same person and occasion.",
@@ -401,6 +401,29 @@ export function App() {
                   </button>
                 )}
               </>
+            ) : (state.stage === 0 && !state.isSearching) ? (
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.8 }}
+                className="flex overflow-x-auto no-scrollbar gap-2 w-full"
+              >
+                {[
+                  "Gift for my mother under 5000",
+                  "Birthday gift for a 5 year old boy",
+                  "Romantic anniversary dinner ideas",
+                  "Same day delivery cakes to Colombo"
+                ].map((suggestion, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => handleSubmit(suggestion, enablePostFilter)}
+                    className="flex-shrink-0 flex items-center px-3 py-1.5 bg-black/40 hover:bg-black/60 border border-white/20 rounded-full text-white/95 text-xs font-semibold transition-colors shadow-lg backdrop-blur-md"
+                  >
+                    {suggestion}
+                  </button>
+                ))}
+              </motion.div>
             ) : undefined}
           />
         </div>
