@@ -395,6 +395,7 @@ export function WishTree({
     );
     if (moveIdx >= 0) {
       finalProductSlots[moveIdx] = { ...finalProductSlots[moveIdx], col: 5, row: 1 };
+      frameFoliageSlots = frameFoliageSlots.filter(s => !(s.col === 5 && s.row === 1));
     }
 
     // Swap product 6,3 ↔ blue frame tile 9,4
