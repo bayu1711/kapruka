@@ -276,6 +276,7 @@ async function processChat(message, history, enablePostFilter = false, language 
   let finalProducts = [];
   let suggestedCategories = [];
   let finalReasoning = "";
+  let finalHint = "";
   let finalRecipient = "";
   let finalSearchQuery = "";
   let finalOriginalSearchQuery = "";
@@ -343,7 +344,7 @@ CRITICAL RULES FOR SEARCH QUERY:
     
     suggestedCategories = categories || [];
     finalReasoning = reasoning || '';
-    let finalHint = hint || '';
+    finalHint = hint || '';
     finalRecipient = recipient || '';
     finalOriginalSearchQuery = searchQuery || '';
     finalSearchQuery = searchQuery || '';
