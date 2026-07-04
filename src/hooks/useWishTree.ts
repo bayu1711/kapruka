@@ -49,6 +49,8 @@ export interface GlobalState {
   showCart: boolean;
   showCheckout: boolean;
   showConfirmation: boolean;
+  cartHistory: HistorySnapshot[];
+  selectedCartItems: string[];
 }
 
 const CART_STORAGE_KEY = 'kapruka_magic_cart';
@@ -132,6 +134,8 @@ export function useWishTree() {
     showCart: screenInit.showCart ?? false,
     showCheckout: screenInit.showCheckout ?? false,
     showConfirmation: screenInit.showConfirmation ?? false,
+    cartHistory: [],
+    selectedCartItems: [],
   });
 
   useEffect(() => {
@@ -193,7 +197,7 @@ export function useWishTree() {
   const handleSubmit = useCallback(async (query: string, enablePostFilter: boolean = false, isFallback: boolean = false, originalQuery?: string) => {
     if (!query.trim()) return;
 
-    if (!isFallback) {
+    if (!isFallback && !globalState.showCart) {
       updateSession((prev) => ({
         ...prev,
         stage: 3,
@@ -205,17 +209,31 @@ export function useWishTree() {
         productSeed: prev.productSeed + 1,
         page: 0,
       }));
+    } else if (!isFallback && globalState.showCart) {
+      setGlobalState(prev => ({ ...prev, aiStatus: t('SEARCHING') })); // Optional, assuming you want a status
     }
 
     const session = sessions[currentSessionIndex];
-    const selectedProductObj = session?.liveProducts?.find(p => p.id === session?.selectedProduct) || null;
-    const formattedHistory = session?.history.flatMap(h => [
+    const inCart = globalState.showCart;
+    const currentProducts = inCart ? globalState.cartItems : (session?.liveProducts || []);
+    
+    // For cart, selectedProductObj might be one of the selected cart items if we are chatting about it
+    // If only one item is selected in cart, we can use that as context, else null.
+    let selectedProductObj = null;
+    if (inCart && globalState.selectedCartItems.length === 1) {
+      selectedProductObj = currentProducts.find(p => p.id === globalState.selectedCartItems[0]) || null;
+    } else if (!inCart) {
+      selectedProductObj = session?.liveProducts?.find(p => p.id === session?.selectedProduct) || null;
+    }
+
+    const currentHistory = inCart ? globalState.cartHistory : (session?.history || []);
+    const formattedHistory = currentHistory.flatMap(h => [
       { role: 'user', content: h.query },
       { role: 'assistant', content: h.aiReasoning ? `Reasoning: ${h.aiReasoning}\nSearched for: ${h.aiActualSearchQuery || 'Unknown'}\nFound: ${h.products.length} products.` : `Found ${h.products.length} products.` }
     ]) || [];
 
     try {
-      const agentResult = await parseUserQuery(query, formattedHistory, enablePostFilter, locale, session?.liveProducts || [], globalState.cartItems || [], selectedProductObj);
+      const agentResult = await parseUserQuery(query, formattedHistory, enablePostFilter, locale, currentProducts, globalState.cartItems, selectedProductObj);
       
       if (agentResult.debugLogs && agentResult.debugLogs.length > 0) {
         const mcpModule = await import('../lib/kapruka-mcp');
@@ -225,12 +243,14 @@ export function useWishTree() {
       }
 
       if (agentResult.intent && agentResult.intent !== 'search') {
-        updateSession((prev) => ({ ...prev, isSearching: false, aiStatus: '' }));
+        if (!inCart) {
+          updateSession((prev) => ({ ...prev, isSearching: false, aiStatus: '' }));
+        }
         
         let actionMessage = '';
         if (agentResult.intent === 'add_to_cart') {
           setGlobalState((prev) => {
-            const product = (session?.liveProducts || []).find(p => p.id === agentResult.targetProductId);
+            const product = currentProducts.find(p => p.id === agentResult.targetProductId);
             if (!product) return prev;
             return { ...prev, cartItems: [...prev.cartItems, product], showCart: true };
           });
@@ -245,31 +265,36 @@ export function useWishTree() {
           actionMessage = agentResult.aiStatusMessage || 'Here is the information you requested.';
         }
 
-        updateSession(prev => ({
-          ...prev,
-          history: [
-            ...prev.history,
-            {
-              query: originalQuery || query,
-              aiStatus: actionMessage,
-              products: prev.liveProducts,
-              categories: prev.liveCategories
-            }
-          ]
-        }));
+        const newHistoryItem = {
+          query: originalQuery || query,
+          aiStatus: actionMessage,
+          products: currentProducts,
+          categories: inCart ? [] : session?.liveCategories || []
+        };
+
+        if (inCart) {
+          setGlobalState(prev => ({ ...prev, cartHistory: [...prev.cartHistory, newHistoryItem] }));
+        } else {
+          updateSession(prev => ({
+            ...prev,
+            history: [...prev.history, newHistoryItem]
+          }));
+        }
         return;
       }
 
-      updateSession((prev) => ({ ...prev, aiStatus: agentResult.aiStatusMessage }));
+      if (!inCart) {
+        updateSession((prev) => ({ ...prev, aiStatus: agentResult.aiStatusMessage }));
 
-      const cats = agentResult.suggestedCategories && agentResult.suggestedCategories.length > 0
-          ? agentResult.suggestedCategories
-          : [];
+        const cats = agentResult.suggestedCategories && agentResult.suggestedCategories.length > 0
+            ? agentResult.suggestedCategories
+            : [];
 
-      if (cats.length > 0) {
-        updateSession(prev => ({ ...prev, liveCategories: cats, selectedProduct: null }));
-      } else {
-        updateSession(prev => ({ ...prev, selectedProduct: null }));
+        if (cats.length > 0) {
+          updateSession(prev => ({ ...prev, liveCategories: cats, selectedProduct: null }));
+        } else {
+          updateSession(prev => ({ ...prev, selectedProduct: null }));
+        }
       }
 
       const mapped: Product[] = (agentResult.products || []).map((p: any) => ({
@@ -282,7 +307,7 @@ export function useWishTree() {
       }));
 
       if (mapped.length === 0 && !isFallback) {
-        const hasHistory = session && session.history.length > 0;
+        const hasHistory = currentHistory.length > 0;
         let fallbackQuery = '';
         if (hasHistory) {
             fallbackQuery = "The previous search returned 0 products. Based on our past conversation, please suggest a completely different alternative gift that is very popular and likely to be in stock.";
@@ -297,101 +322,105 @@ export function useWishTree() {
       }
 
       if (mapped.length > 0) {
-        updateSession(prev => ({ ...prev, liveProducts: mapped }));
+        if (!inCart) {
+          updateSession(prev => ({ ...prev, liveProducts: mapped }));
+        }
       }
 
       // Background fetch
-      (async () => {
-        const updatedProducts = [...mapped];
-        for (let i = 0; i < mapped.length; i++) {
-          try {
-            const details = await import('../lib/kapruka-mcp').then(m => m.getProduct(mapped[i].id));
-            if (details) {
-              updatedProducts[i] = { 
-                ...updatedProducts[i], 
-                details, 
-                image: details.image || updatedProducts[i].image
-              };
-              updateSession(prev => ({ ...prev, liveProducts: [...updatedProducts] }));
-            }
-          } catch (e) {}
-          await new Promise((r) => setTimeout(r, 800));
-        }
-      })();
+      if (!inCart) {
+        (async () => {
+          const updatedProducts = [...mapped];
+          for (let i = 0; i < mapped.length; i++) {
+            try {
+              const details = await import('../lib/kapruka-mcp').then(m => m.getProduct(mapped[i].id));
+              if (details) {
+                updatedProducts[i] = { 
+                  ...updatedProducts[i], 
+                  details, 
+                  image: details.image || updatedProducts[i].image
+                };
+                updateSession(prev => ({ ...prev, liveProducts: [...updatedProducts] }));
+              }
+            } catch (e) {}
+            await new Promise((r) => setTimeout(r, 800));
+          }
+        })();
+      }
       
       const statusMsg = `Found ${mapped.length} results for "${agentResult.searchQuery}"`;
       
-      updateSession((prev) => {
-        if (mapped.length === 0) {
-          const hasPrevProducts = prev.liveProducts.length > 0;
-          return {
-            ...prev,
-            isSearching: false,
-            aiStatus: '',
-            history: [
-              ...prev.history,
-              {
-                query: originalQuery || query,
-                aiStatus: '',
-                products: prev.liveProducts,
-                categories: prev.liveCategories,
-                errorMessage: hasPrevProducts 
-                  ? '0 products found. Reverting to previous search.' 
-                  : (agentResult.reasoning || '0 products found. Try a different wish.'),
-              }
-            ]
-          };
-        }
-        
-        return {
+      const newHistoryItemFull = {
+        query: originalQuery || query,
+        aiStatus: mapped.length === 0 ? '' : statusMsg,
+        products: mapped.length === 0 ? currentProducts : mapped,
+        categories: (!inCart && agentResult.suggestedCategories && agentResult.suggestedCategories.length > 0) ? agentResult.suggestedCategories : (session?.liveCategories || []),
+        errorMessage: mapped.length === 0 
+          ? (currentProducts.length > 0 ? '0 products found. Reverting to previous search.' : (agentResult.reasoning || '0 products found. Try a different wish.'))
+          : undefined,
+        aiReasoning: mapped.length > 0 ? agentResult.reasoning : undefined,
+        aiRecipient: mapped.length > 0 ? agentResult.recipient : undefined,
+        aiActualSearchQuery: mapped.length > 0 ? agentResult.actualSearchQuery : undefined,
+        aiOriginalSearchQuery: mapped.length > 0 ? agentResult.originalSearchQuery : undefined,
+        aiPostFilterReasoning: mapped.length > 0 ? agentResult.postFilterReasoning : undefined,
+        followUpQuestions: mapped.length > 0 ? agentResult.followUpQuestions : undefined,
+        searchParameters: mapped.length > 0 ? agentResult.searchParameters : undefined,
+      };
+
+      if (inCart) {
+         setGlobalState(prev => ({
+           ...prev,
+           cartHistory: [...prev.cartHistory, newHistoryItemFull]
+         }));
+      } else {
+         updateSession((prev) => {
+           if (mapped.length === 0) {
+             return {
+               ...prev,
+               isSearching: false,
+               aiStatus: '',
+               history: [...prev.history, newHistoryItemFull]
+             };
+           }
+           
+           return {
+             ...prev,
+             isSearching: false,
+             aiStatus: '',
+             productSeed: prev.productSeed + 1,
+             aiReasoning: agentResult.reasoning,
+             aiRecipient: agentResult.recipient,
+             aiActualSearchQuery: agentResult.actualSearchQuery,
+             aiOriginalSearchQuery: agentResult.originalSearchQuery,
+             aiPostFilterReasoning: agentResult.postFilterReasoning,
+             followUpQuestions: agentResult.followUpQuestions,
+             searchParameters: agentResult.searchParameters,
+             history: [...prev.history, newHistoryItemFull]
+           };
+         });
+      }
+    } catch (err) {
+      console.error('[Kapruka MCP] search failed:', err);
+      const errorItem = {
+        query: originalQuery || query,
+        aiStatus: '',
+        products: currentProducts,
+        categories: inCart ? [] : session?.liveCategories || [],
+        errorMessage: 'Search failed due to an API error (Rate limit exceeded). Please try again in a minute.',
+      };
+      
+      if (inCart) {
+        setGlobalState(prev => ({ ...prev, cartHistory: [...prev.cartHistory, errorItem] }));
+      } else {
+        updateSession((prev) => ({
           ...prev,
           isSearching: false,
           aiStatus: '',
-          productSeed: prev.productSeed + 1,
-          aiReasoning: agentResult.reasoning,
-          aiRecipient: agentResult.recipient,
-          aiActualSearchQuery: agentResult.actualSearchQuery,
-          aiOriginalSearchQuery: agentResult.originalSearchQuery,
-          aiPostFilterReasoning: agentResult.postFilterReasoning,
-          followUpQuestions: agentResult.followUpQuestions,
-          searchParameters: agentResult.searchParameters,
-          history: [
-            ...prev.history,
-            {
-              query: originalQuery || query,
-              aiStatus: statusMsg,
-              products: mapped,
-              categories: cats.length > 0 ? cats : prev.liveCategories,
-              aiReasoning: agentResult.reasoning,
-              aiRecipient: agentResult.recipient,
-              aiActualSearchQuery: agentResult.actualSearchQuery,
-              aiOriginalSearchQuery: agentResult.originalSearchQuery,
-              aiPostFilterReasoning: agentResult.postFilterReasoning,
-              followUpQuestions: agentResult.followUpQuestions,
-              searchParameters: agentResult.searchParameters,
-            }
-          ]
-        };
-      });
-    } catch (err) {
-      console.error('[Kapruka MCP] search failed:', err);
-      updateSession((prev) => ({
-        ...prev,
-        isSearching: false,
-        aiStatus: '',
-        history: [
-          ...prev.history,
-          {
-            query: originalQuery || query,
-            aiStatus: '',
-            products: prev.liveProducts,
-            categories: prev.liveCategories,
-            errorMessage: 'Search failed due to an API error (Rate limit exceeded). Please try again in a minute.',
-          }
-        ]
-      }));
+          history: [...prev.history, errorItem]
+        }));
+      }
     }
-  }, [updateSession, locale, t, sessions, currentSessionIndex]);
+  }, [updateSession, locale, t, sessions, currentSessionIndex, globalState]);
 
   const refineProducts = useCallback(async (query?: string) => {
     const session = sessions[currentSessionIndex];
@@ -442,6 +471,21 @@ export function useWishTree() {
 
   const toggleCart = useCallback(() => {
     setGlobalState((prev) => ({ ...prev, showCart: !prev.showCart }));
+  }, []);
+
+  const toggleCartItemSelection = useCallback((productId: string) => {
+    setGlobalState((prev) => {
+      const isSelected = prev.selectedCartItems.includes(productId);
+      if (isSelected) {
+        return { ...prev, selectedCartItems: prev.selectedCartItems.filter(id => id !== productId) };
+      } else {
+        return { ...prev, selectedCartItems: [...prev.selectedCartItems, productId] };
+      }
+    });
+  }, []);
+
+  const clearCartSelection = useCallback(() => {
+    setGlobalState(prev => ({ ...prev, selectedCartItems: [] }));
   }, []);
 
   const proceedToCheckout = useCallback(() => {
@@ -602,5 +646,7 @@ export function useWishTree() {
     goToPrevSession,
     deleteSession,
     deleteSessionByIndex,
+    toggleCartItemSelection,
+    clearCartSelection,
   };
 }
