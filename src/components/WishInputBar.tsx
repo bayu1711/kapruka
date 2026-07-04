@@ -1,5 +1,5 @@
 import 'regenerator-runtime/runtime';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowUp, RefreshCw, ChevronRight, ChevronLeft, Mic, MicOff, MessageCircleQuestion, ShoppingCart } from 'lucide-react';
 import type { HistorySnapshot } from '../hooks/useWishTree';
@@ -76,6 +76,13 @@ export function WishInputBar({
   const [loading, setLoading] = useState(false);
   const { t } = useLanguage();
   const { transcript, listening, resetTranscript, browserSupportsSpeechRecognition } = useSpeechRecognition();
+  const historyScrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (historyScrollRef.current) {
+      historyScrollRef.current.scrollTop = historyScrollRef.current.scrollHeight;
+    }
+  }, [history]);
 
   useEffect(() => {
     if (transcript) {
@@ -120,10 +127,12 @@ export function WishInputBar({
         {/* History Log */}
         {history && history.length > 0 && (
           <div 
+            ref={historyScrollRef}
             className="absolute bottom-[calc(100%+0.5rem)] right-0 w-full flex flex-col items-end gap-2 px-2 max-h-[35vh] pt-4 overflow-y-auto mb-2 no-scrollbar pointer-events-auto"
             style={{
-              maskImage: 'linear-gradient(to bottom, transparent 0%, transparent 14%, black 40%, black 100%)',
-              WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, transparent 14%, black 40%, black 100%)'
+              maskImage: 'linear-gradient(to bottom, transparent 0%, transparent 30%, black 60%, black 100%)',
+              WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, transparent 30%, black 60%, black 100%)',
+              overscrollBehaviorY: 'contain'
             }}
           >
             {history.map((snap, idx) => {
