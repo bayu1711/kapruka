@@ -128,10 +128,10 @@ export function WishInputBar({
         {history && history.length > 0 && (
           <div 
             ref={historyScrollRef}
-            className="absolute bottom-[calc(100%+0.5rem)] right-0 w-full flex flex-col items-end gap-2 px-2 max-h-[35vh] pt-4 overflow-y-auto mb-2 no-scrollbar pointer-events-auto"
+            className="absolute bottom-[calc(100%+0.5rem)] right-0 w-full flex flex-col items-end gap-2 px-2 max-h-[20vh] pt-4 overflow-y-auto mb-2 no-scrollbar pointer-events-auto"
             style={{
-              maskImage: 'linear-gradient(to bottom, transparent 0%, transparent 30%, black 60%, black 100%)',
-              WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, transparent 30%, black 60%, black 100%)',
+              maskImage: 'linear-gradient(to bottom, transparent 0%, transparent 10%, black 40%, black 100%)',
+              WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, transparent 10%, black 40%, black 100%)',
               overscrollBehaviorY: 'contain'
             }}
           >
