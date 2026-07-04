@@ -194,7 +194,7 @@ export function useWishTree() {
         ...prev,
         stage: 3,
         visibleBlocks: scenarioBlocks.filter((b) => b.stage <= 3),
-        isSearching: true,
+        isSearching: !prev.selectedProduct,
         aiStatus: t('SEARCHING'),
         searchQuery: query,
         inputValue: '',

@@ -134,7 +134,7 @@ export function WishInputBar({
     >
       <div className="w-full max-w-2xl flex flex-col items-end relative pointer-events-auto">
         {/* History Log */}
-        {history && history.length > 0 && !selectedProduct && (
+        {history && history.length > 0 && (
           <div 
             className="absolute bottom-[calc(100%+0.5rem)] right-0 w-full flex flex-col items-end gap-2 px-2 max-h-[35vh] pt-4 overflow-y-auto mb-2 no-scrollbar pointer-events-auto"
             style={{
@@ -231,12 +231,12 @@ export function WishInputBar({
                     onClick={() => {
                       if (onAddToCart) onAddToCart();
                     }}
-                    className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-semibold px-4 py-1.5 rounded-full shadow-lg shadow-emerald-500/20 backdrop-blur-md border border-emerald-400 flex items-center transition-colors"
+                    className="flex items-center gap-1.5 text-xs font-semibold text-white bg-emerald-500/80 hover:bg-emerald-500 backdrop-blur-md border border-emerald-400 rounded-full px-3 py-1.5 transition-colors shadow-lg shadow-emerald-500/20"
                   >
                     Add to Cart
                   </button>
 
-                  <div className="bg-white/10 text-white/80 text-xs sm:text-sm font-semibold px-3 py-1.5 rounded-full shadow-lg backdrop-blur-md border border-white/20 flex items-center gap-2">
+                  <div className="flex items-center gap-1.5 text-xs font-semibold text-white/90 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-3 py-1.5 shadow-lg">
                     <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                     Chatting with: {selectedProduct.name}
                   </div>
