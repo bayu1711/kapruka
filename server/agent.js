@@ -338,7 +338,7 @@ CRITICAL RULES FOR SEARCH QUERY:
       return { products: [], categories: [], reasoning: '', recipient: '', searchQuery: '' };
     }
 
-    const { intent, targetProductIds, reasoning, hint, recipient, searchQuery, categories, searchParameters, followUpQuestions, answer } = parsed;
+    const { intent, targetProductIds, checkoutDetails, reasoning, hint, recipient, searchQuery, categories, searchParameters, followUpQuestions, answer } = parsed;
     
     let finalIntent = intent || 'search';
     let finalTargetProductIds = targetProductIds || [];
@@ -352,10 +352,11 @@ CRITICAL RULES FOR SEARCH QUERY:
     finalFollowUpQuestions = followUpQuestions || [];
     finalSearchParameters = searchParameters || [];
     
-    if (finalIntent === 'add_to_cart' || finalIntent === 'remove_from_cart' || finalIntent === 'checkout' || finalIntent === 'answer') {
+    if (finalIntent === 'add_to_cart' || finalIntent === 'remove_from_cart' || finalIntent === 'checkout' || finalIntent === 'answer' || finalIntent === 'update_checkout') {
       return {
         intent: finalIntent,
         targetProductIds: finalTargetProductIds,
+        checkoutDetails: checkoutDetails,
         answer: answer,
         searchQuery: finalSearchQuery,
         originalSearchQuery: finalOriginalSearchQuery,
