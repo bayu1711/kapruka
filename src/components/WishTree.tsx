@@ -756,9 +756,7 @@ export function WishTree({
                   transitionProperty: isPaging ? 'all' : 'box-shadow, border-color, opacity, left, top, width, height'
                 }}
                 onClick={() => {
-                  if (isSelected) {
-                    onSelectProduct(null as any); // Deselect
-                  } else {
+                  if (!isSelected) {
                     onSelectProduct(product.id);
                   }
                 }}>
