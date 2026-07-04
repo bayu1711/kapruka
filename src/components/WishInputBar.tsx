@@ -23,6 +23,8 @@ interface WishInputBarProps {
   followUpQuestions?: string[];
   selectedProduct?: any; // We'll type this properly if Product is available
   onAddToCart?: () => void;
+  onRemoveFromCart?: () => void;
+  isProductInCart?: boolean;
   customTopContent?: React.ReactNode;
 }
 
@@ -73,6 +75,9 @@ export function WishInputBar({
   followUpQuestions,
   onFollowUpClick,
   selectedProduct,
+  onAddToCart,
+  onRemoveFromCart,
+  isProductInCart,
   customTopContent,
 }: WishInputBarProps) {
   const [loading, setLoading] = useState(false);
@@ -191,12 +196,20 @@ export function WishInputBar({
               <button
                 type="button"
                 onClick={() => {
-                  if (onAddToCart) onAddToCart();
+                  if (isProductInCart) {
+                    if (onRemoveFromCart) onRemoveFromCart();
+                  } else {
+                    if (onAddToCart) onAddToCart();
+                  }
                 }}
-                className="flex items-center gap-1.5 text-xs font-semibold text-white bg-emerald-500/80 hover:bg-emerald-500 backdrop-blur-md border border-emerald-400 rounded-full px-3 py-1.5 transition-colors shadow-lg shadow-emerald-500/20"
+                className={`flex items-center gap-1.5 text-xs font-semibold text-white backdrop-blur-md border rounded-full px-3 py-1.5 transition-colors shadow-lg ${
+                  isProductInCart
+                    ? 'bg-amber-500/80 hover:bg-amber-500 border-amber-400 shadow-amber-500/20'
+                    : 'bg-emerald-500/80 hover:bg-emerald-500 border-emerald-400 shadow-emerald-500/20'
+                }`}
               >
                 <ShoppingCart className="w-3.5 h-3.5" />
-                Add to Cart
+                {isProductInCart ? 'Added to Cart (Remove)' : 'Add to Cart'}
               </button>
 
               <div className="flex items-center gap-1.5 text-xs font-semibold text-white/90 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-3 py-1.5 shadow-lg max-w-[60%] truncate">

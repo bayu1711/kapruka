@@ -295,6 +295,10 @@ export function App() {
               onAddToCart={() => {
                 if (selectedProductObj) addToCart(selectedProductObj.id);
               }}
+              onRemoveFromCart={() => {
+                if (selectedProductObj) removeFromCart(selectedProductObj.id);
+              }}
+              isProductInCart={selectedProductObj ? state.cartItems.some(item => item.id === selectedProductObj.id) : false}
               customTopContent={state.showCart ? (
                 <>
                   {state.selectedCartItems.length > 0 && (

@@ -18,6 +18,8 @@ interface WishTreeProps {
   showCanopy?: boolean;
   isSearching?: boolean;
   onAddToCart?: (id: string) => void;
+  onRemoveFromCart?: (id: string) => void;
+  cartItemIds?: string[];
   onQuickSearch?: (query: string) => void;
 }
 type CellType = 'foliage' | 'label' | 'product';
@@ -120,6 +122,8 @@ export function WishTree({
   showCanopy = true,
   isSearching,
   onAddToCart,
+  onRemoveFromCart,
+  cartItemIds = [],
   onQuickSearch
 }: WishTreeProps) {
   const { t } = useLanguage();
@@ -727,6 +731,7 @@ export function WishTree({
             const product = products.find((p) => p.id === cell.contentId);
             if (!product) return null;
             const isSelected = selectedProduct === product.id;
+            const isCarted = cartItemIds.includes(product.id);
             return (
               <motion.div
                 key={cell.id}
@@ -750,7 +755,13 @@ export function WishTree({
                   damping: 20,
                   delay: isSearching ? 0 : cell.delay
                 }}
-                className={`absolute overflow-hidden cursor-pointer group z-20 transition-all duration-300 ${isSelected ? 'z-50 bg-transparent' : 'rounded-xl border-2 border-emerald-500/30 shadow-[0_0_16px_rgba(16,185,129,0.4)] hover:scale-105 hover:shadow-[0_0_20px_rgba(16,185,129,0.6)]'}`}
+                className={`absolute overflow-hidden cursor-pointer group z-20 transition-all duration-300 ${
+                  isSelected 
+                    ? 'z-50 bg-transparent' 
+                    : (isCarted 
+                        ? 'rounded-xl border-2 border-amber-400/50 shadow-[0_0_16px_rgba(251,191,36,0.4)] hover:scale-105 hover:shadow-[0_0_20px_rgba(251,191,36,0.6)]'
+                        : 'rounded-xl border-2 border-emerald-500/30 shadow-[0_0_16px_rgba(16,185,129,0.4)] hover:scale-105 hover:shadow-[0_0_20px_rgba(16,185,129,0.6)]')
+                }`}
                 style={{
                   left: isSelected ? '12%' : cell.left,
                   top: isSelected ? '8%' : cell.top,
@@ -876,12 +887,20 @@ export function WishTree({
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              if (onAddToCart) onAddToCart(product.id);
+                              if (isCarted) {
+                                if (onRemoveFromCart) onRemoveFromCart(product.id);
+                              } else {
+                                if (onAddToCart) onAddToCart(product.id);
+                              }
                             }}
-                            className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-3 rounded-full font-bold shadow-lg transition-transform hover:scale-105 active:scale-95 flex items-center justify-center gap-2"
+                            className={`flex-1 px-6 py-3 rounded-full font-bold shadow-lg transition-transform hover:scale-105 active:scale-95 flex items-center justify-center gap-2 ${
+                              isCarted 
+                                ? 'bg-amber-500 hover:bg-amber-600 text-white' 
+                                : 'bg-emerald-500 hover:bg-emerald-600 text-white'
+                            }`}
                           >
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
-                            Add to Cart
+                            {isCarted ? 'Added to Cart (Remove)' : 'Add to Cart'}
                           </button>
                         </div>
                       </div>
