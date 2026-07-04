@@ -32,10 +32,10 @@ export function CartMainView({
 
   return (
     <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
-      <div className="relative w-[min(150vw,68vh)] h-[min(150vw,68vh)] sm:w-[min(115vw,78vh)] sm:h-[min(115vw,78vh)] md:w-[800px] md:h-[800px] max-w-[800px] max-h-[800px] flex-shrink-0 origin-center flex flex-col">
+      <div className="relative w-full h-full px-2 sm:px-0 sm:w-[min(115vw,78vh)] sm:h-[min(115vw,78vh)] md:w-[800px] md:h-[800px] max-w-[800px] max-h-[800px] flex-shrink-0 origin-center flex flex-col">
         {/* Main Content Area - Scrollable */}
         <div 
-          className="w-full h-full overflow-y-auto custom-scrollbar pr-2 pb-[35vh] sm:pb-64 pt-12 sm:pt-16"
+          className="w-full h-full overflow-y-auto custom-scrollbar pr-2 pb-[35vh] sm:pb-64 pt-20 sm:pt-16"
           style={{
             maskImage: 'linear-gradient(to bottom, black 0%, black 70%, transparent 100%)',
             WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 70%, transparent 100%)'
@@ -49,9 +49,9 @@ export function CartMainView({
                 initial={{ opacity: 0, x: 50 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -50 }}
-                className="w-full h-full bg-[#402970]/80 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl overflow-hidden flex flex-col sm:flex-row gap-6 p-6"
+                className="w-full h-full bg-[#402970]/80 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl overflow-hidden flex flex-col sm:flex-row gap-4 sm:gap-6 p-4 sm:p-6"
               >
-                <div className="w-full sm:w-1/2 h-48 sm:h-full rounded-2xl overflow-hidden shadow-inner bg-black/20 relative group">
+                <div className="w-full sm:w-1/2 h-40 sm:h-full shrink-0 rounded-2xl overflow-hidden shadow-inner bg-black/20 relative group">
                   <img 
                     src={selectedProductObj.image || `https://placehold.co/400x400/1e293b/6ee7b7?text=${encodeURIComponent(selectedProductObj.name)}`} 
                     alt={selectedProductObj.name}
@@ -187,7 +187,7 @@ export function CartMainView({
                       </div>
 
                       {/* Right: Image */}
-                      <div className="w-32 sm:w-48 lg:w-56 overflow-hidden relative bg-black/20 shrink-0">
+                      <div className="w-28 sm:w-48 lg:w-56 overflow-hidden relative bg-black/20 shrink-0">
                         <img
                           src={item.image}
                           alt={item.name}
