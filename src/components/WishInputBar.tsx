@@ -23,6 +23,7 @@ interface WishInputBarProps {
   followUpQuestions?: string[];
   selectedProduct?: any; // We'll type this properly if Product is available
   onAddToCart?: () => void;
+  customTopContent?: React.ReactNode;
 }
 
 /** A small tree SVG used as the loading indicator on the send button */
@@ -72,6 +73,7 @@ export function WishInputBar({
   followUpQuestions,
   onFollowUpClick,
   selectedProduct,
+  customTopContent,
 }: WishInputBarProps) {
   const [loading, setLoading] = useState(false);
   const { t } = useLanguage();
@@ -168,6 +170,12 @@ export function WishInputBar({
                 </div>
               );
             })}
+          </div>
+        )}
+        
+        {customTopContent && (
+          <div className="w-full flex justify-end items-end gap-2 px-2 mb-3 pointer-events-auto">
+            {customTopContent}
           </div>
         )}
 
