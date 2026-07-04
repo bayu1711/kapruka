@@ -341,6 +341,8 @@ export function App() {
             onHistoryClick={isCartContext ? undefined : restoreHistory}
             hasMorePages={isCartContext ? false : hasMorePages}
             hasPrevPages={isCartContext ? false : hasPrevPages}
+            liveCategories={liveCategories}
+            onCategorySelect={(cat) => handleSubmit(`Show me ${cat}`)}
             onNextPage={isCartContext ? undefined : () => {
               setIsPaging(true);
               nextPage();

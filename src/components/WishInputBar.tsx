@@ -1,7 +1,7 @@
 import 'regenerator-runtime/runtime';
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowUp, RefreshCw, ChevronRight, ChevronLeft, Mic, MicOff, MessageCircleQuestion, ShoppingCart } from 'lucide-react';
+import { ArrowUp, RefreshCw, ChevronRight, ChevronLeft, Mic, MicOff, MessageCircleQuestion, ShoppingCart, ListTree } from 'lucide-react';
 import type { HistorySnapshot } from '../hooks/useWishTree';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -27,6 +27,8 @@ interface WishInputBarProps {
   onRemoveFromCart?: () => void;
   isProductInCart?: boolean;
   customTopContent?: React.ReactNode;
+  liveCategories?: string[];
+  onCategorySelect?: (category: string) => void;
 }
 
 /** A small 'U' SVG used as the loading indicator on the send button */
@@ -71,8 +73,11 @@ export function WishInputBar({
   onRemoveFromCart,
   isProductInCart,
   customTopContent,
+  liveCategories,
+  onCategorySelect,
 }: WishInputBarProps) {
   const [loading, setLoading] = useState(false);
+  const [showCategories, setShowCategories] = useState(false);
   const { t } = useLanguage();
   const { transcript, listening, resetTranscript, browserSupportsSpeechRecognition } = useSpeechRecognition();
   const historyScrollRef = useRef<HTMLDivElement>(null);
@@ -218,6 +223,42 @@ export function WishInputBar({
                 className="w-full flex flex-wrap justify-end items-end gap-2 px-2 mb-3"
               >
             <div className="flex flex-wrap gap-2 justify-end">
+              {liveCategories && liveCategories.length > 0 && (
+                <div className="relative flex items-end justify-end">
+                  <button
+                    type="button"
+                    onClick={() => setShowCategories(!showCategories)}
+                    className="flex items-center gap-1.5 text-xs font-semibold text-blue-100 bg-blue-500/20 hover:bg-blue-500/40 backdrop-blur-md border border-blue-500/30 rounded-full px-3 py-1.5 transition-colors"
+                  >
+                    <ListTree className="w-3.5 h-3.5" />
+                    Categories
+                  </button>
+                  <AnimatePresence>
+                    {showCategories && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                        className="absolute bottom-full right-0 mb-2 w-64 p-2 bg-black/80 backdrop-blur-xl border border-white/20 rounded-xl shadow-2xl flex flex-wrap gap-2 max-h-48 overflow-y-auto z-50"
+                      >
+                        {liveCategories.map(cat => (
+                          <button
+                            key={cat}
+                            type="button"
+                            onClick={() => {
+                              setShowCategories(false);
+                              onCategorySelect?.(cat);
+                            }}
+                            className="px-2 py-1 text-xs font-medium text-white/90 hover:text-white bg-white/10 hover:bg-white/20 rounded-lg transition-colors border border-white/10"
+                          >
+                            {cat}
+                          </button>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              )}
               {hasPrevPages && (
                 <button
                   type="button"

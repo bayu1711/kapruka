@@ -550,9 +550,17 @@ export function WishTree({
     return allCells;
   }, [products, liveCategories, searchParameters]);
   return (
-    <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
+    <div className="relative w-full h-full flex flex-col items-center justify-center overflow-hidden">
       {/* Responsive square container — kept strictly 1:1 so the % grid stays aligned to the canopy */}
       <div className="relative w-[min(150vw,68vh)] h-[min(150vw,68vh)] sm:w-[min(115vw,78vh)] sm:h-[min(115vw,78vh)] md:w-[800px] md:h-[800px] max-w-[800px] max-h-[800px] flex-shrink-0 origin-center">
+        {/* Trunk Extension to reach the bottom AI chat */}
+        {showCanopy && (
+          <div 
+            className="absolute left-[45%] top-[95%] w-[10%] h-[100vh] bg-gradient-to-b from-[#451a03] to-[#1a0901]"
+            aria-hidden="true"
+          />
+        )}
+        
         {/* Soft glows behind the tree */}
         <div className="absolute inset-x-0 top-0 h-2/3 bg-emerald-500/15 blur-3xl rounded-full pointer-events-none" />
         <div className="absolute inset-0 bg-blue-500/10 blur-3xl rounded-full scale-90 pointer-events-none" />
