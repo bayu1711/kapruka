@@ -10,6 +10,8 @@ interface CartMainViewProps {
   onRemoveItem: (id: string) => void;
   selectedProduct: string | null;
   onSelectProduct: (id: string | null) => void;
+  selectedCartItems: string[];
+  onToggleItemSelection: (id: string) => void;
 }
 
 export function CartMainView({
@@ -17,7 +19,9 @@ export function CartMainView({
   onCheckout,
   onRemoveItem,
   selectedProduct,
-  onSelectProduct
+  onSelectProduct,
+  selectedCartItems,
+  onToggleItemSelection
 }: CartMainViewProps) {
   const { t } = useLanguage();
   const subtotal = items.reduce((sum, item) => sum + item.price, 0);
@@ -171,16 +175,36 @@ export function CartMainView({
                 exit={{ opacity: 0 }}
                 className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
               >
-                {items.map((item, index) => (
-                  <motion.div
-                    key={`${item.id}-${index}`}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.05 }}
-                    onClick={() => onSelectProduct(item.id)}
-                    className="relative bg-white/5 rounded-2xl border border-white/10 hover:border-white/30 cursor-pointer transition-all duration-300 hover:scale-105 overflow-hidden group flex flex-col"
-                  >
-                    <div className="aspect-square w-full overflow-hidden relative bg-black/20 shrink-0">
+                {items.map((item, index) => {
+                  const isChecked = selectedCartItems.includes(item.id);
+                  return (
+                    <motion.div
+                      key={`${item.id}-${index}`}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      onClick={() => onSelectProduct(item.id)}
+                      className={`relative bg-white/5 rounded-2xl border ${isChecked ? 'border-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.2)]' : 'border-white/10 hover:border-white/30'} cursor-pointer transition-all duration-300 hover:scale-105 overflow-hidden group flex flex-col`}
+                    >
+                      <div className="absolute top-3 left-3 z-10" onClick={(e) => e.stopPropagation()}>
+                        <label className="flex items-center cursor-pointer group/checkbox p-1">
+                          <div className="relative flex items-center justify-center w-6 h-6">
+                            <input
+                              type="checkbox"
+                              checked={isChecked}
+                              onChange={() => onToggleItemSelection(item.id)}
+                              className="peer sr-only"
+                            />
+                            <div className={`w-5 h-5 rounded-md border-2 transition-all flex items-center justify-center ${isChecked ? 'bg-emerald-500 border-emerald-500' : 'border-white/40 group-hover/checkbox:border-white/70 bg-black/40 backdrop-blur-sm'}`}>
+                              <svg className={`w-3.5 h-3.5 text-white ${isChecked ? 'opacity-100 scale-100' : 'opacity-0 scale-50'} transition-all`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                              </svg>
+                            </div>
+                          </div>
+                        </label>
+                      </div>
+
+                      <div className="aspect-square w-full overflow-hidden relative bg-black/20 shrink-0">
                       <img
                         src={item.image}
                         alt={item.name}
@@ -211,7 +235,7 @@ export function CartMainView({
                       </p>
                     </div>
                   </motion.div>
-                ))}
+                )})}
                 
                 {items.length === 0 && (
                   <div className="col-span-full py-20 flex flex-col items-center justify-center text-white/50 bg-white/5 rounded-3xl border border-white/5 border-dashed">
