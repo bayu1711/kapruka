@@ -22,6 +22,7 @@ interface WishInputBarProps {
   hasPrevPages?: boolean;
   followUpQuestions?: string[];
   selectedProduct?: any; // We'll type this properly if Product is available
+  onAddToCart?: () => void;
 }
 
 /** A small tree SVG used as the loading indicator on the send button */
@@ -133,7 +134,7 @@ export function WishInputBar({
     >
       <div className="w-full max-w-2xl flex flex-col items-end relative pointer-events-auto">
         {/* History Log */}
-        {history && history.length > 0 && (
+        {history && history.length > 0 && !selectedProduct && (
           <div 
             className="absolute bottom-[calc(100%+0.5rem)] right-0 w-full flex flex-col items-end gap-2 px-2 max-h-[35vh] pt-4 overflow-y-auto mb-2 no-scrollbar pointer-events-auto"
             style={{
@@ -178,7 +179,7 @@ export function WishInputBar({
         )}
 
         {/* Action Chips */}
-        {(hasPrevPages || hasMorePages || onRandomize) && (
+        {!selectedProduct && (hasPrevPages || hasMorePages || onRandomize) && (
           <div className="w-full flex flex-wrap justify-end items-end gap-2 px-2 mb-3">
             <div className="flex flex-wrap gap-2 justify-end">
               {hasPrevPages && (
@@ -222,11 +223,23 @@ export function WishInputBar({
                 initial={{ opacity: 0, y: 10, scale: 0.95 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                className="absolute -top-12 left-4 sm:left-6 z-10"
+                className="absolute -top-12 left-4 sm:left-6 z-10 w-[calc(100%-2rem)] sm:w-[calc(100%-3rem)] pointer-events-auto"
               >
-                <div className="bg-emerald-500 text-white text-xs sm:text-sm font-semibold px-3 py-1.5 rounded-full shadow-lg backdrop-blur-md border border-emerald-400 flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
-                  Chatting about: {selectedProduct.name}
+                <div className="flex justify-between items-center w-full">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (onAddToCart) onAddToCart();
+                    }}
+                    className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-semibold px-4 py-1.5 rounded-full shadow-lg shadow-emerald-500/20 backdrop-blur-md border border-emerald-400 flex items-center transition-colors"
+                  >
+                    Add to Cart
+                  </button>
+
+                  <div className="bg-white/10 text-white/80 text-xs sm:text-sm font-semibold px-3 py-1.5 rounded-full shadow-lg backdrop-blur-md border border-white/20 flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                    Chatting with: {selectedProduct.name}
+                  </div>
                 </div>
               </motion.div>
             )}

@@ -215,6 +215,9 @@ export function App() {
               }}
               followUpQuestions={state.followUpQuestions}
               selectedProduct={selectedProductObj}
+              onAddToCart={() => {
+                if (selectedProductObj) addToCart(selectedProductObj.id);
+              }}
             />
           </div>
         }
