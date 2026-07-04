@@ -237,7 +237,7 @@ export function WishInputBar({
               type="text"
               value={value}
               onChange={(e) => onChange(e.target.value)}
-              placeholder={(followUpQuestions && followUpQuestions.length > 0) ? followUpQuestions[0] : (placeholder || t('PLACEHOLDER'))}
+              placeholder={selectedProduct ? `Ask about ${selectedProduct.name} (e.g. warranty, delivery)...` : ((followUpQuestions && followUpQuestions.length > 0) ? followUpQuestions[0] : (placeholder || t('PLACEHOLDER')))}
               disabled={disabled}
               className={`w-full px-4 py-3 sm:px-6 sm:py-4 ${browserSupportsSpeechRecognition ? 'pr-28 sm:pr-32' : 'pr-12 sm:pr-14'} bg-transparent text-white placeholder:text-white/40 font-heading text-base sm:text-lg outline-none`}
             />
