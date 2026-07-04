@@ -72,7 +72,11 @@ function loadSessions(): Session[] {
   if (typeof window === 'undefined') return [];
   try {
     const saved = localStorage.getItem(SESSIONS_STORAGE_KEY);
-    if (saved) return JSON.parse(saved);
+    if (saved) {
+      const parsed: Session[] = JSON.parse(saved);
+      const filtered = parsed.filter(s => s.history.length > 0 || s.stage > 0);
+      return filtered.length > 0 ? filtered : [];
+    }
   } catch (e) {}
   return [];
 }
@@ -479,12 +483,38 @@ export function useWishTree() {
       setSessions(prev => [...prev, newSession]);
       setCurrentSessionIndex(sessions.length);
     } else {
-      setCurrentSessionIndex(prev => prev + 1);
+      setSessions(prev => {
+        const current = prev[currentSessionIndex];
+        if (current && current.history.length === 0 && current.stage === 0) {
+          const newSessions = [...prev];
+          newSessions.splice(currentSessionIndex, 1);
+          return newSessions;
+        }
+        return prev;
+      });
+      // If we deleted the current session, the next session is now at the same index
+      // If we didn't, the next session is at currentSessionIndex + 1
+      setCurrentSessionIndex(prevIdx => {
+        const current = sessions[prevIdx];
+        if (current && current.history.length === 0 && current.stage === 0) {
+          return prevIdx;
+        }
+        return prevIdx + 1;
+      });
     }
-  }, [currentSessionIndex, sessions.length]);
+  }, [currentSessionIndex, sessions]);
 
   const goToPrevSession = useCallback(() => {
     if (currentSessionIndex > 0) {
+      setSessions(prev => {
+        const current = prev[currentSessionIndex];
+        if (current && current.history.length === 0 && current.stage === 0) {
+          const newSessions = [...prev];
+          newSessions.splice(currentSessionIndex, 1);
+          return newSessions;
+        }
+        return prev;
+      });
       setCurrentSessionIndex(prev => prev - 1);
     }
   }, [currentSessionIndex]);
@@ -525,6 +555,23 @@ export function useWishTree() {
     };
   }, [currentSession, globalState]);
 
+  const selectSession = useCallback((index: number) => {
+    if (index === currentSessionIndex) return;
+    const current = sessions[currentSessionIndex];
+    const isCurrentEmpty = current && current.history.length === 0 && current.stage === 0;
+    
+    if (isCurrentEmpty) {
+      setSessions(prev => {
+        const newSessions = [...prev];
+        newSessions.splice(currentSessionIndex, 1);
+        return newSessions;
+      });
+      setCurrentSessionIndex(index > currentSessionIndex ? index - 1 : index);
+    } else {
+      setCurrentSessionIndex(index);
+    }
+  }, [currentSessionIndex, sessions]);
+
   return {
     state,
     advanceStage,
@@ -550,7 +597,7 @@ export function useWishTree() {
     restoreHistory,
     sessions,
     currentSessionIndex,
-    selectSession: setCurrentSessionIndex,
+    selectSession,
     goToNextSession,
     goToPrevSession,
     deleteSession,

@@ -132,7 +132,7 @@ export function App() {
         >
           <Settings className="w-4 h-4 sm:w-5 sm:h-5" />
         </button>
-        {(sessions.length > 1 || state.stage > 0) && (
+        {(history.length > 0 || state.stage > 0) && (
           <button
             onClick={deleteSession}
             className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-orange-700/80 hover:bg-orange-800 text-white rounded-full shadow-lg transition-colors backdrop-blur-md border border-orange-700/20"
