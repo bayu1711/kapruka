@@ -202,14 +202,16 @@ export function App() {
 
         <div className={`absolute top-28 sm:top-1/2 sm:-translate-y-1/2 right-4 sm:right-6 z-40 transition-opacity duration-300 pointer-events-none flex items-center justify-end opacity-100`}>
           {currentSessionIndex === sessions.length - 1 ? (
-            <button
-              onClick={goToNextSession}
-              className="pointer-events-auto px-3 py-2 sm:px-4 sm:py-3 rounded-full bg-emerald-500 hover:bg-emerald-400 backdrop-blur-md flex items-center gap-1.5 sm:gap-2 justify-center text-white font-heading transition-all hover:scale-105 shadow-[0_4px_20px_rgba(16,185,129,0.3)]"
-              title="Start New Wish Tree"
-            >
-              <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
-              <span className="font-semibold text-xs sm:text-sm">New Tree</span>
-            </button>
+            (history.length > 0 || state.stage > 0) && (
+              <button
+                onClick={goToNextSession}
+                className="pointer-events-auto px-3 py-2 sm:px-4 sm:py-3 rounded-full bg-emerald-500 hover:bg-emerald-400 backdrop-blur-md flex items-center gap-1.5 sm:gap-2 justify-center text-white font-heading transition-all hover:scale-105 shadow-[0_4px_20px_rgba(16,185,129,0.3)]"
+                title="Start New Wish Tree"
+              >
+                <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
+                <span className="font-semibold text-xs sm:text-sm">New Tree</span>
+              </button>
+            )
           ) : (
             <button
               onClick={goToNextSession}
