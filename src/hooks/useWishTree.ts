@@ -489,24 +489,30 @@ export function useWishTree() {
     }
   }, [currentSessionIndex]);
 
-  const deleteSession = useCallback(() => {
+  const deleteSessionByIndex = useCallback((indexToDelete: number) => {
     setSessions(prevSessions => {
       const newSessions = [...prevSessions];
-      newSessions.splice(currentSessionIndex, 1);
+      newSessions.splice(indexToDelete, 1);
       if (newSessions.length === 0) {
         newSessions.push(createNewSession(0));
       }
       
       setCurrentSessionIndex(current => {
-        if (current >= newSessions.length) {
-          return Math.max(0, newSessions.length - 1);
+        if (current === indexToDelete) {
+          return Math.max(0, Math.min(current, newSessions.length - 1));
+        } else if (current > indexToDelete) {
+          return current - 1;
         }
         return current;
       });
       
       return newSessions;
     });
-  }, [currentSessionIndex]);
+  }, []);
+
+  const deleteSession = useCallback(() => {
+    deleteSessionByIndex(currentSessionIndex);
+  }, [currentSessionIndex, deleteSessionByIndex]);
 
   const currentSession = sessions[currentSessionIndex];
   const currentConfig = currentSession ? stageConfigs[currentSession.stage] : stageConfigs[0];
@@ -548,5 +554,6 @@ export function useWishTree() {
     goToNextSession,
     goToPrevSession,
     deleteSession,
+    deleteSessionByIndex,
   };
 }

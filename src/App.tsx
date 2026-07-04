@@ -55,6 +55,7 @@ export function App() {
     goToPrevSession,
     deleteSession,
     selectSession,
+    deleteSessionByIndex,
   } = useWishTree();
   // Enable dark mode
   useEffect(() => {
@@ -143,7 +144,7 @@ export function App() {
         <button
           onClick={() => setIsSearchModalOpen(true)}
           className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-blue-500/20 hover:bg-blue-500/40 text-blue-200 rounded-full shadow-lg transition-colors backdrop-blur-md border border-blue-500/30"
-          title="Search Conversations"
+          title="Search Wishes"
         >
           <Search className="w-4 h-4 sm:w-5 sm:h-5" />
         </button>
@@ -302,6 +303,7 @@ export function App() {
         onClose={() => setIsSearchModalOpen(false)}
         sessions={sessions}
         onSelectSession={selectSession}
+        onDeleteSession={deleteSessionByIndex}
         currentSessionIndex={currentSessionIndex}
       />
     </div>);
