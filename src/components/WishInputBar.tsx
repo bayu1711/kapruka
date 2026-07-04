@@ -150,7 +150,7 @@ export function WishInputBar({
                       {displayQuery}
                     </button>
                   </div>
-                  {snap.aiStatus && !snap.aiStatus.startsWith('Found ') && (
+                  {snap.aiStatus && !snap.aiStatus.match(/^Found \d+ (items|results)/) && (
                     <div className="flex justify-start w-full">
                       <div className="text-left text-sm backdrop-blur-xl border rounded-2xl px-4 py-2 max-w-[80%] break-words transition-all text-emerald-50 bg-emerald-700/60 border-emerald-400/50 shadow-lg font-medium">
                         {snap.aiStatus}

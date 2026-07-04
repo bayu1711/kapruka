@@ -18,7 +18,7 @@ const OutputSchema = z.object({
     giftMessage: z.string().optional()
   }).optional().describe("If intent is update_checkout, fill any details the user provides. Leave others undefined. Try to extract name, phone number, city, or date."),
   answer: z.string().optional().describe("If intent is 'answer', provide the answer to the user's question here. Be conversational, concise, and helpful."),
-  hint: z.string().optional().describe("A simple, short, non-technical context (1-2 sentences) about why these products are shown, to give the user a hint and encourage them to prompt again. e.g. 'I found these popular anniversary gifts for your wife.'"),
+  hint: z.string().describe("A simple, short, non-technical context (1-2 sentences) about why these products are shown. This MUST be provided. e.g. 'I found these popular anniversary gifts for your wife.'"),
   reasoning: z.string().describe("Analyze the recipient and occasion. Explain what types of gifts are appropriate vs inappropriate, and why you are choosing the specific Kapruka search query."),
   recipient: z.string().describe("Who the gift is for (e.g. mother, friend, self, unspecified)"),
   searchQuery: z.string().describe("The specific Kapruka search term (e.g. 'roses', 'birthday cake', 'saree')"),
@@ -311,7 +311,8 @@ CRITICAL RULES FOR SEARCH QUERY:
 2. If the user intent is vague (e.g. "gift for 5 year old boy"), pick ONE highly specific, popular item type. E.g. use "remote control car" or "lego" instead of "toys".
 3. If the user intent is "gift for mom", pick "saree", "handbag", "perfume", or "mother's day cake" instead of "flowers".
 4. Extract ALL contextual facts and constraints (like occasion, recipient, budget, brand, style, color, relationship) into the searchParameters array as discrete key-value pairs (e.g. [{key: "occasion", value: "Birthday"}, {key: "recipient", value: "Father"}]). DO NOT write lengthy reasoning paragraphs explaining the context. DO NOT include these constraints in the query itself.
-5. The user's preferred language is ${language}. You MUST translate your 'reasoning', 'postFilterReasoning', and 'followUpQuestions' into ${language}. DO NOT translate the 'searchQuery' or 'categories' keys.`)
+5. You MUST always generate a 'hint' string that is a short, conversational response explaining why you picked these items to display on the screen.
+6. The user's preferred language is ${language}. You MUST translate your 'reasoning', 'hint', 'postFilterReasoning', and 'followUpQuestions' into ${language}. DO NOT translate the 'searchQuery' or 'categories' keys.`)
     ];
 
     if (history && history.length > 0) {
