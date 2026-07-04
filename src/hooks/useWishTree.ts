@@ -544,6 +544,7 @@ export function useWishTree() {
     restoreHistory,
     sessions,
     currentSessionIndex,
+    selectSession: setCurrentSessionIndex,
     goToNextSession,
     goToPrevSession,
     deleteSession,

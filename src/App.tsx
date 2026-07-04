@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Plus, Axe, Settings } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, Axe, Settings, Search } from 'lucide-react';
 import { useWishTree } from './hooks/useWishTree';
 import { AiStatus } from './components/AiStatus';
 import { WishTree } from './components/WishTree';
@@ -11,6 +11,7 @@ import { CartDrawer } from './components/CartDrawer';
 import { CheckoutSummary } from './components/CheckoutSummary';
 import { ConfirmationState } from './components/ConfirmationState';
 import { ProductDetailsModal } from './components/ProductDetailsModal';
+import { GlobalSearchModal } from './components/GlobalSearchModal';
 import { useLanguage } from './contexts/LanguageContext';
 import SpeechRecognition from 'react-speech-recognition';
 import { Locale } from './i18n/translations';
@@ -53,6 +54,7 @@ export function App() {
     goToNextSession,
     goToPrevSession,
     deleteSession,
+    selectSession,
   } = useWishTree();
   // Enable dark mode
   useEffect(() => {
@@ -80,6 +82,7 @@ export function App() {
 
   const [isPaging, setIsPaging] = useState(false);
   const [isDevToolsOpen, setIsDevToolsOpen] = useState(false);
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [enablePostFilter, setEnablePostFilter] = useState(false);
   const [showDebugGrid, setShowDebugGrid] = useState(false);
   const [showCanopy, setShowCanopy] = useState(true);
@@ -137,6 +140,13 @@ export function App() {
             <Axe className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
         )}
+        <button
+          onClick={() => setIsSearchModalOpen(true)}
+          className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-blue-500/20 hover:bg-blue-500/40 text-blue-200 rounded-full shadow-lg transition-colors backdrop-blur-md border border-blue-500/30"
+          title="Search Conversations"
+        >
+          <Search className="w-4 h-4 sm:w-5 sm:h-5" />
+        </button>
         <CartBadge count={state.cartItems.length} onClick={toggleCart} />
       </div>
 
@@ -285,5 +295,14 @@ export function App() {
       <AnimatePresence>
         {state.showConfirmation && <ConfirmationState onClose={closeConfirmation} />}
       </AnimatePresence>
+
+      {/* Global Search Modal */}
+      <GlobalSearchModal
+        isOpen={isSearchModalOpen}
+        onClose={() => setIsSearchModalOpen(false)}
+        sessions={sessions}
+        onSelectSession={selectSession}
+        currentSessionIndex={currentSessionIndex}
+      />
     </div>);
 }
