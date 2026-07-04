@@ -11,8 +11,23 @@ import { CartDrawer } from './components/CartDrawer';
 import { CheckoutSummary } from './components/CheckoutSummary';
 import { ConfirmationState } from './components/ConfirmationState';
 import { ProductDetailsModal } from './components/ProductDetailsModal';
+import { useLanguage } from './contexts/LanguageContext';
+import SpeechRecognition from 'react-speech-recognition';
+import { Locale } from './i18n/translations';
 const PRODUCT_PAGE_SIZE = 20;
 export function App() {
+  const { locale, setLocale, t } = useLanguage();
+  
+  const cycleLanguage = () => {
+    const langs: Locale[] = ['en-US', 'si-LK', 'ta-LK'];
+    const nextIndex = (langs.indexOf(locale) + 1) % langs.length;
+    const nextLang = langs[nextIndex];
+    setLocale(nextLang);
+    SpeechRecognition.stopListening();
+  };
+
+  const langLabel = ['EN', 'SI', 'TA'][['en-US', 'si-LK', 'ta-LK'].indexOf(locale)];
+
   const {
     state,
     handleSubmit,
@@ -98,6 +113,14 @@ export function App() {
       {/* UI Components */}
 
       <div className={`fixed top-4 right-4 sm:top-6 sm:right-6 z-50 flex items-center gap-2 sm:gap-3 transition-opacity duration-300 opacity-100`}>
+        <button
+          type="button"
+          onClick={cycleLanguage}
+          className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-white/10 hover:bg-white/20 text-white/80 hover:text-white rounded-full shadow-lg transition-colors backdrop-blur-md border border-white/20 font-mono text-xs sm:text-sm font-bold"
+          title="Change Voice Language"
+        >
+          {langLabel}
+        </button>
         <button
           onClick={() => setIsDevToolsOpen(true)}
           className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-purple-500/20 hover:bg-purple-500/40 text-purple-200 rounded-full shadow-lg transition-colors backdrop-blur-md border border-purple-500/30"

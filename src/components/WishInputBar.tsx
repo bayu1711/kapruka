@@ -74,8 +74,7 @@ export function WishInputBar({
   selectedProduct,
 }: WishInputBarProps) {
   const [loading, setLoading] = useState(false);
-  const { locale, setLocale, t } = useLanguage();
-
+  const { t } = useLanguage();
   const { transcript, listening, resetTranscript, browserSupportsSpeechRecognition } = useSpeechRecognition();
 
   useEffect(() => {
@@ -89,24 +88,9 @@ export function WishInputBar({
       SpeechRecognition.stopListening();
     } else {
       resetTranscript();
-      SpeechRecognition.startListening({ continuous: true, language: locale });
+      SpeechRecognition.startListening({ continuous: true, language: 'en-US' }); // Or get current locale if we pass it
     }
   };
-
-  const cycleLanguage = () => {
-    const langs: Locale[] = ['en-US', 'si-LK', 'ta-LK'];
-    const nextIndex = (langs.indexOf(locale) + 1) % langs.length;
-    const nextLang = langs[nextIndex];
-    setLocale(nextLang);
-    if (listening) {
-      SpeechRecognition.stopListening();
-      setTimeout(() => {
-        SpeechRecognition.startListening({ continuous: true, language: nextLang });
-      }, 50);
-    }
-  };
-
-  const langLabel = ['EN', 'SI', 'TA'][['en-US', 'si-LK', 'ta-LK'].indexOf(locale)];
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -199,7 +183,7 @@ export function WishInputBar({
 
               <div className="flex items-center gap-1.5 text-xs font-semibold text-white/90 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-3 py-1.5 shadow-lg max-w-[60%] truncate">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
-                <span className="truncate">Chatting with: {selectedProduct.name}</span>
+                <span className="truncate">Wishing for: {selectedProduct.name}</span>
               </div>
             </motion.div>
           ) : (
@@ -260,14 +244,6 @@ export function WishInputBar({
             />
             {browserSupportsSpeechRecognition && (
               <div className="absolute right-12 sm:right-16 top-1/2 -translate-y-1/2 flex items-center gap-1">
-                <button
-                  type="button"
-                  onClick={cycleLanguage}
-                  className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center transition-colors bg-white/5 text-white/50 hover:bg-white/10 hover:text-white/80 font-mono text-xs sm:text-sm font-bold"
-                  title="Change Voice Language"
-                >
-                  {langLabel}
-                </button>
                 <button
                   type="button"
                   onClick={toggleListening}
