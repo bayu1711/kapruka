@@ -293,8 +293,9 @@ CRITICAL RULES FOR INTENT:
 1. If the user wants to buy, add, or get items that are CURRENTLY in the "Visible Products" or "Selected Product", set intent="add_to_cart" and extract their exact IDs into "targetProductIds".
 2. If the user wants to remove items from their cart, set intent="remove_from_cart" and set "targetProductIds" to the items' IDs from "Cart Items".
 3. If the user says "checkout", "buy now" (without specifying a product), or "pay", set intent="checkout".
-4. If the user is asking a question (e.g. "what is the warranty?", "can this be delivered today?", "tell me about this product") especially when a product is selected, set intent="answer" and provide the answer in the "answer" field. Use information from the "Selected Product" context if available.
-5. For all other requests (looking for gifts, exploring, etc), set intent="search".
+4. If the user asks to compare items (e.g., in their cart or visible products), set intent="answer" and write a detailed text comparison of the items' prices, names, and features using the data provided in the context. Do NOT refuse to compare them.
+5. If the user is asking a question (e.g. "what is the warranty?", "can this be delivered today?", "tell me about this product") especially when a product is selected, set intent="answer" and provide the answer in the "answer" field. Use information from the "Selected Product" context if available.
+6. For all other requests (looking for gifts, exploring, etc), set intent="search".
 
 CRITICAL RULES FOR SEARCH QUERY:
 1. NEVER output generic category names like 'toys', 'electronics', 'flowers', or 'gifts'. Kapruka's search engine works best with specific items.
