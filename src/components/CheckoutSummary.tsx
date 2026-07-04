@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useRef, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   MapPin, Calendar, Gift, User, Phone,
   ArrowRight, Loader2, ExternalLink, AlertTriangle, X
 } from 'lucide-react';
 import type { Product } from '../data/scenario';
-import { createOrder } from '../lib/kapruka-mcp';
+import { createOrder, listDeliveryCities, checkDelivery } from '../lib/kapruka-mcp';
 import { useLanguage } from '../contexts/LanguageContext';
 
 interface CheckoutSummaryProps {
@@ -34,6 +34,45 @@ export function CheckoutSummary({ items, details, onUpdateDetails, onConfirm, on
   const [placing, setPlacing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [citySuggestions, setCitySuggestions] = useState<string[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  const handleCityChange = (val: string) => {
+    onUpdateDetails({ city: val });
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (val.length < 2) {
+      setCitySuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+    debounceRef.current = setTimeout(async () => {
+      try {
+        const cities = await listDeliveryCities(val);
+        setCitySuggestions(cities.slice(0, 6));
+        setShowSuggestions(cities.length > 0);
+      } catch {
+        setCitySuggestions([]);
+      }
+    }, 350);
+  };
+
+  const selectCity = (c: string) => {
+    onUpdateDetails({ city: c });
+    setShowSuggestions(false);
+  };
+
   const subtotal = items.reduce((sum, item) => sum + item.price, 0);
 
   // Validate required fields
@@ -45,6 +84,11 @@ export function CheckoutSummary({ items, details, onUpdateDetails, onConfirm, on
     setError(null);
 
     try {
+      const deliveryRes = await checkDelivery(details.city.trim(), details.deliveryDate);
+      if (!deliveryRes.available) {
+        throw new Error(deliveryRes.message || 'Delivery is not available for the selected city and date.');
+      }
+
       // Pass all cart items to the checkout endpoint
       const result = await createOrder({
         cart: items.map(item => ({ productId: item.id, quantity: 1 })),
@@ -134,15 +178,40 @@ export function CheckoutSummary({ items, details, onUpdateDetails, onConfirm, on
                     <h3 className="font-heading font-semibold text-white flex items-center gap-2 mb-3">
                       <MapPin className="w-4 h-4 text-emerald-400" /> {t('DELIVERY_INFO')}
                     </h3>
-                    <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5">
-                      <MapPin className="w-3.5 h-3.5 text-white/40 flex-shrink-0" />
-                      <input
-                        type="text"
-                        placeholder="City *"
-                        value={details.city}
-                        onChange={(e) => onUpdateDetails({ city: e.target.value })}
-                        className="bg-transparent text-white text-sm placeholder:text-white/30 outline-none w-full"
-                      />
+                    <div className="relative" ref={wrapperRef}>
+                      <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5">
+                        <MapPin className="w-3.5 h-3.5 text-white/40 flex-shrink-0" />
+                        <input
+                          type="text"
+                          placeholder="City *"
+                          value={details.city}
+                          onChange={(e) => handleCityChange(e.target.value)}
+                          onFocus={() => {
+                            if (citySuggestions.length > 0) setShowSuggestions(true);
+                          }}
+                          className="bg-transparent text-white text-sm placeholder:text-white/30 outline-none w-full"
+                        />
+                      </div>
+                      <AnimatePresence>
+                        {showSuggestions && (
+                          <motion.ul
+                            initial={{ opacity: 0, y: -4 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -4 }}
+                            className="absolute top-full left-0 right-0 z-30 mt-1 bg-slate-900 border border-white/10 rounded-xl overflow-hidden shadow-xl"
+                          >
+                            {citySuggestions.map((c) => (
+                              <li
+                                key={c}
+                                onMouseDown={() => selectCity(c)}
+                                className="px-4 py-2.5 text-sm text-white/80 hover:bg-white/10 cursor-pointer transition-colors"
+                              >
+                                {c}
+                              </li>
+                            ))}
+                          </motion.ul>
+                        )}
+                      </AnimatePresence>
                     </div>
                     <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5">
                       <Calendar className="w-3.5 h-3.5 text-white/40 flex-shrink-0" />
