@@ -828,9 +828,9 @@ export function WishTree({
                         {product.details?.description && (
                           <div className="text-white text-sm sm:text-base mb-4 leading-relaxed font-medium bg-[#402970]/[.98] p-3 sm:p-4 rounded-xl backdrop-blur-sm border border-white/10 shadow-inner">
                             <p className="opacity-90">{product.details.description}</p>
-                            {product.details.description.endsWith('...') && product.url && (
+                            {(product.details.description.trim().endsWith('...') || product.details.description.trim().endsWith('…')) && (
                               <a 
-                                href={product.url}
+                                href={product.url || `https://www.kapruka.com/buyonline/${product.name.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase()}/kid/${product.id}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="inline-block mt-2 text-emerald-400 hover:text-emerald-300 text-sm font-semibold transition-colors"
@@ -858,18 +858,16 @@ export function WishTree({
                         )}
 
                         {/* View on Kapruka URL */}
-                        {product.url && (
-                          <a 
-                            href={product.url} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="text-xs sm:text-sm text-emerald-400 hover:text-emerald-300 hover:underline flex items-center gap-1.5 mb-6 w-fit transition-colors"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <span>View details on Kapruka website</span>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
-                          </a>
-                        )}
+                        <a 
+                          href={product.url || `https://www.kapruka.com/buyonline/${product.name.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase()}/kid/${product.id}`}
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-xs sm:text-sm text-emerald-400 hover:text-emerald-300 hover:underline flex items-center gap-1.5 mb-6 w-fit transition-colors"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <span>View details on Kapruka website</span>
+                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+                        </a>
                         
                         <div className="mt-auto pt-4 flex gap-3">
                           <button
