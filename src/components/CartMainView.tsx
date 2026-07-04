@@ -153,9 +153,9 @@ export function CartMainView({
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.05 }}
                       onClick={() => onSelectProduct(item.id)}
-                      className={`relative bg-white/5 rounded-2xl border ${isChecked ? 'border-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.2)]' : 'border-white/10 hover:border-white/30'} cursor-pointer transition-all duration-300 hover:scale-[1.02] overflow-hidden group flex flex-row items-stretch min-h-[120px]`}
+                      className={`relative bg-white/5 rounded-2xl border ${isChecked ? 'border-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.2)]' : 'border-white/10 hover:border-white/30'} cursor-pointer transition-all duration-300 hover:scale-[1.02] overflow-hidden group flex flex-row items-stretch min-h-[90px]`}
                     >
-                      <div className="absolute top-4 left-4 z-10" onClick={(e) => e.stopPropagation()}>
+                      <div className="absolute top-3 sm:top-4 left-3 sm:left-4 z-10" onClick={(e) => e.stopPropagation()}>
                         <label className="flex items-center cursor-pointer group/checkbox p-1">
                           <div className="relative flex items-center justify-center w-6 h-6">
                             <input
@@ -174,14 +174,14 @@ export function CartMainView({
                       </div>
 
                       {/* Left: Info */}
-                      <div className="flex-1 p-4 sm:p-5 pl-14 sm:pl-16 flex flex-col justify-center">
-                        <h3 className="font-heading font-medium text-white mb-1 line-clamp-2 leading-tight text-lg sm:text-xl">
+                      <div className="flex-1 p-3 sm:p-4 pl-12 sm:pl-14 flex flex-col justify-center">
+                        <h3 className="font-heading font-medium text-white mb-0.5 line-clamp-2 leading-tight text-base sm:text-lg">
                           {item.name}
                         </h3>
-                        <p className="text-sm font-mono text-white/50 mb-3 line-clamp-1">
+                        <p className="text-xs sm:text-sm font-mono text-white/50 mb-1.5 line-clamp-1">
                           {item.category}
                         </p>
-                        <p className="text-xl sm:text-2xl font-mono font-bold text-emerald-400">
+                        <p className="text-lg sm:text-xl font-mono font-bold text-emerald-400 leading-none">
                           LKR {item.price.toLocaleString()}
                         </p>
                       </div>
