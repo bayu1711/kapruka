@@ -1,6 +1,6 @@
 export interface AgentResult {
   intent?: 'search' | 'add_to_cart' | 'remove_from_cart' | 'checkout';
-  targetProductId?: string;
+  targetProductIds?: string[];
   searchQuery: string;
   suggestedCategories: string[];
   aiStatusMessage: string;
@@ -39,7 +39,7 @@ export async function parseUserQuery(
     
     return {
       intent: data.intent,
-      targetProductId: data.targetProductId,
+      targetProductIds: data.targetProductIds,
       searchQuery: userMessage, 
       actualSearchQuery: data.searchQuery, // The actual query Gemini used
       originalSearchQuery: data.originalSearchQuery,

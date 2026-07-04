@@ -250,14 +250,20 @@ export function useWishTree() {
         let actionMessage = '';
         if (agentResult.intent === 'add_to_cart') {
           setGlobalState((prev) => {
-            const product = currentProducts.find(p => p.id === agentResult.targetProductId);
-            if (!product) return prev;
-            return { ...prev, cartItems: [...prev.cartItems, product], showCart: true };
+            const ids = agentResult.targetProductIds || [];
+            const newProducts = currentProducts.filter(p => ids.includes(p.id));
+            if (newProducts.length === 0) return prev;
+            return { ...prev, cartItems: [...prev.cartItems, ...newProducts], showCart: true };
           });
-          actionMessage = 'Item added to cart.';
+          const count = agentResult.targetProductIds?.length || 0;
+          actionMessage = count > 1 ? `${count} items added to cart.` : 'Item added to cart.';
         } else if (agentResult.intent === 'remove_from_cart') {
-          setGlobalState(prev => ({ ...prev, cartItems: prev.cartItems.filter(item => item.id !== agentResult.targetProductId) }));
-          actionMessage = 'Item removed from cart.';
+          setGlobalState(prev => {
+            const ids = agentResult.targetProductIds || [];
+            return { ...prev, cartItems: prev.cartItems.filter(item => !ids.includes(item.id)) };
+          });
+          const count = agentResult.targetProductIds?.length || 0;
+          actionMessage = count > 1 ? `${count} items removed from cart.` : 'Item removed from cart.';
         } else if (agentResult.intent === 'checkout') {
           setGlobalState(prev => ({ ...prev, showCheckout: true }));
           actionMessage = 'Proceeding to checkout.';
