@@ -199,7 +199,9 @@ export function useWishTree() {
   const handleSubmit = useCallback(async (query: string, enablePostFilter: boolean = false, isFallback: boolean = false, originalQuery?: string) => {
     if (!query.trim()) return;
 
-    if (!isFallback && !globalState.showCart) {
+    const inCart = globalState.showCart || globalState.showCheckout || globalState.showConfirmation;
+
+    if (!isFallback && !inCart) {
       updateSession((prev) => ({
         ...prev,
         stage: 3,
@@ -211,12 +213,11 @@ export function useWishTree() {
         productSeed: prev.productSeed + 1,
         page: 0,
       }));
-    } else if (!isFallback && globalState.showCart) {
+    } else if (!isFallback && inCart) {
       setGlobalState(prev => ({ ...prev, isSearchingCart: true, aiStatus: t('SEARCHING') })); 
     }
 
     const session = sessions[currentSessionIndex];
-    const inCart = globalState.showCart;
     const currentProducts = inCart ? globalState.cartItems : (session?.liveProducts || []);
     
     // For cart, selectedProductObj might be one of the selected cart items if we are chatting about it

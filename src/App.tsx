@@ -106,6 +106,8 @@ export function App() {
   const hasMorePages = (state.page + 1) * PRODUCT_PAGE_SIZE < totalProducts;
   const hasPrevPages = state.page > 0;
   const hasSelection = !!state.selectedProduct;
+  const isCartContext = state.showCart || state.showCheckout || state.showConfirmation;
+
   return (
     <div className="relative w-full h-[100dvh] bg-[#402970] overflow-hidden flex flex-col">
       {/* Background effects */}
@@ -320,83 +322,81 @@ export function App() {
           </div>
         )}
 
-        {!state.showCheckout && !state.showConfirmation && (
-          <div className={`w-full transition-opacity duration-300 opacity-100`}>
-            <WishInputBar
-              value={state.inputValue}
-              onChange={updateInput}
-              onSubmit={onSubmit}
-              placeholder={currentConfig?.prompt || 'What are you wishing for today?'}
-              disabled={state.showCheckout || state.showConfirmation || state.isSearching}
-              isSearching={state.isSearching}
-              history={state.showCart ? state.cartHistory : history}
-              onHistoryClick={state.showCart ? undefined : restoreHistory}
-              hasMorePages={state.showCart ? false : hasMorePages}
-              hasPrevPages={state.showCart ? false : hasPrevPages}
-              onNextPage={state.showCart ? undefined : () => {
-                setIsPaging(true);
-                nextPage();
-              }}
-              onPrevPage={state.showCart ? undefined : () => {
-                setIsPaging(true);
-                prevPage();
-              }}
-              onRandomize={state.showCart ? undefined : () => {
-                const randomQueries = [
-                  "Please suggest completely different gift ideas, but keep all my previous constraints (like occasion, recipient, budget) in mind.",
-                  "Show me some alternative options for the same person and occasion.",
-                  "I want something else, but still fitting the same context we discussed."
-                ];
-                const q = randomQueries[Math.floor(Math.random() * randomQueries.length)];
-                handleSubmit(q);
-              }}
-              followUpQuestions={state.followUpQuestions}
-              selectedProduct={selectedProductObj}
-              onAddToCart={() => {
-                if (selectedProductObj) addToCart(selectedProductObj.id);
-              }}
-              onRemoveFromCart={() => {
-                if (selectedProductObj) removeFromCart(selectedProductObj.id);
-              }}
-              isProductInCart={selectedProductObj ? state.cartItems.some(item => item.id === selectedProductObj.id) : false}
-              customTopContent={state.showCart ? (
-                <>
-                  {state.selectedCartItems.length > 0 && (
-                    <div className="flex items-center gap-1.5 text-xs font-semibold text-white/90 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-3 py-1.5 shadow-lg truncate max-w-[50%]">
-                      <span className="truncate">
-                        {state.selectedCartItems.length === 1 
-                          ? (state.cartItems.find(p => p.id === state.selectedCartItems[0])?.name || '1 item selected')
-                          : `Selected: ${state.selectedCartItems.length} items`}
-                      </span>
-                    </div>
-                  )}
-                  {state.selectedCartItems.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        handleSubmit(`I want to compare the selected items.`);
-                      }}
-                      className="flex items-center gap-1.5 text-xs font-semibold text-blue-100 bg-blue-500/20 hover:bg-blue-500/40 backdrop-blur-md border border-blue-500/30 rounded-full px-3 py-1.5 transition-colors shadow-lg"
-                    >
-                      Compare selected
-                    </button>
-                  )}
-                  {(state.selectedCartItems.length > 0 || state.cartItems.length > 0) && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        proceedToCheckout();
-                      }}
-                      className="flex items-center gap-1.5 text-xs font-semibold text-white bg-emerald-500/80 hover:bg-emerald-500 backdrop-blur-md border border-emerald-400 rounded-full px-3 py-1.5 transition-colors shadow-lg shadow-emerald-500/20"
-                    >
-                      {state.selectedCartItems.length > 0 ? 'Checkout selected' : 'Proceed to Checkout'}
-                    </button>
-                  )}
-                </>
-              ) : undefined}
-            />
-          </div>
-        )}
+        <div className={`w-full transition-opacity duration-300 opacity-100`}>
+          <WishInputBar
+            value={state.inputValue}
+            onChange={updateInput}
+            onSubmit={onSubmit}
+            placeholder={currentConfig?.prompt || 'What are you wishing for today?'}
+            disabled={state.isSearching}
+            isSearching={state.isSearching}
+            history={isCartContext ? state.cartHistory : history}
+            onHistoryClick={isCartContext ? undefined : restoreHistory}
+            hasMorePages={isCartContext ? false : hasMorePages}
+            hasPrevPages={isCartContext ? false : hasPrevPages}
+            onNextPage={isCartContext ? undefined : () => {
+              setIsPaging(true);
+              nextPage();
+            }}
+            onPrevPage={isCartContext ? undefined : () => {
+              setIsPaging(true);
+              prevPage();
+            }}
+            onRandomize={isCartContext ? undefined : () => {
+              const randomQueries = [
+                "Please suggest completely different gift ideas, but keep all my previous constraints (like occasion, recipient, budget) in mind.",
+                "Show me some alternative options for the same person and occasion.",
+                "I want something else, but still fitting the same context we discussed."
+              ];
+              const q = randomQueries[Math.floor(Math.random() * randomQueries.length)];
+              handleSubmit(q);
+            }}
+            followUpQuestions={state.followUpQuestions}
+            selectedProduct={selectedProductObj}
+            onAddToCart={() => {
+              if (selectedProductObj) addToCart(selectedProductObj.id);
+            }}
+            onRemoveFromCart={() => {
+              if (selectedProductObj) removeFromCart(selectedProductObj.id);
+            }}
+            isProductInCart={selectedProductObj ? state.cartItems.some(item => item.id === selectedProductObj.id) : false}
+            customTopContent={(state.showCart && !state.showCheckout && !state.showConfirmation) ? (
+              <>
+                {state.selectedCartItems.length > 0 && (
+                  <div className="flex items-center gap-1.5 text-xs font-semibold text-white/90 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-3 py-1.5 shadow-lg truncate max-w-[50%]">
+                    <span className="truncate">
+                      {state.selectedCartItems.length === 1 
+                        ? (state.cartItems.find(p => p.id === state.selectedCartItems[0])?.name || '1 item selected')
+                        : `Selected: ${state.selectedCartItems.length} items`}
+                    </span>
+                  </div>
+                )}
+                {state.selectedCartItems.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handleSubmit(`I want to compare the selected items.`);
+                    }}
+                    className="flex items-center gap-1.5 text-xs font-semibold text-blue-100 bg-blue-500/20 hover:bg-blue-500/40 backdrop-blur-md border border-blue-500/30 rounded-full px-3 py-1.5 transition-colors shadow-lg"
+                  >
+                    Compare selected
+                  </button>
+                )}
+                {(state.selectedCartItems.length > 0 || state.cartItems.length > 0) && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      proceedToCheckout();
+                    }}
+                    className="flex items-center gap-1.5 text-xs font-semibold text-white bg-emerald-500/80 hover:bg-emerald-500 backdrop-blur-md border border-emerald-400 rounded-full px-3 py-1.5 transition-colors shadow-lg shadow-emerald-500/20"
+                  >
+                    {state.selectedCartItems.length > 0 ? 'Checkout selected' : 'Proceed to Checkout'}
+                  </button>
+                )}
+              </>
+            ) : undefined}
+          />
+        </div>
       </div>
 
 

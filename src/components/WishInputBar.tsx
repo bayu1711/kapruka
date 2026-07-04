@@ -135,7 +135,6 @@ export function WishInputBar({
             }}
           >
             {history.map((snap, idx) => {
-              const isLastTwo = idx >= history.length - 2;
               let displayQuery = snap.query;
               if (displayQuery.startsWith('Q: ') && displayQuery.includes('\nA: ')) {
                 displayQuery = displayQuery.split('\nA: ')[1];
@@ -146,22 +145,14 @@ export function WishInputBar({
                     <button
                       type="button"
                       onClick={() => onHistoryClick?.(idx)}
-                      className={`text-right text-sm transition-all backdrop-blur-xl border rounded-2xl px-4 py-2 max-w-[80%] break-words ${
-                        isLastTwo 
-                          ? 'text-white bg-white/30 border-white/40 hover:bg-white/40 shadow-lg'
-                          : 'text-white/50 bg-white/5 border-white/10 hover:text-white/80 hover:bg-white/10'
-                      }`}
+                      className="text-right text-sm transition-all backdrop-blur-xl border rounded-2xl px-4 py-2 max-w-[80%] break-words text-white bg-white/30 border-white/40 hover:bg-white/40 shadow-lg"
                     >
                       {displayQuery}
                     </button>
                   </div>
                   {snap.aiStatus && !snap.aiStatus.startsWith('Found ') && (
                     <div className="flex justify-start w-full">
-                      <div className={`text-left text-sm backdrop-blur-xl border rounded-2xl px-4 py-2 max-w-[80%] break-words transition-all ${
-                        isLastTwo
-                          ? 'text-emerald-50 bg-emerald-700/60 border-emerald-400/50 shadow-lg font-medium'
-                          : 'text-emerald-100/40 bg-emerald-900/10 border-emerald-500/10'
-                      }`}>
+                      <div className="text-left text-sm backdrop-blur-xl border rounded-2xl px-4 py-2 max-w-[80%] break-words transition-all text-emerald-50 bg-emerald-700/60 border-emerald-400/50 shadow-lg font-medium">
                         {snap.aiStatus}
                       </div>
                     </div>
