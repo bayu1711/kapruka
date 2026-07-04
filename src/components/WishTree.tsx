@@ -594,11 +594,11 @@ export function WishTree({
           )}
 
           {/* Kapruka 'u' smile (Yellow) */}
-          <g filter="drop-shadow(0px 8px 16px rgba(0,0,0,0.2))">
+          <g filter="drop-shadow(0px 8px 16px rgba(0,0,0,0.2))" opacity="0.85">
             {isSearching ? (
               <motion.path
-                initial={{ pathLength: 0, opacity: 0.5 }}
-                animate={{ pathLength: [0, 1, 0], pathOffset: [0, 0, 1], opacity: [0.5, 1, 0.5] }}
+                initial={{ pathLength: 0, opacity: 0.4 }}
+                animate={{ pathLength: [0, 1, 0], pathOffset: [0, 0, 1], opacity: [0.4, 1, 0.4] }}
                 transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
                 d="M 240 350 A 160 100 0 0 0 560 350"
                 stroke="#FDE047"
