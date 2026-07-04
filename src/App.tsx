@@ -7,7 +7,7 @@ import { WishTree } from './components/WishTree';
 import { DevToolsDrawer } from './components/DevToolsDrawer';
 import { WishInputBar } from './components/WishInputBar';
 import { CartBadge } from './components/CartBadge';
-import { CartDrawer } from './components/CartDrawer';
+import { CartMainView } from './components/CartMainView';
 import { CheckoutSummary } from './components/CheckoutSummary';
 import { ConfirmationState } from './components/ConfirmationState';
 import { ProductDetailsModal } from './components/ProductDetailsModal';
@@ -157,35 +157,54 @@ export function App() {
       {/* Main tree visualization */}
       <div className="flex-1 relative w-full flex flex-col pt-16 sm:pt-0 min-h-0">
         <AnimatePresence mode="wait">
-          <motion.div
-            key={currentSessionIndex}
-            initial={{ opacity: 0, x: 100 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -100 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            className="flex-1 w-full h-full relative min-h-0 overflow-hidden"
-          >
-            <WishTree
-              stage={state.stage}
-              products={visibleProducts}
-              selectedProduct={state.selectedProduct}
-              onSelectProduct={selectProduct}
-              isPaging={isPaging}
-              liveCategories={liveCategories}
-              aiReasoning={state.aiReasoning}
-              aiRecipient={state.aiRecipient}
-              aiActualSearchQuery={state.aiActualSearchQuery}
-              aiOriginalSearchQuery={state.aiOriginalSearchQuery}
-              searchParameters={state.searchParameters}
-              showDebugGrid={showDebugGrid}
-              showCanopy={showCanopy}
-              isSearching={state.isSearching}
-              onAddToCart={addToCart}
-              onQuickSearch={(query) => {
-                handleSubmit(query, enablePostFilter);
-              }}
-            />
-          </motion.div>
+          {state.showCart ? (
+            <motion.div
+              key="cart-view"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              className="flex-1 w-full h-full relative min-h-0"
+            >
+              <CartMainView
+                items={cartProducts}
+                onCheckout={proceedToCheckout}
+                onRemoveItem={removeFromCart}
+                selectedProduct={state.selectedProduct}
+                onSelectProduct={selectProduct}
+              />
+            </motion.div>
+          ) : (
+            <motion.div
+              key={currentSessionIndex}
+              initial={{ opacity: 0, x: 100 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -100 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              className="flex-1 w-full h-full relative min-h-0 overflow-hidden"
+            >
+              <WishTree
+                stage={state.stage}
+                products={visibleProducts}
+                selectedProduct={state.selectedProduct}
+                onSelectProduct={selectProduct}
+                isPaging={isPaging}
+                liveCategories={liveCategories}
+                aiReasoning={state.aiReasoning}
+                aiRecipient={state.aiRecipient}
+                aiActualSearchQuery={state.aiActualSearchQuery}
+                aiOriginalSearchQuery={state.aiOriginalSearchQuery}
+                searchParameters={state.searchParameters}
+                showDebugGrid={showDebugGrid}
+                showCanopy={showCanopy}
+                isSearching={state.isSearching}
+                onAddToCart={addToCart}
+                onQuickSearch={(query) => {
+                  handleSubmit(query, enablePostFilter);
+                }}
+              />
+            </motion.div>
+          )}
         </AnimatePresence>
 
         {/* Navigation Arrows */}
@@ -262,14 +281,6 @@ export function App() {
         }
       </div>
 
-      {/* Cart drawer */}
-      <CartDrawer
-        isOpen={state.showCart}
-        onClose={toggleCart}
-        items={cartProducts}
-        onCheckout={proceedToCheckout}
-        onRemoveItem={removeFromCart}
-      />
 
       {/* Dev Tools drawer */}
       <DevToolsDrawer

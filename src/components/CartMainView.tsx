@@ -1,0 +1,230 @@
+import React from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { X, ShoppingCart, ArrowRight, Trash2, ChevronLeft } from 'lucide-react';
+import type { Product } from '../data/scenario';
+import { useLanguage } from '../contexts/LanguageContext';
+
+interface CartMainViewProps {
+  items: Product[];
+  onCheckout: () => void;
+  onRemoveItem: (id: string) => void;
+  selectedProduct: string | null;
+  onSelectProduct: (id: string | null) => void;
+}
+
+export function CartMainView({
+  items,
+  onCheckout,
+  onRemoveItem,
+  selectedProduct,
+  onSelectProduct
+}: CartMainViewProps) {
+  const { t } = useLanguage();
+  const subtotal = items.reduce((sum, item) => sum + item.price, 0);
+
+  const selectedProductObj = selectedProduct 
+    ? items.find(p => p.id === selectedProduct) 
+    : null;
+
+  return (
+    <div className="w-full h-full flex flex-col overflow-hidden">
+      
+      {/* Header - Always visible */}
+      <div className="w-full flex-shrink-0 px-4 sm:px-8 pt-8 pb-4">
+        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 bg-slate-900/40 backdrop-blur-md p-6 rounded-2xl border border-white/10">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center">
+              <ShoppingCart className="w-6 h-6 text-emerald-400" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-heading font-bold text-white mb-1">
+                {t('YOUR_CART')}
+              </h2>
+              <p className="text-white/60 font-mono">
+                {items.length} {items.length === 1 ? 'item' : 'items'}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 w-full sm:w-auto">
+             <div className="text-left sm:text-right">
+               <p className="text-white/60 text-sm font-heading mb-1">{t('TOTAL')}</p>
+               <p className="text-2xl font-mono font-bold text-emerald-400">
+                 LKR {subtotal.toLocaleString()}
+               </p>
+             </div>
+             <button
+               onClick={onCheckout}
+               disabled={items.length === 0}
+               className="w-full sm:w-auto py-3 px-8 bg-emerald-500 hover:bg-emerald-600 disabled:bg-emerald-500/50 disabled:cursor-not-allowed text-white font-heading font-semibold rounded-xl transition-colors flex items-center justify-center gap-2 group shadow-lg shadow-emerald-500/25"
+             >
+               {t('CHECKOUT')}
+               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+             </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content Area - Scrollable */}
+      <div className="flex-1 w-full overflow-y-auto px-4 sm:px-8 pb-32 custom-scrollbar">
+        <div className="max-w-6xl mx-auto relative h-full">
+          <AnimatePresence mode="wait">
+            {selectedProductObj ? (
+              /* Detailed Product View */
+              <motion.div
+                key="detail-view"
+                initial={{ opacity: 0, x: 50 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -50 }}
+                className="w-full bg-[#402970]/80 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl overflow-hidden flex flex-col sm:flex-row gap-6 p-6"
+              >
+                <div className="w-full sm:w-1/2 h-64 sm:h-[500px] rounded-2xl overflow-hidden shadow-inner bg-black/20 relative group">
+                  <img 
+                    src={selectedProductObj.image || `https://placehold.co/400x400/1e293b/6ee7b7?text=${encodeURIComponent(selectedProductObj.name)}`} 
+                    alt={selectedProductObj.name}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <button
+                    onClick={() => onSelectProduct(null)}
+                    className="absolute top-4 left-4 p-2 bg-black/40 hover:bg-black/60 rounded-full text-white transition-colors flex items-center justify-center"
+                    title="Back to Cart Grid"
+                  >
+                    <ChevronLeft className="w-6 h-6" />
+                  </button>
+                </div>
+
+                <div className="flex-1 flex flex-col min-h-0 overflow-y-auto custom-scrollbar pr-2 relative">
+                  <button
+                    onClick={() => onSelectProduct(null)}
+                    className="absolute top-0 right-0 p-2 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors flex items-center justify-center"
+                    title="Close Details"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+
+                  <div className="mb-6 pt-2">
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="px-3 py-1 bg-white/10 rounded-full text-xs font-mono font-medium text-emerald-300">
+                        {selectedProductObj.category}
+                      </span>
+                      {selectedProductObj.delivery === 'Same Day' && (
+                        <span className="px-3 py-1 bg-blue-500/20 rounded-full text-xs font-mono font-medium text-blue-300">
+                          Available Today
+                        </span>
+                      )}
+                    </div>
+                    <h3 className="text-3xl sm:text-4xl font-heading font-bold text-white mb-4 leading-tight pr-10">
+                      {selectedProductObj.name}
+                    </h3>
+                    <div className="flex items-baseline gap-3">
+                      <p className="text-4xl font-mono font-bold text-emerald-400">
+                        LKR {selectedProductObj.price.toLocaleString()}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex-1 text-white/80 space-y-4">
+                    <p className="text-base leading-relaxed">
+                      {selectedProductObj.description || "A wonderful gift choice that brings joy and happiness to your loved ones. Specially selected to match your preferences."}
+                    </p>
+                    
+                    <div className="grid grid-cols-2 gap-4 mt-6">
+                      <div className="bg-white/5 p-4 rounded-xl">
+                        <span className="text-sm text-white/50 font-mono block mb-1">Occasion</span>
+                        <span className="text-base font-medium">{selectedProductObj.occasion || "Any Occasion"}</span>
+                      </div>
+                      <div className="bg-white/5 p-4 rounded-xl">
+                        <span className="text-sm text-white/50 font-mono block mb-1">Recipient</span>
+                        <span className="text-base font-medium">{selectedProductObj.recipient || "Anyone"}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="mt-8 flex flex-wrap gap-4">
+                    <button
+                      onClick={() => onCheckout()}
+                      className="flex-1 min-w-[200px] py-4 px-6 bg-emerald-500 hover:bg-emerald-600 text-white font-heading font-bold rounded-xl transition-all shadow-[0_4px_20px_rgba(16,185,129,0.3)] hover:shadow-[0_4px_25px_rgba(16,185,129,0.4)] flex items-center justify-center gap-2"
+                    >
+                      {t('CHECKOUT')}
+                      <ArrowRight className="w-5 h-5" />
+                    </button>
+                    <button
+                      onClick={() => {
+                        onRemoveItem(selectedProductObj.id);
+                        onSelectProduct(null);
+                      }}
+                      className="py-4 px-6 bg-red-500/20 hover:bg-red-500/30 text-red-300 rounded-xl transition-colors flex items-center justify-center gap-2"
+                    >
+                      <Trash2 className="w-5 h-5" />
+                      <span>Remove</span>
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            ) : (
+              /* Grid View */
+              <motion.div
+                key="grid-view"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
+              >
+                {items.map((item, index) => (
+                  <motion.div
+                    key={`${item.id}-${index}`}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    onClick={() => onSelectProduct(item.id)}
+                    className="relative bg-white/5 rounded-2xl border border-white/10 hover:border-white/30 cursor-pointer transition-all duration-300 hover:scale-105 overflow-hidden group flex flex-col"
+                  >
+                    <div className="aspect-square w-full overflow-hidden relative bg-black/20 shrink-0">
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      />
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onRemoveItem(item.id);
+                        }}
+                        className="absolute top-3 right-3 p-2.5 bg-black/40 hover:bg-red-500/80 rounded-full text-white/80 hover:text-white transition-colors opacity-0 group-hover:opacity-100"
+                        title={t('REMOVE_ITEM')}
+                      >
+                        <Trash2 className="w-5 h-5" />
+                      </button>
+                    </div>
+                    <div className="p-5 flex-1 flex flex-col justify-between">
+                      <div>
+                        <h3 className="font-heading font-medium text-white mb-1 line-clamp-2 leading-tight">
+                          {item.name}
+                        </h3>
+                        <p className="text-sm font-mono text-white/50 mb-3 line-clamp-1">
+                          {item.category}
+                        </p>
+                      </div>
+                      <p className="text-xl font-mono font-bold text-emerald-400">
+                        LKR {item.price.toLocaleString()}
+                      </p>
+                    </div>
+                  </motion.div>
+                ))}
+                
+                {items.length === 0 && (
+                  <div className="col-span-full py-20 flex flex-col items-center justify-center text-white/50 bg-white/5 rounded-3xl border border-white/5 border-dashed">
+                    <ShoppingCart className="w-20 h-20 mb-6 opacity-20" />
+                    <p className="text-2xl font-heading mb-2 text-white/70">Your cart is empty</p>
+                    <p className="text-base font-mono">Select a product from the tree to add it here.</p>
+                  </div>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+    </div>
+  );
+}
