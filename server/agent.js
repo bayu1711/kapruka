@@ -8,8 +8,15 @@ const path = require('path');
 dotenv.config({ path: path.join(__dirname, '../.env.local') });
 
 const OutputSchema = z.object({
-  intent: z.enum(['search', 'add_to_cart', 'remove_from_cart', 'checkout', 'answer']).optional().describe("The user's core intent. Default is 'search'. Use 'add_to_cart' or 'remove_from_cart' if they want to manage items they see on the screen. Use 'checkout' if they want to finalize their order or pay. Use 'answer' if the user is asking a question about a product or seeking information rather than taking an action."),
+  intent: z.enum(['search', 'add_to_cart', 'remove_from_cart', 'checkout', 'answer', 'update_checkout']).optional().describe("The user's core intent. Default is 'search'. Use 'add_to_cart' or 'remove_from_cart' if they want to manage items they see on the screen. Use 'checkout' if they want to finalize their order or pay. Use 'answer' if the user is asking a question about a product or seeking information rather than taking an action. Use 'update_checkout' if the user provides details for their order like delivery city, recipient name, phone, gift message, or delivery date while on the checkout screen."),
   targetProductIds: z.array(z.string()).optional().describe("If intent is add_to_cart or remove_from_cart, the exact IDs of the products from the current screen context."),
+  checkoutDetails: z.object({
+    recipientName: z.string().optional(),
+    recipientPhone: z.string().optional(),
+    city: z.string().optional(),
+    deliveryDate: z.string().optional(),
+    giftMessage: z.string().optional()
+  }).optional().describe("If intent is update_checkout, fill any details the user provides. Leave others undefined. Try to extract name, phone number, city, or date."),
   answer: z.string().optional().describe("If intent is 'answer', provide the answer to the user's question here. Be conversational, concise, and helpful."),
   reasoning: z.string().describe("Analyze the recipient and occasion. Explain what types of gifts are appropriate vs inappropriate, and why you are choosing the specific Kapruka search query."),
   recipient: z.string().describe("Who the gift is for (e.g. mother, friend, self, unspecified)"),

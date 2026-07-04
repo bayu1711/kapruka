@@ -44,6 +44,14 @@ export interface Session {
   history: HistorySnapshot[];
 }
 
+export interface CheckoutDetails {
+  recipientName: string;
+  recipientPhone: string;
+  city: string;
+  deliveryDate: string;
+  giftMessage: string;
+}
+
 export interface GlobalState {
   cartItems: Product[];
   showCart: boolean;
@@ -52,6 +60,7 @@ export interface GlobalState {
   cartHistory: HistorySnapshot[];
   selectedCartItems: string[];
   isSearchingCart?: boolean;
+  checkoutDetails: CheckoutDetails;
 }
 
 const CART_STORAGE_KEY = 'kapruka_magic_cart';
@@ -130,14 +139,26 @@ export function useWishTree() {
     return Math.min(idx, sessions.length > 0 ? sessions.length - 1 : 0);
   });
 
-  const [globalState, setGlobalState] = useState<GlobalState>({
-    cartItems: loadCart(),
-    showCart: screenInit.showCart ?? false,
-    showCheckout: screenInit.showCheckout ?? false,
-    showConfirmation: screenInit.showConfirmation ?? false,
-    cartHistory: [],
-    selectedCartItems: [],
-    isSearchingCart: false,
+  const [globalState, setGlobalState] = useState<GlobalState>(() => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    
+    return {
+      cartItems: loadCart(),
+      showCart: screenInit.showCart ?? false,
+      showCheckout: screenInit.showCheckout ?? false,
+      showConfirmation: screenInit.showConfirmation ?? false,
+      cartHistory: [],
+      selectedCartItems: [],
+      isSearchingCart: false,
+      checkoutDetails: {
+        recipientName: '',
+        recipientPhone: '',
+        city: 'Colombo',
+        deliveryDate: tomorrow.toISOString().split('T')[0],
+        giftMessage: 'Happy Birthday! 🎉',
+      }
+    };
   });
 
   useEffect(() => {
@@ -270,6 +291,17 @@ export function useWishTree() {
         } else if (agentResult.intent === 'checkout') {
           setGlobalState(prev => ({ ...prev, showCheckout: true }));
           actionMessage = 'Proceeding to checkout.';
+        } else if (agentResult.intent === 'update_checkout') {
+          setGlobalState(prev => {
+            const newDetails = { ...prev.checkoutDetails };
+            if (agentResult.checkoutDetails?.recipientName) newDetails.recipientName = agentResult.checkoutDetails.recipientName;
+            if (agentResult.checkoutDetails?.recipientPhone) newDetails.recipientPhone = agentResult.checkoutDetails.recipientPhone;
+            if (agentResult.checkoutDetails?.city) newDetails.city = agentResult.checkoutDetails.city;
+            if (agentResult.checkoutDetails?.deliveryDate) newDetails.deliveryDate = agentResult.checkoutDetails.deliveryDate;
+            if (agentResult.checkoutDetails?.giftMessage) newDetails.giftMessage = agentResult.checkoutDetails.giftMessage;
+            return { ...prev, checkoutDetails: newDetails };
+          });
+          actionMessage = 'Checkout details updated based on your input.';
         } else if (agentResult.intent === 'answer') {
           actionMessage = agentResult.aiStatusMessage || 'Here is the information you requested.';
         }
@@ -519,6 +551,13 @@ export function useWishTree() {
     setGlobalState((prev) => ({ ...prev, showConfirmation: false }));
   }, []);
 
+  const updateCheckoutDetails = useCallback((updates: Partial<CheckoutDetails>) => {
+    setGlobalState((prev) => ({
+      ...prev,
+      checkoutDetails: { ...prev.checkoutDetails, ...updates }
+    }));
+  }, []);
+
   const updateInput = useCallback((value: string) => {
     updateSession((prev) => ({ ...prev, inputValue: value }));
   }, [updateSession]);
@@ -629,6 +668,7 @@ export function useWishTree() {
 
   return {
     state,
+    updateCheckoutDetails,
     advanceStage,
     refineProducts,
     handleSubmit,

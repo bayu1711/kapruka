@@ -1,5 +1,5 @@
 export interface AgentResult {
-  intent?: 'search' | 'add_to_cart' | 'remove_from_cart' | 'checkout';
+  intent?: 'search' | 'add_to_cart' | 'remove_from_cart' | 'checkout' | 'answer' | 'update_checkout';
   targetProductIds?: string[];
   searchQuery: string;
   suggestedCategories: string[];
@@ -13,6 +13,13 @@ export interface AgentResult {
   followUpQuestions?: string[];
   searchParameters?: {key: string, value: string}[];
   debugLogs?: any[];
+  checkoutDetails?: {
+    recipientName?: string;
+    recipientPhone?: string;
+    city?: string;
+    deliveryDate?: string;
+    giftMessage?: string;
+  };
 }
 
 export async function parseUserQuery(
@@ -40,6 +47,7 @@ export async function parseUserQuery(
     return {
       intent: data.intent,
       targetProductIds: data.targetProductIds,
+      checkoutDetails: data.checkoutDetails,
       searchQuery: userMessage, 
       actualSearchQuery: data.searchQuery, // The actual query Gemini used
       originalSearchQuery: data.originalSearchQuery,

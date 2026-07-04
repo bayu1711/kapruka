@@ -58,6 +58,7 @@ export function App() {
     deleteSessionByIndex,
     toggleCartItemSelection,
     clearCartSelection,
+    updateCheckoutDetails,
   } = useWishTree();
   // Enable dark mode
   useEffect(() => {
@@ -231,7 +232,13 @@ export function App() {
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
               className="flex-1 w-full h-full relative min-h-0"
             >
-              <CheckoutSummary items={cartProducts} onConfirm={confirmOrder} onClose={cancelCheckout} />
+              <CheckoutSummary 
+                items={cartProducts} 
+                details={state.checkoutDetails}
+                onUpdateDetails={updateCheckoutDetails}
+                onConfirm={confirmOrder} 
+                onClose={cancelCheckout} 
+              />
             </motion.div>
           ) : state.showCart ? (
             <motion.div

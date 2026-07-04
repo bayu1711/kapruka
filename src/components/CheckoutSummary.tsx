@@ -10,22 +10,25 @@ import { useLanguage } from '../contexts/LanguageContext';
 
 interface CheckoutSummaryProps {
   items: Product[];
+  details: {
+    recipientName: string;
+    recipientPhone: string;
+    city: string;
+    giftMessage: string;
+    deliveryDate: string;
+  };
+  onUpdateDetails: (updates: Partial<CheckoutSummaryProps['details']>) => void;
   onConfirm: () => void;
   onClose: () => void;
 }
 
-export function CheckoutSummary({ items, onConfirm, onClose }: CheckoutSummaryProps) {
+export function CheckoutSummary({ items, details, onUpdateDetails, onConfirm, onClose }: CheckoutSummaryProps) {
   const { t } = useLanguage();
-  // Form state
-  const [recipientName, setRecipientName] = useState('');
-  const [recipientPhone, setRecipientPhone] = useState('');
-  const [city, setCity] = useState('Colombo');
-  const [giftMessage, setGiftMessage] = useState('Happy Birthday! 🎉');
 
-  // Tomorrow as default date
+  // Tomorrow as default min date
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
-  const [deliveryDate, setDeliveryDate] = useState(tomorrow.toISOString().split('T')[0]);
+  const minDate = tomorrow.toISOString().split('T')[0];
 
   // Checkout state
   const [placing, setPlacing] = useState(false);
@@ -34,7 +37,7 @@ export function CheckoutSummary({ items, onConfirm, onClose }: CheckoutSummaryPr
   const subtotal = items.reduce((sum, item) => sum + item.price, 0);
 
   // Validate required fields
-  const isValid = recipientName.trim().length > 0 && recipientPhone.trim().length > 0 && city.trim().length > 0;
+  const isValid = details.recipientName.trim().length > 0 && details.recipientPhone.trim().length > 0 && details.city.trim().length > 0;
 
   const handlePlaceOrder = async () => {
     if (!isValid || placing || items.length === 0) return;
@@ -45,11 +48,11 @@ export function CheckoutSummary({ items, onConfirm, onClose }: CheckoutSummaryPr
       // Pass all cart items to the checkout endpoint
       const result = await createOrder({
         cart: items.map(item => ({ productId: item.id, quantity: 1 })),
-        recipientName: recipientName.trim(),
-        recipientPhone: recipientPhone.trim(),
-        city: city.trim(),
-        deliveryDate,
-        giftMessage: giftMessage.trim() || undefined,
+        recipientName: details.recipientName.trim(),
+        recipientPhone: details.recipientPhone.trim(),
+        city: details.city.trim(),
+        deliveryDate: details.deliveryDate,
+        giftMessage: details.giftMessage.trim() || undefined,
       });
 
       if (result.payUrl) {
@@ -109,8 +112,8 @@ export function CheckoutSummary({ items, onConfirm, onClose }: CheckoutSummaryPr
                       <input
                         type="text"
                         placeholder="Recipient full name *"
-                        value={recipientName}
-                        onChange={(e) => setRecipientName(e.target.value)}
+                        value={details.recipientName}
+                        onChange={(e) => onUpdateDetails({ recipientName: e.target.value })}
                         className="bg-transparent text-white text-sm placeholder:text-white/30 outline-none w-full"
                       />
                     </div>
@@ -119,8 +122,8 @@ export function CheckoutSummary({ items, onConfirm, onClose }: CheckoutSummaryPr
                       <input
                         type="tel"
                         placeholder="Recipient phone *"
-                        value={recipientPhone}
-                        onChange={(e) => setRecipientPhone(e.target.value)}
+                        value={details.recipientPhone}
+                        onChange={(e) => onUpdateDetails({ recipientPhone: e.target.value })}
                         className="bg-transparent text-white text-sm placeholder:text-white/30 outline-none w-full"
                       />
                     </div>
@@ -136,8 +139,8 @@ export function CheckoutSummary({ items, onConfirm, onClose }: CheckoutSummaryPr
                       <input
                         type="text"
                         placeholder="City *"
-                        value={city}
-                        onChange={(e) => setCity(e.target.value)}
+                        value={details.city}
+                        onChange={(e) => onUpdateDetails({ city: e.target.value })}
                         className="bg-transparent text-white text-sm placeholder:text-white/30 outline-none w-full"
                       />
                     </div>
@@ -145,9 +148,9 @@ export function CheckoutSummary({ items, onConfirm, onClose }: CheckoutSummaryPr
                       <Calendar className="w-3.5 h-3.5 text-white/40 flex-shrink-0" />
                       <input
                         type="date"
-                        value={deliveryDate}
-                        min={tomorrow.toISOString().split('T')[0]}
-                        onChange={(e) => setDeliveryDate(e.target.value)}
+                        value={details.deliveryDate}
+                        min={minDate}
+                        onChange={(e) => onUpdateDetails({ deliveryDate: e.target.value })}
                         className="bg-transparent text-white text-sm outline-none w-full [color-scheme:dark]"
                       />
                     </div>
@@ -159,8 +162,8 @@ export function CheckoutSummary({ items, onConfirm, onClose }: CheckoutSummaryPr
                       <Gift className="w-4 h-4 text-emerald-400" /> Gift Message
                     </h3>
                     <textarea
-                      value={giftMessage}
-                      onChange={(e) => setGiftMessage(e.target.value)}
+                      value={details.giftMessage}
+                      onChange={(e) => onUpdateDetails({ giftMessage: e.target.value })}
                       className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder:text-white/40 font-heading text-sm outline-none focus:border-emerald-400/50 transition-colors resize-none"
                       rows={2}
                       placeholder="Optional gift message..."
