@@ -181,6 +181,9 @@ export function App() {
               showCanopy={showCanopy}
               isSearching={state.isSearching}
               onAddToCart={addToCart}
+              onQuickSearch={(query) => {
+                handleSubmit(query, enablePostFilter);
+              }}
             />
           </motion.div>
         </AnimatePresence>

@@ -18,6 +18,7 @@ interface WishTreeProps {
   showCanopy?: boolean;
   isSearching?: boolean;
   onAddToCart?: (id: string) => void;
+  onQuickSearch?: (query: string) => void;
 }
 type CellType = 'foliage' | 'label' | 'product';
 interface GridCell {
@@ -118,7 +119,8 @@ export function WishTree({
   showDebugGrid: showDebugGridProp,
   showCanopy = true,
   isSearching,
-  onAddToCart
+  onAddToCart,
+  onQuickSearch
 }: WishTreeProps) {
   const { t } = useLanguage();
   const [showDebugGrid, setShowDebugGrid] = useState(false);
@@ -902,55 +904,47 @@ export function WishTree({
           }}
           className="absolute inset-0 flex items-center justify-center pointer-events-none z-30">
           
-            <div className="text-center bg-slate-950/60 backdrop-blur-md p-6 sm:p-12 rounded-2xl sm:rounded-3xl border border-white/10 mx-4 max-w-[90%]">
+            <div className="text-center p-6 sm:p-12 mx-4 max-w-[90%] w-full max-w-4xl">
               <motion.h1
-              initial={{
-                opacity: 0,
-                y: 20
-              }}
-              animate={{
-                opacity: 1,
-                y: 0
-              }}
-              transition={{
-                delay: 0.2
-              }}
-              className="text-4xl sm:text-6xl font-heading font-bold text-white mb-2 sm:mb-4">
-              
-                {t('KAPRUKA')}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="text-5xl sm:text-7xl md:text-8xl font-heading font-bold mb-2 pb-2 text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-teal-200 to-cyan-300"
+                style={{ WebkitTextStroke: '1px rgba(255,255,255,0.1)' }}
+              >
+                Hello, there
               </motion.h1>
               <motion.h2
-              initial={{
-                opacity: 0,
-                y: 20
-              }}
-              animate={{
-                opacity: 1,
-                y: 0
-              }}
-              transition={{
-                delay: 0.4
-              }}
-              className="text-4xl sm:text-7xl font-heading font-bold text-emerald-400 mb-4 sm:mb-6 drop-shadow-[0_0_20px_rgba(16,185,129,0.5)]">
-              
-                {t('WISH_TREE_TITLE')}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="text-2xl sm:text-4xl md:text-5xl font-heading font-medium text-white/95 mb-8 drop-shadow-lg"
+              >
+                {t('PLACEHOLDER')}
               </motion.h2>
-              <motion.p
-              initial={{
-                opacity: 0,
-                y: 20
-              }}
-              animate={{
-                opacity: 1,
-                y: 0
-              }}
-              transition={{
-                delay: 0.6
-              }}
-              className="text-sm sm:text-xl text-white/80 font-heading">
               
-                {t('TREE_SUBTITLE')}
-              </motion.p>
+              {/* Quick Suggestion Pills */}
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.8 }}
+                className="mt-6 sm:mt-10 flex flex-wrap justify-center gap-3 pointer-events-auto"
+              >
+                {[
+                  "Gift for my mother under 5000",
+                  "Birthday gift for a 5 year old boy",
+                  "Romantic anniversary dinner ideas",
+                  "Same day delivery cakes to Colombo"
+                ].map((suggestion, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => onQuickSearch && onQuickSearch(suggestion)}
+                    className="px-4 py-2 sm:px-5 sm:py-3 bg-black/20 hover:bg-black/40 border border-white/20 rounded-full text-white/95 text-xs sm:text-sm font-medium transition-all hover:scale-105 active:scale-95 shadow-xl backdrop-blur-md"
+                  >
+                    {suggestion}
+                  </button>
+                ))}
+              </motion.div>
             </div>
           </motion.div>
         }
