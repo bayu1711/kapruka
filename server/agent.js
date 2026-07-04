@@ -8,8 +8,9 @@ const path = require('path');
 dotenv.config({ path: path.join(__dirname, '../.env.local') });
 
 const OutputSchema = z.object({
-  intent: z.enum(['search', 'add_to_cart', 'remove_from_cart', 'checkout']).optional().describe("The user's core intent. Default is 'search'. Use 'add_to_cart' or 'remove_from_cart' if they want to manage items they see on the screen. Use 'checkout' if they want to finalize their order or pay."),
+  intent: z.enum(['search', 'add_to_cart', 'remove_from_cart', 'checkout', 'answer']).optional().describe("The user's core intent. Default is 'search'. Use 'add_to_cart' or 'remove_from_cart' if they want to manage items they see on the screen. Use 'checkout' if they want to finalize their order or pay. Use 'answer' if the user is asking a question about a product or seeking information rather than taking an action."),
   targetProductId: z.string().optional().describe("If intent is add_to_cart or remove_from_cart, the exact ID of the product from the current screen context."),
+  answer: z.string().optional().describe("If intent is 'answer', provide the answer to the user's question here. Be conversational, concise, and helpful."),
   reasoning: z.string().describe("Analyze the recipient and occasion. Explain what types of gifts are appropriate vs inappropriate, and why you are choosing the specific Kapruka search query."),
   recipient: z.string().describe("Who the gift is for (e.g. mother, friend, self, unspecified)"),
   searchQuery: z.string().describe("The specific Kapruka search term (e.g. 'roses', 'birthday cake', 'saree')"),
@@ -262,7 +263,7 @@ async function invokeWithFallback(schema, outputName, messages) {
   throw new Error('All available API keys have hit their rate limits.');
 }
 
-async function processChat(message, history, enablePostFilter = false, language = 'en-US', visibleProducts = [], cartItems = []) {
+async function processChat(message, history, enablePostFilter = false, language = 'en-US', visibleProducts = [], cartItems = [], selectedProduct = null) {
   let internalSystemLog = "";
   let finalProducts = [];
   let suggestedCategories = [];
@@ -284,14 +285,16 @@ async function processChat(message, history, enablePostFilter = false, language 
 Your job is to determine the absolute BEST precise search phrase (can be multiple words) based on the user's LATEST request, while using the conversation history for context.
 
 CURRENT SCREEN CONTEXT:
+Selected Product (in focus): ${JSON.stringify(selectedProduct)}
 Visible Products (user sees these right now): ${JSON.stringify(visibleProducts)}
 Cart Items: ${JSON.stringify(cartItems)}
 
 CRITICAL RULES FOR INTENT:
-1. If the user wants to buy, add, or get an item that is CURRENTLY in the "Visible Products", set intent="add_to_cart" and extract the exact "targetProductId" from the list.
+1. If the user wants to buy, add, or get an item that is CURRENTLY in the "Visible Products" or "Selected Product", set intent="add_to_cart" and extract the exact "targetProductId" from the list.
 2. If the user wants to remove an item from their cart, set intent="remove_from_cart" and set "targetProductId" to the item's ID from "Cart Items".
 3. If the user says "checkout", "buy now" (without specifying a product), or "pay", set intent="checkout".
-4. For all other requests (looking for gifts, exploring, etc), set intent="search".
+4. If the user is asking a question (e.g. "what is the warranty?", "can this be delivered today?", "tell me about this product") especially when a product is selected, set intent="answer" and provide the answer in the "answer" field. Use information from the "Selected Product" context if available.
+5. For all other requests (looking for gifts, exploring, etc), set intent="search".
 
 CRITICAL RULES FOR SEARCH QUERY:
 1. NEVER output generic category names like 'toys', 'electronics', 'flowers', or 'gifts'. Kapruka's search engine works best with specific items.
@@ -324,7 +327,7 @@ CRITICAL RULES FOR SEARCH QUERY:
       return { products: [], categories: [], reasoning: '', recipient: '', searchQuery: '' };
     }
 
-    const { intent, targetProductId, reasoning, recipient, searchQuery, categories, searchParameters, followUpQuestions } = parsed;
+    const { intent, targetProductId, reasoning, recipient, searchQuery, categories, searchParameters, followUpQuestions, answer } = parsed;
     
     let finalIntent = intent || 'search';
     let finalTargetProductId = targetProductId || '';
@@ -337,22 +340,24 @@ CRITICAL RULES FOR SEARCH QUERY:
     finalFollowUpQuestions = followUpQuestions || [];
     finalSearchParameters = searchParameters || [];
     
-    if (finalIntent !== 'search') {
-      return { 
+    if (finalIntent === 'add_to_cart' || finalIntent === 'remove_from_cart' || finalIntent === 'checkout' || finalIntent === 'answer') {
+      return {
         intent: finalIntent,
         targetProductId: finalTargetProductId,
-        products: [], 
-        categories: suggestedCategories,
-        reasoning: finalReasoning,
-        recipient: finalRecipient,
+        answer: answer,
         searchQuery: finalSearchQuery,
         originalSearchQuery: finalOriginalSearchQuery,
-        postFilterReasoning: '',
+        categories: suggestedCategories,
+        products: [], // no products needed for cart/checkout/answer actions
+        reasoning: finalReasoning,
+        recipient: finalRecipient,
+        postFilterReasoning: finalPostFilterReasoning,
         followUpQuestions: finalFollowUpQuestions,
-        searchParameters: finalSearchParameters
+        searchParameters: finalSearchParameters,
+        debugLogs
       };
     }
-
+    
     let finalQueryStr = searchQuery || '';
     const params = {};
     if (searchParameters) {

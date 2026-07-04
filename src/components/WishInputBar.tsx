@@ -147,17 +147,28 @@ export function WishInputBar({
                 displayQuery = displayQuery.split('\nA: ')[1];
               }
               return (
-                <div key={idx} className="flex flex-col items-end w-full mb-1">
-                  <button
-                    type="button"
-                    onClick={() => onHistoryClick?.(idx)}
-                    className="text-right text-sm text-white/50 hover:text-white/80 transition-colors bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl px-4 py-2 max-w-[80%] break-words"
-                  >
-                    {displayQuery}
-                  </button>
+                <div key={idx} className="flex flex-col w-full mb-2 gap-1">
+                  <div className="flex justify-end w-full">
+                    <button
+                      type="button"
+                      onClick={() => onHistoryClick?.(idx)}
+                      className="text-right text-sm text-white/50 hover:text-white/80 transition-colors bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl px-4 py-2 max-w-[80%] break-words"
+                    >
+                      {displayQuery}
+                    </button>
+                  </div>
+                  {snap.aiStatus && !snap.aiStatus.startsWith('Found ') && (
+                    <div className="flex justify-start w-full">
+                      <div className="text-left text-sm text-emerald-100 bg-emerald-900/40 backdrop-blur-md border border-emerald-500/30 rounded-2xl px-4 py-2 max-w-[80%] break-words">
+                        {snap.aiStatus}
+                      </div>
+                    </div>
+                  )}
                   {snap.errorMessage && (
-                    <div className="text-xs text-red-200 mt-1 mr-2 px-2.5 py-1.5 bg-red-950/60 backdrop-blur-sm rounded-lg border border-red-500/30 max-w-[80%] text-right break-words">
-                      {snap.errorMessage}
+                    <div className="flex justify-end w-full">
+                      <div className="text-xs text-red-200 mr-2 px-2.5 py-1.5 bg-red-950/60 backdrop-blur-sm rounded-lg border border-red-500/30 max-w-[80%] text-right break-words">
+                        {snap.errorMessage}
+                      </div>
                     </div>
                   )}
                 </div>

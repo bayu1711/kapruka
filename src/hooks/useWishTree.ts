@@ -199,19 +199,19 @@ export function useWishTree() {
         searchQuery: query,
         inputValue: '',
         productSeed: prev.productSeed + 1,
-        selectedProduct: null,
         page: 0,
       }));
     }
 
     const session = sessions[currentSessionIndex];
+    const selectedProductObj = session?.liveProducts?.find(p => p.id === session?.selectedProduct) || null;
     const formattedHistory = session?.history.flatMap(h => [
       { role: 'user', content: h.query },
       { role: 'assistant', content: h.aiReasoning ? `Reasoning: ${h.aiReasoning}\nSearched for: ${h.aiActualSearchQuery || 'Unknown'}\nFound: ${h.products.length} products.` : `Found ${h.products.length} products.` }
     ]) || [];
 
     try {
-      const agentResult = await parseUserQuery(query, formattedHistory, enablePostFilter, locale, session?.liveProducts || [], globalState.cartItems || []);
+      const agentResult = await parseUserQuery(query, formattedHistory, enablePostFilter, locale, session?.liveProducts || [], globalState.cartItems || [], selectedProductObj);
       
       if (agentResult.debugLogs && agentResult.debugLogs.length > 0) {
         const mcpModule = await import('../lib/kapruka-mcp');
@@ -237,6 +237,8 @@ export function useWishTree() {
         } else if (agentResult.intent === 'checkout') {
           setGlobalState(prev => ({ ...prev, showCheckout: true }));
           actionMessage = 'Proceeding to checkout.';
+        } else if (agentResult.intent === 'answer') {
+          actionMessage = agentResult.aiStatusMessage || 'Here is the information you requested.';
         }
 
         updateSession(prev => ({
@@ -261,7 +263,9 @@ export function useWishTree() {
           : [];
 
       if (cats.length > 0) {
-        updateSession(prev => ({ ...prev, liveCategories: cats }));
+        updateSession(prev => ({ ...prev, liveCategories: cats, selectedProduct: null }));
+      } else {
+        updateSession(prev => ({ ...prev, selectedProduct: null }));
       }
 
       const mapped: Product[] = (agentResult.products || []).map((p: any) => ({
