@@ -154,10 +154,10 @@ export function WishInputBar({
                     <button
                       type="button"
                       onClick={() => onHistoryClick?.(idx)}
-                      className={`text-right text-sm transition-colors backdrop-blur-md border border-white/10 rounded-2xl px-4 py-2 max-w-[80%] break-words ${
+                      className={`text-right text-sm transition-all backdrop-blur-xl border rounded-2xl px-4 py-2 max-w-[80%] break-words ${
                         isLastTwo 
-                          ? 'text-white/90 bg-white/20 hover:bg-white/30'
-                          : 'text-white/50 bg-white/5 hover:text-white/80 hover:bg-white/10'
+                          ? 'text-white bg-white/30 border-white/40 hover:bg-white/40 shadow-lg'
+                          : 'text-white/50 bg-white/5 border-white/10 hover:text-white/80 hover:bg-white/10'
                       }`}
                     >
                       {displayQuery}
@@ -165,9 +165,9 @@ export function WishInputBar({
                   </div>
                   {snap.aiStatus && !snap.aiStatus.startsWith('Found ') && (
                     <div className="flex justify-start w-full">
-                      <div className={`text-left text-sm backdrop-blur-md border rounded-2xl px-4 py-2 max-w-[80%] break-words transition-colors ${
+                      <div className={`text-left text-sm backdrop-blur-xl border rounded-2xl px-4 py-2 max-w-[80%] break-words transition-all ${
                         isLastTwo
-                          ? 'text-emerald-100 bg-emerald-900/40 border-emerald-500/30'
+                          ? 'text-emerald-50 bg-emerald-700/60 border-emerald-400/50 shadow-lg font-medium'
                           : 'text-emerald-100/40 bg-emerald-900/10 border-emerald-500/10'
                       }`}>
                         {snap.aiStatus}
