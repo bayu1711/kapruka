@@ -759,7 +759,7 @@ export function WishTree({
                   isSelected 
                     ? 'z-50 bg-transparent' 
                     : (isCarted 
-                        ? 'rounded-xl border-2 border-amber-400/50 shadow-[0_0_16px_rgba(251,191,36,0.4)] hover:scale-105 hover:shadow-[0_0_20px_rgba(251,191,36,0.6)]'
+                        ? 'rounded-xl border-2 border-yellow-400/50 shadow-[0_0_16px_rgba(253,224,71,0.4)] hover:scale-105 hover:shadow-[0_0_20px_rgba(253,224,71,0.6)]'
                         : 'rounded-xl border-2 border-emerald-500/30 shadow-[0_0_16px_rgba(16,185,129,0.4)] hover:scale-105 hover:shadow-[0_0_20px_rgba(16,185,129,0.6)]')
                 }`}
                 style={{
@@ -895,7 +895,7 @@ export function WishTree({
                             }}
                             className={`flex-1 px-6 py-3 rounded-full font-bold shadow-lg transition-transform hover:scale-105 active:scale-95 flex items-center justify-center gap-2 ${
                               isCarted 
-                                ? 'bg-amber-500 hover:bg-amber-600 text-white' 
+                                ? 'bg-yellow-400 hover:bg-yellow-500 text-[#402970]' 
                                 : 'bg-emerald-500 hover:bg-emerald-600 text-white'
                             }`}
                           >

@@ -202,10 +202,10 @@ export function WishInputBar({
                     if (onAddToCart) onAddToCart();
                   }
                 }}
-                className={`flex items-center gap-1.5 text-xs font-semibold text-white backdrop-blur-md border rounded-full px-3 py-1.5 transition-colors shadow-lg ${
+                className={`flex items-center gap-1.5 text-xs font-semibold backdrop-blur-md border rounded-full px-3 py-1.5 transition-colors shadow-lg ${
                   isProductInCart
-                    ? 'bg-amber-500/80 hover:bg-amber-500 border-amber-400 shadow-amber-500/20'
-                    : 'bg-emerald-500/80 hover:bg-emerald-500 border-emerald-400 shadow-emerald-500/20'
+                    ? 'bg-yellow-400/90 hover:bg-yellow-400 border-yellow-300 shadow-yellow-400/20 text-[#402970]'
+                    : 'bg-emerald-500/80 hover:bg-emerald-500 border-emerald-400 shadow-emerald-500/20 text-white'
                 }`}
               >
                 <ShoppingCart className="w-3.5 h-3.5" />
