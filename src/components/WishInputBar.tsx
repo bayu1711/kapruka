@@ -1,7 +1,7 @@
 import 'regenerator-runtime/runtime';
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowUp, RefreshCw, ChevronRight, ChevronLeft, Mic, MicOff, MessageCircleQuestion } from 'lucide-react';
+import { ArrowUp, RefreshCw, ChevronRight, ChevronLeft, Mic, MicOff, MessageCircleQuestion, ShoppingCart } from 'lucide-react';
 import type { HistorySnapshot } from '../hooks/useWishTree';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -178,6 +178,7 @@ export function WishInputBar({
                 }}
                 className="flex items-center gap-1.5 text-xs font-semibold text-white bg-emerald-500/80 hover:bg-emerald-500 backdrop-blur-md border border-emerald-400 rounded-full px-3 py-1.5 transition-colors shadow-lg shadow-emerald-500/20"
               >
+                <ShoppingCart className="w-3.5 h-3.5" />
                 Add to Cart
               </button>
 
