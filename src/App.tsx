@@ -97,7 +97,7 @@ export function App() {
 
       {/* UI Components */}
 
-      <div className={`fixed top-4 right-4 sm:top-6 sm:right-6 z-50 flex items-center gap-2 sm:gap-3 transition-opacity duration-300 ${hasSelection ? 'opacity-20 pointer-events-none' : 'opacity-100'}`}>
+      <div className={`fixed top-4 right-4 sm:top-6 sm:right-6 z-50 flex items-center gap-2 sm:gap-3 transition-opacity duration-300 opacity-100`}>
         <button
           onClick={() => setIsDevToolsOpen(true)}
           className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-purple-500/20 hover:bg-purple-500/40 text-purple-200 rounded-full shadow-lg transition-colors backdrop-blur-md border border-purple-500/30"
@@ -153,7 +153,7 @@ export function App() {
 
         {/* Navigation Arrows */}
         {currentSessionIndex > 0 && (
-          <div className={`absolute top-28 sm:top-1/2 sm:-translate-y-1/2 left-4 sm:left-6 z-40 transition-opacity duration-300 pointer-events-none ${hasSelection ? 'opacity-20' : 'opacity-100'}`}>
+          <div className={`absolute top-28 sm:top-1/2 sm:-translate-y-1/2 left-4 sm:left-6 z-40 transition-opacity duration-300 pointer-events-none opacity-100`}>
             <button
               onClick={goToPrevSession}
               className="pointer-events-auto w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 flex items-center justify-center text-white/80 hover:text-white transition-all hover:scale-110 shadow-xl"
@@ -163,7 +163,7 @@ export function App() {
           </div>
         )}
 
-        <div className={`absolute top-28 sm:top-1/2 sm:-translate-y-1/2 right-4 sm:right-6 z-40 transition-opacity duration-300 pointer-events-none flex items-center justify-end ${hasSelection ? 'opacity-20' : 'opacity-100'}`}>
+        <div className={`absolute top-28 sm:top-1/2 sm:-translate-y-1/2 right-4 sm:right-6 z-40 transition-opacity duration-300 pointer-events-none flex items-center justify-end opacity-100`}>
           {currentSessionIndex === sessions.length - 1 ? (
             <button
               onClick={goToNextSession}
@@ -185,7 +185,7 @@ export function App() {
         </div>
 
         {!state.showCheckout && !state.showConfirmation &&
-          <div className={`w-full transition-opacity duration-300 ${hasSelection ? 'opacity-20 pointer-events-none' : 'opacity-100'}`}>
+          <div className={`w-full transition-opacity duration-300 opacity-100`}>
             <WishInputBar
               value={state.inputValue}
               onChange={updateInput}
