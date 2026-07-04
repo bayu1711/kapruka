@@ -34,7 +34,13 @@ export function CartMainView({
     <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
       <div className="relative w-[min(150vw,68vh)] h-[min(150vw,68vh)] sm:w-[min(115vw,78vh)] sm:h-[min(115vw,78vh)] md:w-[800px] md:h-[800px] max-w-[800px] max-h-[800px] flex-shrink-0 origin-center flex flex-col">
         {/* Main Content Area - Scrollable */}
-        <div className="w-full h-full overflow-y-auto custom-scrollbar pr-2 pb-32 pt-12 sm:pt-16">
+        <div 
+          className="w-full h-full overflow-y-auto custom-scrollbar pr-2 pb-[35vh] sm:pb-64 pt-12 sm:pt-16"
+          style={{
+            maskImage: 'linear-gradient(to bottom, black 0%, black 70%, transparent 100%)',
+            WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 70%, transparent 100%)'
+          }}
+        >
           <AnimatePresence mode="wait">
             {selectedProductObj ? (
               /* Detailed Product View */
