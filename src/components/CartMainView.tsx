@@ -32,45 +32,8 @@ export function CartMainView({
 
   return (
     <div className="w-full h-full flex flex-col overflow-hidden">
-      
-      {/* Header - Always visible */}
-      <div className="w-full flex-shrink-0 px-4 sm:px-8 pt-8 pb-4">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 bg-slate-900/40 backdrop-blur-md p-6 rounded-2xl border border-white/10">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center">
-              <ShoppingCart className="w-6 h-6 text-emerald-400" />
-            </div>
-            <div>
-              <h2 className="text-3xl font-heading font-bold text-white mb-1">
-                {t('YOUR_CART')}
-              </h2>
-              <p className="text-white/60 font-mono">
-                {items.length} {items.length === 1 ? 'item' : 'items'}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 w-full sm:w-auto">
-             <div className="text-left sm:text-right">
-               <p className="text-white/60 text-sm font-heading mb-1">{t('TOTAL')}</p>
-               <p className="text-2xl font-mono font-bold text-emerald-400">
-                 LKR {subtotal.toLocaleString()}
-               </p>
-             </div>
-             <button
-               onClick={onCheckout}
-               disabled={items.length === 0}
-               className="w-full sm:w-auto py-3 px-8 bg-emerald-500 hover:bg-emerald-600 disabled:bg-emerald-500/50 disabled:cursor-not-allowed text-white font-heading font-semibold rounded-xl transition-colors flex items-center justify-center gap-2 group shadow-lg shadow-emerald-500/25"
-             >
-               {t('CHECKOUT')}
-               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-             </button>
-          </div>
-        </div>
-      </div>
-
       {/* Main Content Area - Scrollable */}
-      <div className="flex-1 w-full overflow-y-auto px-4 sm:px-8 pb-32 custom-scrollbar">
+      <div className="flex-1 w-full overflow-y-auto px-4 sm:px-8 pt-24 sm:pt-32 pb-32 custom-scrollbar">
         <div className="max-w-6xl mx-auto relative h-full">
           <AnimatePresence mode="wait">
             {selectedProductObj ? (

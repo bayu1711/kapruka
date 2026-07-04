@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Plus, Axe, Settings, Search, TreePine } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, Axe, Settings, Search, TreePine, ShoppingCart } from 'lucide-react';
 import { useWishTree } from './hooks/useWishTree';
 import { AiStatus } from './components/AiStatus';
 import { WishTree } from './components/WishTree';
@@ -117,6 +117,31 @@ export function App() {
       </div>
 
       {/* UI Components */}
+
+      {state.showCart && (
+        <div className="fixed top-4 left-4 sm:top-6 sm:left-6 z-50 flex items-center gap-4 sm:gap-6 bg-slate-900/40 backdrop-blur-md px-4 py-2 sm:px-6 sm:py-3 rounded-2xl border border-white/10 shadow-lg">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center">
+              <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-400" />
+            </div>
+            <div>
+              <h2 className="text-xl sm:text-2xl font-heading font-bold text-white mb-0.5 leading-none">
+                {t('YOUR_CART')}
+              </h2>
+              <p className="text-white/60 font-mono text-xs sm:text-sm">
+                {cartProducts.length} {cartProducts.length === 1 ? 'item' : 'items'}
+              </p>
+            </div>
+          </div>
+          <div className="h-8 sm:h-10 w-px bg-white/10 hidden sm:block"></div>
+          <div className="text-left hidden sm:block">
+             <p className="text-white/60 text-[10px] sm:text-xs font-heading mb-0.5 leading-none">{t('TOTAL')}</p>
+             <p className="text-lg sm:text-xl font-mono font-bold text-emerald-400 leading-none">
+               LKR {cartProducts.reduce((sum, item) => sum + item.price, 0).toLocaleString()}
+             </p>
+           </div>
+        </div>
+      )}
 
       <div className={`fixed top-4 right-4 sm:top-6 sm:right-6 z-50 flex items-center gap-2 sm:gap-3 transition-opacity duration-300 opacity-100`}>
         <button
