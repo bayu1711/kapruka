@@ -143,6 +143,7 @@ export function WishInputBar({
             }}
           >
             {history.map((snap, idx) => {
+              const isLastTwo = idx >= history.length - 2;
               let displayQuery = snap.query;
               if (displayQuery.startsWith('Q: ') && displayQuery.includes('\nA: ')) {
                 displayQuery = displayQuery.split('\nA: ')[1];
@@ -153,14 +154,22 @@ export function WishInputBar({
                     <button
                       type="button"
                       onClick={() => onHistoryClick?.(idx)}
-                      className="text-right text-sm text-white/50 hover:text-white/80 transition-colors bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl px-4 py-2 max-w-[80%] break-words"
+                      className={`text-right text-sm transition-colors backdrop-blur-md border border-white/10 rounded-2xl px-4 py-2 max-w-[80%] break-words ${
+                        isLastTwo 
+                          ? 'text-white/90 bg-white/20 hover:bg-white/30'
+                          : 'text-white/50 bg-white/5 hover:text-white/80 hover:bg-white/10'
+                      }`}
                     >
                       {displayQuery}
                     </button>
                   </div>
                   {snap.aiStatus && !snap.aiStatus.startsWith('Found ') && (
                     <div className="flex justify-start w-full">
-                      <div className="text-left text-sm text-emerald-100 bg-emerald-900/40 backdrop-blur-md border border-emerald-500/30 rounded-2xl px-4 py-2 max-w-[80%] break-words">
+                      <div className={`text-left text-sm backdrop-blur-md border rounded-2xl px-4 py-2 max-w-[80%] break-words transition-colors ${
+                        isLastTwo
+                          ? 'text-emerald-100 bg-emerald-900/40 border-emerald-500/30'
+                          : 'text-emerald-100/40 bg-emerald-900/10 border-emerald-500/10'
+                      }`}>
                         {snap.aiStatus}
                       </div>
                     </div>
