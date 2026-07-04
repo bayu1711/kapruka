@@ -33,7 +33,7 @@ export function CartMainView({
   return (
     <div className="w-full h-full flex flex-col overflow-hidden">
       {/* Main Content Area - Scrollable */}
-      <div className="flex-1 w-full overflow-y-auto px-4 sm:px-8 pt-24 sm:pt-32 pb-32 custom-scrollbar">
+      <div className="flex-1 w-full overflow-y-auto px-4 sm:px-8 pt-24 sm:pt-32 pb-48 sm:pb-56 custom-scrollbar">
         <div className="max-w-6xl mx-auto relative h-full">
           <AnimatePresence mode="wait">
             {selectedProductObj ? (
@@ -136,7 +136,7 @@ export function CartMainView({
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
+                className="w-full grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 sm:gap-5"
               >
                 {items.map((item, index) => {
                   const isChecked = selectedCartItems.includes(item.id);
