@@ -33,7 +33,7 @@ export function CartMainView({
   return (
     <div className="w-full h-full flex flex-col overflow-hidden">
       {/* Main Content Area - Scrollable */}
-      <div className="flex-1 w-full overflow-y-auto px-4 sm:px-8 pt-24 sm:pt-32 pb-48 sm:pb-56 custom-scrollbar">
+      <div className="flex-1 w-full overflow-y-auto px-4 sm:px-8 pt-24 sm:pt-32 pb-[35vh] custom-scrollbar">
         <div className="max-w-6xl mx-auto relative h-full">
           <AnimatePresence mode="wait">
             {selectedProductObj ? (
@@ -132,11 +132,11 @@ export function CartMainView({
             ) : (
               /* Grid View */
               <motion.div
-                key="grid-view"
+                key="list-view"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="w-full grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 sm:gap-5"
+                className="w-full flex flex-col gap-4 sm:gap-5 max-w-4xl mx-auto"
               >
                 {items.map((item, index) => {
                   const isChecked = selectedCartItems.includes(item.id);
@@ -147,9 +147,9 @@ export function CartMainView({
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.05 }}
                       onClick={() => onSelectProduct(item.id)}
-                      className={`relative bg-white/5 rounded-2xl border ${isChecked ? 'border-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.2)]' : 'border-white/10 hover:border-white/30'} cursor-pointer transition-all duration-300 hover:scale-105 overflow-hidden group flex flex-col`}
+                      className={`relative bg-white/5 rounded-2xl border ${isChecked ? 'border-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.2)]' : 'border-white/10 hover:border-white/30'} cursor-pointer transition-all duration-300 hover:scale-[1.02] overflow-hidden group flex flex-row items-stretch min-h-[120px]`}
                     >
-                      <div className="absolute top-3 left-3 z-10" onClick={(e) => e.stopPropagation()}>
+                      <div className="absolute top-4 left-4 z-10" onClick={(e) => e.stopPropagation()}>
                         <label className="flex items-center cursor-pointer group/checkbox p-1">
                           <div className="relative flex items-center justify-center w-6 h-6">
                             <input
@@ -167,38 +167,40 @@ export function CartMainView({
                         </label>
                       </div>
 
-                      <div className="aspect-square w-full overflow-hidden relative bg-black/20 shrink-0">
-                      <img
-                        src={item.image}
-                        alt={item.name}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                      />
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onRemoveItem(item.id);
-                        }}
-                        className="absolute top-3 right-3 p-2.5 bg-black/40 hover:bg-red-500/80 rounded-full text-white/80 hover:text-white transition-colors opacity-0 group-hover:opacity-100"
-                        title={t('REMOVE_ITEM')}
-                      >
-                        <Trash2 className="w-5 h-5" />
-                      </button>
-                    </div>
-                    <div className="p-5 flex-1 flex flex-col justify-between">
-                      <div>
-                        <h3 className="font-heading font-medium text-white mb-1 line-clamp-2 leading-tight">
+                      {/* Left: Info */}
+                      <div className="flex-1 p-4 sm:p-5 pl-14 sm:pl-16 flex flex-col justify-center">
+                        <h3 className="font-heading font-medium text-white mb-1 line-clamp-2 leading-tight text-lg sm:text-xl">
                           {item.name}
                         </h3>
                         <p className="text-sm font-mono text-white/50 mb-3 line-clamp-1">
                           {item.category}
                         </p>
+                        <p className="text-xl sm:text-2xl font-mono font-bold text-emerald-400">
+                          LKR {item.price.toLocaleString()}
+                        </p>
                       </div>
-                      <p className="text-xl font-mono font-bold text-emerald-400">
-                        LKR {item.price.toLocaleString()}
-                      </p>
-                    </div>
-                  </motion.div>
-                )})}
+
+                      {/* Right: Image */}
+                      <div className="w-32 sm:w-48 lg:w-56 overflow-hidden relative bg-black/20 shrink-0">
+                        <img
+                          src={item.image}
+                          alt={item.name}
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        />
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onRemoveItem(item.id);
+                          }}
+                          className="absolute top-3 right-3 p-2.5 bg-black/40 hover:bg-red-500/80 rounded-full text-white/80 hover:text-white transition-colors opacity-0 group-hover:opacity-100 shadow-md"
+                          title={t('REMOVE_ITEM')}
+                        >
+                          <Trash2 className="w-5 h-5" />
+                        </button>
+                      </div>
+                    </motion.div>
+                  );
+                })}
                 
                 {items.length === 0 && (
                   <div className="col-span-full py-20 flex flex-col items-center justify-center text-white/50 bg-white/5 rounded-3xl border border-white/5 border-dashed">
