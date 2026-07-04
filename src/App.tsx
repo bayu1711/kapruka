@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Plus, Axe, Settings, Search } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, Axe, Settings, Search, TreePine } from 'lucide-react';
 import { useWishTree } from './hooks/useWishTree';
 import { AiStatus } from './components/AiStatus';
 import { WishTree } from './components/WishTree';
@@ -56,6 +56,8 @@ export function App() {
     deleteSession,
     selectSession,
     deleteSessionByIndex,
+    toggleCartItemSelection,
+    clearCartSelection,
   } = useWishTree();
   // Enable dark mode
   useEffect(() => {
@@ -125,30 +127,43 @@ export function App() {
         >
           {langLabel}
         </button>
-        <button
-          onClick={() => setIsDevToolsOpen(true)}
-          className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-purple-500/20 hover:bg-purple-500/40 text-purple-200 rounded-full shadow-lg transition-colors backdrop-blur-md border border-purple-500/30"
-          title="Developer Tools"
-        >
-          <Settings className="w-4 h-4 sm:w-5 sm:h-5" />
-        </button>
-        {(history.length > 0 || state.stage > 0) && (
+
+        {state.showCart ? (
           <button
-            onClick={deleteSession}
-            className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-orange-700/80 hover:bg-orange-800 text-white rounded-full shadow-lg transition-colors backdrop-blur-md border border-orange-700/20"
-            title="Chop down this tree"
+            onClick={toggleCart}
+            className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-emerald-500/20 hover:bg-emerald-500/40 text-emerald-200 rounded-full shadow-lg transition-colors backdrop-blur-md border border-emerald-500/30"
+            title="Back to Tree"
           >
-            <Axe className="w-4 h-4 sm:w-5 sm:h-5" />
+            <TreePine className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
+        ) : (
+          <>
+            <button
+              onClick={() => setIsDevToolsOpen(true)}
+              className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-purple-500/20 hover:bg-purple-500/40 text-purple-200 rounded-full shadow-lg transition-colors backdrop-blur-md border border-purple-500/30"
+              title="Developer Tools"
+            >
+              <Settings className="w-4 h-4 sm:w-5 sm:h-5" />
+            </button>
+            {(history.length > 0 || state.stage > 0) && (
+              <button
+                onClick={deleteSession}
+                className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-orange-700/80 hover:bg-orange-800 text-white rounded-full shadow-lg transition-colors backdrop-blur-md border border-orange-700/20"
+                title="Chop down this tree"
+              >
+                <Axe className="w-4 h-4 sm:w-5 sm:h-5" />
+              </button>
+            )}
+            <button
+              onClick={() => setIsSearchModalOpen(true)}
+              className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-blue-500/20 hover:bg-blue-500/40 text-blue-200 rounded-full shadow-lg transition-colors backdrop-blur-md border border-blue-500/30"
+              title="Search Wishes"
+            >
+              <Search className="w-4 h-4 sm:w-5 sm:h-5" />
+            </button>
+            <CartBadge count={state.cartItems.length} onClick={toggleCart} />
+          </>
         )}
-        <button
-          onClick={() => setIsSearchModalOpen(true)}
-          className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-blue-500/20 hover:bg-blue-500/40 text-blue-200 rounded-full shadow-lg transition-colors backdrop-blur-md border border-blue-500/30"
-          title="Search Wishes"
-        >
-          <Search className="w-4 h-4 sm:w-5 sm:h-5" />
-        </button>
-        <CartBadge count={state.cartItems.length} onClick={toggleCart} />
       </div>
 
 
@@ -172,6 +187,8 @@ export function App() {
                 onRemoveItem={removeFromCart}
                 selectedProduct={state.selectedProduct}
                 onSelectProduct={selectProduct}
+                selectedCartItems={state.selectedCartItems}
+                onToggleItemSelection={toggleCartItemSelection}
               />
             </motion.div>
           ) : (
@@ -208,7 +225,7 @@ export function App() {
         </AnimatePresence>
 
         {/* Navigation Arrows */}
-        {currentSessionIndex > 0 && (
+        {!state.showCart && currentSessionIndex > 0 && (
           <div className={`absolute top-28 sm:top-1/2 sm:-translate-y-1/2 left-4 sm:left-6 z-40 transition-opacity duration-300 pointer-events-none opacity-100`}>
             <button
               onClick={goToPrevSession}
@@ -219,30 +236,32 @@ export function App() {
           </div>
         )}
 
-        <div className={`absolute top-28 sm:top-1/2 sm:-translate-y-1/2 right-4 sm:right-6 z-40 transition-opacity duration-300 pointer-events-none flex items-center justify-end opacity-100`}>
-          {currentSessionIndex === sessions.length - 1 ? (
-            (history.length > 0 || state.stage > 0) && (
+        {!state.showCart && (
+          <div className={`absolute top-28 sm:top-1/2 sm:-translate-y-1/2 right-4 sm:right-6 z-40 transition-opacity duration-300 pointer-events-none flex items-center justify-end opacity-100`}>
+            {currentSessionIndex === sessions.length - 1 ? (
+              (history.length > 0 || state.stage > 0) && (
+                <button
+                  onClick={goToNextSession}
+                  className="pointer-events-auto px-3 py-2 sm:px-4 sm:py-3 rounded-full bg-emerald-500 hover:bg-emerald-400 backdrop-blur-md flex items-center gap-1.5 sm:gap-2 justify-center text-white font-heading transition-all hover:scale-105 shadow-[0_4px_20px_rgba(16,185,129,0.3)]"
+                  title="Start New Wish Tree"
+                >
+                  <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <span className="font-semibold text-xs sm:text-sm">New Tree</span>
+                </button>
+              )
+            ) : (
               <button
                 onClick={goToNextSession}
-                className="pointer-events-auto px-3 py-2 sm:px-4 sm:py-3 rounded-full bg-emerald-500 hover:bg-emerald-400 backdrop-blur-md flex items-center gap-1.5 sm:gap-2 justify-center text-white font-heading transition-all hover:scale-105 shadow-[0_4px_20px_rgba(16,185,129,0.3)]"
-                title="Start New Wish Tree"
+                className="pointer-events-auto w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 flex items-center justify-center text-white/80 hover:text-white transition-all hover:scale-110 shadow-xl"
+                title="Next Session"
               >
-                <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
-                <span className="font-semibold text-xs sm:text-sm">New Tree</span>
+                <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
               </button>
-            )
-          ) : (
-            <button
-              onClick={goToNextSession}
-              className="pointer-events-auto w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 flex items-center justify-center text-white/80 hover:text-white transition-all hover:scale-110 shadow-xl"
-              title="Next Session"
-            >
-              <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
-            </button>
-          )}
-        </div>
+            )}
+          </div>
+        )}
 
-        {!state.showCheckout && !state.showConfirmation &&
+        {!state.showCheckout && !state.showConfirmation && (
           <div className={`w-full transition-opacity duration-300 opacity-100`}>
             <WishInputBar
               value={state.inputValue}
@@ -250,19 +269,19 @@ export function App() {
               onSubmit={onSubmit}
               placeholder={currentConfig?.prompt || 'What are you wishing for today?'}
               disabled={state.showCheckout || state.showConfirmation || state.isSearching}
-              history={history}
-              onHistoryClick={restoreHistory}
-              hasMorePages={hasMorePages}
-              hasPrevPages={hasPrevPages}
-              onNextPage={() => {
+              history={state.showCart ? state.cartHistory : history}
+              onHistoryClick={state.showCart ? undefined : restoreHistory}
+              hasMorePages={state.showCart ? false : hasMorePages}
+              hasPrevPages={state.showCart ? false : hasPrevPages}
+              onNextPage={state.showCart ? undefined : () => {
                 setIsPaging(true);
                 nextPage();
               }}
-              onPrevPage={() => {
+              onPrevPage={state.showCart ? undefined : () => {
                 setIsPaging(true);
                 prevPage();
               }}
-              onRandomize={() => {
+              onRandomize={state.showCart ? undefined : () => {
                 const randomQueries = [
                   "Please suggest completely different gift ideas, but keep all my previous constraints (like occasion, recipient, budget) in mind.",
                   "Show me some alternative options for the same person and occasion.",
@@ -276,9 +295,44 @@ export function App() {
               onAddToCart={() => {
                 if (selectedProductObj) addToCart(selectedProductObj.id);
               }}
+              customTopContent={state.showCart ? (
+                <>
+                  {state.selectedCartItems.length > 0 && (
+                    <div className="flex items-center gap-1.5 text-xs font-semibold text-white/90 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-3 py-1.5 shadow-lg truncate max-w-[50%]">
+                      <span className="truncate">
+                        {state.selectedCartItems.length === 1 
+                          ? (state.cartItems.find(p => p.id === state.selectedCartItems[0])?.name || '1 item selected')
+                          : `Selected: ${state.selectedCartItems.length} items`}
+                      </span>
+                    </div>
+                  )}
+                  {state.selectedCartItems.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        handleSubmit(`I want to compare the selected items.`);
+                      }}
+                      className="flex items-center gap-1.5 text-xs font-semibold text-blue-100 bg-blue-500/20 hover:bg-blue-500/40 backdrop-blur-md border border-blue-500/30 rounded-full px-3 py-1.5 transition-colors shadow-lg"
+                    >
+                      Compare selected
+                    </button>
+                  )}
+                  {(state.selectedCartItems.length > 0 || state.cartItems.length > 0) && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        proceedToCheckout();
+                      }}
+                      className="flex items-center gap-1.5 text-xs font-semibold text-white bg-emerald-500/80 hover:bg-emerald-500 backdrop-blur-md border border-emerald-400 rounded-full px-3 py-1.5 transition-colors shadow-lg shadow-emerald-500/20"
+                    >
+                      {state.selectedCartItems.length > 0 ? 'Checkout selected' : 'Proceed to Checkout'}
+                    </button>
+                  )}
+                </>
+              ) : undefined}
             />
           </div>
-        }
+        )}
       </div>
 
 
