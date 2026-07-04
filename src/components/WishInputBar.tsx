@@ -29,32 +29,22 @@ interface WishInputBarProps {
   customTopContent?: React.ReactNode;
 }
 
-/** A small tree SVG used as the loading indicator on the send button */
-function TreeSpinner() {
+/** A small 'U' SVG used as the loading indicator on the send button */
+function USpinner() {
   return (
     <motion.svg
       viewBox="0 0 24 24"
       className="w-4 h-4 sm:w-5 sm:h-5"
-      fill="none"
-      animate={{ rotate: [0, 0, 15, -15, 10, -10, 5, -5, 0] }}
-      transition={{ duration: 1.2, repeat: Infinity, ease: 'easeInOut' }}
     >
-      {/* Trunk */}
-      <rect x="10.5" y="17" width="3" height="5" rx="1" fill="white" opacity="0.9" />
-      {/* Bottom layer */}
-      <polygon points="12,11 5,20 19,20" fill="white" opacity="0.75" />
-      {/* Middle layer */}
-      <polygon points="12,6 6.5,15 17.5,15" fill="white" opacity="0.88" />
-      {/* Top layer */}
-      <polygon points="12,2 8,10 16,10" fill="white" />
-      {/* Glowing star on top */}
-      <motion.circle
-        cx="12"
-        cy="2"
-        r="1.5"
-        fill="#6ee7b7"
-        animate={{ opacity: [1, 0.3, 1], scale: [1, 1.4, 1] }}
-        transition={{ duration: 0.8, repeat: Infinity, ease: 'easeInOut' }}
+      <motion.path
+        initial={{ pathLength: 0, opacity: 0.4 }}
+        animate={{ pathLength: [0, 1, 0], pathOffset: [0, 0, 1], opacity: [0.4, 1, 0.4] }}
+        transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+        d="M 6 9 A 6 6 0 0 0 18 9"
+        stroke="#FDE047"
+        strokeWidth="3.5"
+        strokeLinecap="round"
+        fill="none"
       />
     </motion.svg>
   );
@@ -312,7 +302,7 @@ export function WishInputBar({
                     exit={{ scale: 0, opacity: 0 }}
                     transition={{ duration: 0.15 }}
                   >
-                    <TreeSpinner />
+                    <USpinner />
                   </motion.span>
                 ) : (
                   <motion.span

@@ -51,6 +51,7 @@ export interface GlobalState {
   showConfirmation: boolean;
   cartHistory: HistorySnapshot[];
   selectedCartItems: string[];
+  isSearchingCart?: boolean;
 }
 
 const CART_STORAGE_KEY = 'kapruka_magic_cart';
@@ -136,6 +137,7 @@ export function useWishTree() {
     showConfirmation: screenInit.showConfirmation ?? false,
     cartHistory: [],
     selectedCartItems: [],
+    isSearchingCart: false,
   });
 
   useEffect(() => {
@@ -210,7 +212,7 @@ export function useWishTree() {
         page: 0,
       }));
     } else if (!isFallback && globalState.showCart) {
-      setGlobalState(prev => ({ ...prev, aiStatus: t('SEARCHING') })); // Optional, assuming you want a status
+      setGlobalState(prev => ({ ...prev, isSearchingCart: true, aiStatus: t('SEARCHING') })); 
     }
 
     const session = sessions[currentSessionIndex];
@@ -279,7 +281,7 @@ export function useWishTree() {
         };
 
         if (inCart) {
-          setGlobalState(prev => ({ ...prev, cartHistory: [...prev.cartHistory, newHistoryItem] }));
+          setGlobalState(prev => ({ ...prev, isSearchingCart: false, cartHistory: [...prev.cartHistory, newHistoryItem] }));
         } else {
           updateSession(prev => ({
             ...prev,
@@ -376,6 +378,7 @@ export function useWishTree() {
       if (inCart) {
          setGlobalState(prev => ({
            ...prev,
+           isSearchingCart: false,
            cartHistory: [...prev.cartHistory, newHistoryItemFull]
          }));
       } else {
@@ -416,7 +419,7 @@ export function useWishTree() {
       };
       
       if (inCart) {
-        setGlobalState(prev => ({ ...prev, cartHistory: [...prev.cartHistory, errorItem] }));
+        setGlobalState(prev => ({ ...prev, isSearchingCart: false, cartHistory: [...prev.cartHistory, errorItem] }));
       } else {
         updateSession((prev) => ({
           ...prev,
@@ -602,6 +605,7 @@ export function useWishTree() {
     return {
       ...(currentSession || createNewSession(0)),
       ...globalState,
+      isSearching: globalState.showCart ? !!globalState.isSearchingCart : (currentSession?.isSearching || false)
     };
   }, [currentSession, globalState]);
 

@@ -69,155 +69,163 @@ export function CheckoutSummary({ items, onConfirm, onClose }: CheckoutSummaryPr
   };
 
   return (
-    <>
-      {/* Backdrop */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        onClick={onClose}
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
-      />
-
-      {/* Drawer */}
-      <motion.div
-        initial={{ x: '100%' }}
-        animate={{ x: 0 }}
-        exit={{ x: '100%' }}
-        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        className="fixed right-0 top-0 bottom-0 w-full max-w-md bg-slate-900/95 backdrop-blur-xl border-l border-white/10 z-50 overflow-y-auto shadow-[0_0_50px_rgba(16,185,129,0.25)] p-6 sm:p-8 flex flex-col"
-      >
-        {/* Soft glowing ambient */}
-        <div className="absolute -top-20 -right-20 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
-
-        {/* Close */}
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 text-white/50 hover:text-white transition-colors bg-white/5 hover:bg-white/10 p-2 rounded-full z-20"
+    <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
+      <div className="relative w-full h-full px-2 sm:px-0 sm:w-[min(115vw,78vh)] sm:h-[min(115vw,78vh)] md:w-[800px] md:h-[800px] max-w-[800px] max-h-[800px] flex-shrink-0 origin-center flex flex-col">
+        {/* Main Content Area - Scrollable */}
+        <div 
+          className="w-full h-full overflow-y-auto custom-scrollbar pr-2 pb-[35vh] sm:pb-64 pt-20 sm:pt-16"
+          style={{
+            maskImage: 'linear-gradient(to bottom, black 0%, black 70%, transparent 100%)',
+            WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 70%, transparent 100%)'
+          }}
         >
-          <X className="w-4 h-4" />
-        </button>
+          <div className="w-full bg-[#402970]/80 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl overflow-hidden flex flex-col p-6 sm:p-8 relative">
+            {/* Soft glowing ambient */}
+            <div className="absolute -top-20 -right-20 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="pt-2">
-          <h2 className="text-2xl font-heading font-bold text-white mb-6">
-            {t('CHECKOUT_DETAILS')}
-          </h2>
+            {/* Back/Close */}
+            <button
+              onClick={onClose}
+              className="absolute top-4 right-4 sm:top-6 sm:right-6 p-2 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors flex items-center justify-center z-20"
+              title="Back to Cart"
+            >
+              <X className="w-5 h-5" />
+            </button>
 
-          {/* Recipient details */}
-          <div className="bg-white/5 rounded-xl p-5 border border-white/10 mb-4 space-y-3">
-            <h3 className="font-heading font-semibold text-white flex items-center gap-2">
-              <User className="w-4 h-4 text-emerald-400" /> Recipient
-            </h3>
-            <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5">
-              <User className="w-3.5 h-3.5 text-white/40 flex-shrink-0" />
-              <input
-                type="text"
-                placeholder="Recipient full name *"
-                value={recipientName}
-                onChange={(e) => setRecipientName(e.target.value)}
-                className="bg-transparent text-white text-sm placeholder:text-white/30 outline-none w-full"
-              />
-            </div>
-            <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5">
-              <Phone className="w-3.5 h-3.5 text-white/40 flex-shrink-0" />
-              <input
-                type="tel"
-                placeholder="Recipient phone *"
-                value={recipientPhone}
-                onChange={(e) => setRecipientPhone(e.target.value)}
-                className="bg-transparent text-white text-sm placeholder:text-white/30 outline-none w-full"
-              />
-            </div>
-          </div>
+            <div className="pt-2">
+              <h2 className="text-2xl font-heading font-bold text-white mb-6">
+                {t('CHECKOUT_DETAILS')}
+              </h2>
 
-          {/* Delivery details */}
-          <div className="bg-white/5 rounded-xl p-5 border border-white/10 mb-4 space-y-3">
-            <h3 className="font-heading font-semibold text-white flex items-center gap-2 mb-3">
-              <MapPin className="w-4 h-4 text-emerald-400" /> {t('DELIVERY_INFO')}
-            </h3>
-            <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5">
-              <MapPin className="w-3.5 h-3.5 text-white/40 flex-shrink-0" />
-              <input
-                type="text"
-                placeholder="City *"
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                className="bg-transparent text-white text-sm placeholder:text-white/30 outline-none w-full"
-              />
-            </div>
-            <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5">
-              <Calendar className="w-3.5 h-3.5 text-white/40 flex-shrink-0" />
-              <input
-                type="date"
-                value={deliveryDate}
-                min={tomorrow.toISOString().split('T')[0]}
-                onChange={(e) => setDeliveryDate(e.target.value)}
-                className="bg-transparent text-white text-sm outline-none w-full [color-scheme:dark]"
-              />
-            </div>
-          </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="flex flex-col gap-4">
+                  {/* Recipient details */}
+                  <div className="bg-white/5 rounded-xl p-5 border border-white/10 space-y-3">
+                    <h3 className="font-heading font-semibold text-white flex items-center gap-2">
+                      <User className="w-4 h-4 text-emerald-400" /> Recipient
+                    </h3>
+                    <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5">
+                      <User className="w-3.5 h-3.5 text-white/40 flex-shrink-0" />
+                      <input
+                        type="text"
+                        placeholder="Recipient full name *"
+                        value={recipientName}
+                        onChange={(e) => setRecipientName(e.target.value)}
+                        className="bg-transparent text-white text-sm placeholder:text-white/30 outline-none w-full"
+                      />
+                    </div>
+                    <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5">
+                      <Phone className="w-3.5 h-3.5 text-white/40 flex-shrink-0" />
+                      <input
+                        type="tel"
+                        placeholder="Recipient phone *"
+                        value={recipientPhone}
+                        onChange={(e) => setRecipientPhone(e.target.value)}
+                        className="bg-transparent text-white text-sm placeholder:text-white/30 outline-none w-full"
+                      />
+                    </div>
+                  </div>
 
-          {/* Gift message */}
-          <div className="bg-white/5 rounded-xl p-5 border border-white/10 mb-4">
-            <h3 className="font-heading font-semibold text-white flex items-center gap-2 mb-3">
-              <Gift className="w-4 h-4 text-emerald-400" /> Gift Message
-            </h3>
-            <textarea
-              value={giftMessage}
-              onChange={(e) => setGiftMessage(e.target.value)}
-              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder:text-white/40 font-heading text-sm outline-none focus:border-emerald-400/50 transition-colors resize-none"
-              rows={2}
-              placeholder="Optional gift message..."
-            />
-          </div>
+                  {/* Delivery details */}
+                  <div className="bg-white/5 rounded-xl p-5 border border-white/10 space-y-3">
+                    <h3 className="font-heading font-semibold text-white flex items-center gap-2 mb-3">
+                      <MapPin className="w-4 h-4 text-emerald-400" /> {t('DELIVERY_INFO')}
+                    </h3>
+                    <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5">
+                      <MapPin className="w-3.5 h-3.5 text-white/40 flex-shrink-0" />
+                      <input
+                        type="text"
+                        placeholder="City *"
+                        value={city}
+                        onChange={(e) => setCity(e.target.value)}
+                        className="bg-transparent text-white text-sm placeholder:text-white/30 outline-none w-full"
+                      />
+                    </div>
+                    <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5">
+                      <Calendar className="w-3.5 h-3.5 text-white/40 flex-shrink-0" />
+                      <input
+                        type="date"
+                        value={deliveryDate}
+                        min={tomorrow.toISOString().split('T')[0]}
+                        onChange={(e) => setDeliveryDate(e.target.value)}
+                        className="bg-transparent text-white text-sm outline-none w-full [color-scheme:dark]"
+                      />
+                    </div>
+                  </div>
 
-          {/* Order summary */}
-          <div className="bg-emerald-500/10 rounded-xl p-5 border border-emerald-500/20 mb-6">
-            {items.map((item) => (
-              <div key={item.id} className="flex justify-between items-center mb-2 text-sm">
-                <span className="text-white/70 truncate mr-4">{item.name}</span>
-                <span className="font-mono text-white flex-shrink-0">LKR {item.price.toLocaleString()}</span>
+                  {/* Gift message */}
+                  <div className="bg-white/5 rounded-xl p-5 border border-white/10">
+                    <h3 className="font-heading font-semibold text-white flex items-center gap-2 mb-3">
+                      <Gift className="w-4 h-4 text-emerald-400" /> Gift Message
+                    </h3>
+                    <textarea
+                      value={giftMessage}
+                      onChange={(e) => setGiftMessage(e.target.value)}
+                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder:text-white/40 font-heading text-sm outline-none focus:border-emerald-400/50 transition-colors resize-none"
+                      rows={2}
+                      placeholder="Optional gift message..."
+                    />
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-4">
+                  {/* Order summary */}
+                  <div className="bg-emerald-500/10 rounded-xl p-5 border border-emerald-500/20">
+                    <h3 className="font-heading font-semibold text-white mb-4">Order Summary</h3>
+                    <div className="max-h-[200px] overflow-y-auto custom-scrollbar pr-2 mb-4 space-y-3">
+                      {items.map((item) => (
+                        <div key={item.id} className="flex items-center gap-3 text-sm">
+                           <img src={item.image} alt={item.name} className="w-10 h-10 rounded-lg object-cover bg-black/20" />
+                          <span className="text-white/80 line-clamp-2 flex-1">{item.name}</span>
+                          <span className="font-mono text-emerald-300 font-medium whitespace-nowrap">LKR {item.price.toLocaleString()}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="h-px bg-emerald-500/20 my-4" />
+                    <div className="flex justify-between items-end">
+                      <span className="text-lg font-heading text-white">{t('TOTAL')}</span>
+                      <span className="text-2xl font-mono font-bold text-emerald-400">LKR {subtotal.toLocaleString()}</span>
+                    </div>
+                    <p className="text-xs text-white/50 font-mono mt-3">
+                      Prices locked for 60 minutes after order creation
+                    </p>
+                  </div>
+
+                  {/* Error */}
+                  {error && (
+                    <div className="flex items-start gap-2 bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-3 text-red-300 text-sm">
+                      <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                      <span>{error}</span>
+                    </div>
+                  )}
+
+                  <div className="mt-auto pt-4">
+                    {/* Confirm button */}
+                    <button
+                      onClick={handlePlaceOrder}
+                      disabled={!isValid || placing}
+                      className="w-full py-4 px-6 bg-emerald-500 hover:bg-emerald-600 disabled:bg-white/10 disabled:text-white/40 disabled:cursor-not-allowed text-white font-heading font-bold text-lg rounded-xl transition-all shadow-[0_4px_20px_rgba(16,185,129,0.3)] hover:shadow-[0_4px_25px_rgba(16,185,129,0.4)] disabled:shadow-none flex items-center justify-center gap-2 group"
+                    >
+                      {placing ? (
+                        <><Loader2 className="w-5 h-5 animate-spin" /> Creating order...</>
+                      ) : (
+                        <>
+                          <ExternalLink className="w-5 h-5" />
+                          {t('CONFIRM_PAY')}
+                          <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                        </>
+                      )}
+                    </button>
+                    <p className="text-xs text-white/30 font-mono text-center mt-3">
+                      You'll be redirected to Kapruka's secure payment page
+                    </p>
+                  </div>
+                </div>
               </div>
-            ))}
-            <div className="h-px bg-white/10 my-3" />
-            <div className="flex justify-between items-center">
-              <span className="text-lg font-heading font-semibold text-white">{t('TOTAL')}</span>
-              <span className="text-2xl font-mono font-bold text-emerald-400">LKR {subtotal.toLocaleString()}</span>
             </div>
-            <p className="text-xs text-white/40 font-mono mt-2">
-              Prices locked for 60 minutes after order creation
-            </p>
           </div>
-
-          {/* Error */}
-          {error && (
-            <div className="flex items-start gap-2 bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-3 mb-4 text-red-300 text-sm">
-              <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
-              <span>{error}</span>
-            </div>
-          )}
-
-          {/* Confirm button */}
-          <button
-            onClick={handlePlaceOrder}
-            disabled={!isValid || placing}
-            className="w-full py-4 px-6 bg-emerald-500 hover:bg-emerald-600 disabled:bg-white/10 disabled:cursor-not-allowed text-white font-heading font-semibold text-lg rounded-xl transition-colors flex items-center justify-center gap-2 group shadow-[0_4px_20px_rgba(16,185,129,0.3)]"
-          >
-            {placing ? (
-              <><Loader2 className="w-5 h-5 animate-spin" /> Creating order...</>
-            ) : (
-              <>
-                <ExternalLink className="w-5 h-5" />
-                {t('CONFIRM_PAY')}
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </>
-            )}
-          </button>
-          <p className="text-xs text-white/30 font-mono text-center mt-3">
-            You'll be redirected to Kapruka's secure payment page
-          </p>
         </div>
-      </motion.div>
-    </>
+      </div>
+    </div>
   );
 }

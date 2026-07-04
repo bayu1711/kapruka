@@ -119,7 +119,7 @@ export function App() {
       {/* UI Components */}
 
       <div className={`fixed top-4 right-4 sm:top-6 sm:right-6 z-50 flex items-center gap-2 sm:gap-3 transition-opacity duration-300 opacity-100`}>
-        {state.showCart && (
+        {(state.showCart || state.showCheckout || state.showConfirmation) && !state.showConfirmation && (
           <div className="flex items-center gap-1.5 sm:gap-2 mr-2 sm:mr-4">
             {/* Icon Box */}
             <div className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-black/60 backdrop-blur-md rounded-full border border-white/10 shadow-lg">
@@ -129,7 +129,7 @@ export function App() {
             {/* Title Box */}
             <div className="flex items-center h-8 sm:h-10 bg-black/60 backdrop-blur-md px-3 sm:px-4 rounded-full border border-white/10 shadow-lg">
               <span className="text-xs sm:text-sm font-heading font-bold text-white whitespace-nowrap">
-                {t('YOUR_CART')}
+                {state.showCheckout ? 'CHECKOUT' : t('YOUR_CART')}
               </span>
             </div>
             
@@ -158,9 +158,16 @@ export function App() {
           {langLabel}
         </button>
 
-        {state.showCart ? (
+        {(state.showCart || state.showCheckout || state.showConfirmation) ? (
           <button
-            onClick={toggleCart}
+            onClick={() => {
+              if (state.showConfirmation) closeConfirmation();
+              else if (state.showCheckout) {
+                cancelCheckout();
+                toggleCart(); // to go back to tree if we cancel checkout, or wait, cancel checkout goes to cart? Yes, if showCart is true. So let's just use a function that closes all.
+              }
+              else toggleCart();
+            }}
             className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-emerald-500/20 hover:bg-emerald-500/40 text-emerald-200 rounded-full shadow-lg transition-colors backdrop-blur-md border border-emerald-500/30"
             title="Back to Tree"
           >
@@ -202,7 +209,29 @@ export function App() {
       {/* Main tree visualization */}
       <div className="flex-1 relative w-full flex flex-col pt-16 sm:pt-0 min-h-0">
         <AnimatePresence mode="wait">
-          {state.showCart ? (
+          {state.showConfirmation ? (
+            <motion.div
+              key="confirmation-view"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              className="flex-1 w-full h-full relative min-h-0"
+            >
+              <ConfirmationState onClose={closeConfirmation} />
+            </motion.div>
+          ) : state.showCheckout ? (
+            <motion.div
+              key="checkout-view"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              className="flex-1 w-full h-full relative min-h-0"
+            >
+              <CheckoutSummary items={cartProducts} onConfirm={confirmOrder} onClose={cancelCheckout} />
+            </motion.div>
+          ) : state.showCart ? (
             <motion.div
               key="cart-view"
               initial={{ opacity: 0, scale: 0.95 }}
@@ -255,7 +284,7 @@ export function App() {
         </AnimatePresence>
 
         {/* Navigation Arrows */}
-        {!state.showCart && currentSessionIndex > 0 && (
+        {(!state.showCart && !state.showCheckout && !state.showConfirmation) && currentSessionIndex > 0 && (
           <div className={`absolute top-28 sm:top-1/2 sm:-translate-y-1/2 left-4 sm:left-6 z-40 transition-opacity duration-300 pointer-events-none opacity-100`}>
             <button
               onClick={goToPrevSession}
@@ -266,7 +295,7 @@ export function App() {
           </div>
         )}
 
-        {!state.showCart && (
+        {(!state.showCart && !state.showCheckout && !state.showConfirmation) && (
           <div className={`absolute top-28 sm:top-1/2 sm:-translate-y-1/2 right-4 sm:right-6 z-40 transition-opacity duration-300 pointer-events-none flex items-center justify-end opacity-100`}>
             {currentSessionIndex === sessions.length - 1 ? (
               (history.length > 0 || state.stage > 0) && (
@@ -389,18 +418,6 @@ export function App() {
         searchParameters={state.searchParameters}
         liveCategories={liveCategories}
       />
-
-      {/* Checkout */}
-      <AnimatePresence>
-        {state.showCheckout &&
-          <CheckoutSummary items={cartProducts} onConfirm={confirmOrder} onClose={cancelCheckout} />
-        }
-      </AnimatePresence>
-
-      {/* Confirmation */}
-      <AnimatePresence>
-        {state.showConfirmation && <ConfirmationState onClose={closeConfirmation} />}
-      </AnimatePresence>
 
       {/* Global Search Modal */}
       <GlobalSearchModal
