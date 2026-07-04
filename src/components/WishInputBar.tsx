@@ -13,6 +13,7 @@ interface WishInputBarProps {
   onSubmit: (finalValue?: string) => void;
   placeholder: string;
   disabled?: boolean;
+  isSearching?: boolean;
   history?: HistorySnapshot[];
   onHistoryClick?: (index: number) => void;
   onNextPage?: () => void;
@@ -65,6 +66,7 @@ export function WishInputBar({
   onSubmit,
   placeholder,
   disabled,
+  isSearching,
   history,
   onHistoryClick,
   onNextPage,
@@ -121,7 +123,7 @@ export function WishInputBar({
     setLoading(false);
   };
 
-  const isLoading = loading && !disabled;
+  const isLoadingIndicator = loading || isSearching;
 
   return (
     <motion.div
@@ -298,11 +300,11 @@ export function WishInputBar({
             )}
             <button
               type="submit"
-              disabled={!value.trim() || disabled || isLoading}
+              disabled={!value.trim() || disabled || isLoadingIndicator}
               className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-emerald-500 hover:bg-emerald-600 disabled:bg-white/10 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
             >
               <AnimatePresence mode="wait" initial={false}>
-                {isLoading ? (
+                {isLoadingIndicator ? (
                   <motion.span
                     key="tree"
                     initial={{ scale: 0, opacity: 0 }}

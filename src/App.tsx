@@ -299,6 +299,7 @@ export function App() {
               onSubmit={onSubmit}
               placeholder={currentConfig?.prompt || 'What are you wishing for today?'}
               disabled={state.showCheckout || state.showConfirmation || state.isSearching}
+              isSearching={state.isSearching}
               history={state.showCart ? state.cartHistory : history}
               onHistoryClick={state.showCart ? undefined : restoreHistory}
               hasMorePages={state.showCart ? false : hasMorePages}
