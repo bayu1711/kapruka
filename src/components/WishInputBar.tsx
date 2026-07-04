@@ -179,8 +179,37 @@ export function WishInputBar({
         )}
 
         {/* Action Chips */}
-        {!selectedProduct && (hasPrevPages || hasMorePages || onRandomize) && (
-          <div className="w-full flex flex-wrap justify-end items-end gap-2 px-2 mb-3">
+        <AnimatePresence mode="popLayout">
+          {selectedProduct ? (
+            <motion.div
+              initial={{ opacity: 0, y: 10, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 10, scale: 0.95 }}
+              className="w-full flex justify-between items-end gap-2 px-2 mb-3 pointer-events-auto"
+            >
+              <button
+                type="button"
+                onClick={() => {
+                  if (onAddToCart) onAddToCart();
+                }}
+                className="flex items-center gap-1.5 text-xs font-semibold text-white bg-emerald-500/80 hover:bg-emerald-500 backdrop-blur-md border border-emerald-400 rounded-full px-3 py-1.5 transition-colors shadow-lg shadow-emerald-500/20"
+              >
+                Add to Cart
+              </button>
+
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-white/90 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-3 py-1.5 shadow-lg max-w-[60%] truncate">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+                <span className="truncate">Chatting with: {selectedProduct.name}</span>
+              </div>
+            </motion.div>
+          ) : (
+            (hasPrevPages || hasMorePages || onRandomize) && (
+              <motion.div
+                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                className="w-full flex flex-wrap justify-end items-end gap-2 px-2 mb-3"
+              >
             <div className="flex flex-wrap gap-2 justify-end">
               {hasPrevPages && (
                 <button
@@ -213,37 +242,12 @@ export function WishInputBar({
                 </button>
               )}
             </div>
-          </div>
-        )}
+          </motion.div>
+            )
+          )}
+        </AnimatePresence>
 
         <form onSubmit={handleFormSubmit} className="w-full relative mt-2">
-          <AnimatePresence>
-            {selectedProduct && (
-              <motion.div
-                initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                className="absolute -top-12 left-4 sm:left-6 z-10 w-[calc(100%-2rem)] sm:w-[calc(100%-3rem)] pointer-events-auto"
-              >
-                <div className="flex justify-between items-center w-full">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (onAddToCart) onAddToCart();
-                    }}
-                    className="flex items-center gap-1.5 text-xs font-semibold text-white bg-emerald-500/80 hover:bg-emerald-500 backdrop-blur-md border border-emerald-400 rounded-full px-3 py-1.5 transition-colors shadow-lg shadow-emerald-500/20"
-                  >
-                    Add to Cart
-                  </button>
-
-                  <div className="flex items-center gap-1.5 text-xs font-semibold text-white/90 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-3 py-1.5 shadow-lg">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                    Chatting with: {selectedProduct.name}
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
 
           <div className="relative bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl sm:rounded-2xl shadow-2xl overflow-hidden">
             <input
