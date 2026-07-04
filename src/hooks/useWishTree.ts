@@ -389,7 +389,7 @@ export function useWishTree() {
         })();
       }
       
-      const statusMsg = `Found ${mapped.length} results for "${agentResult.searchQuery}"`;
+      const statusMsg = agentResult.aiStatusMessage || `Found ${mapped.length} results for "${agentResult.searchQuery}"`;
       
       const newHistoryItemFull = {
         query: originalQuery || query,

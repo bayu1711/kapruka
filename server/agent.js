@@ -18,6 +18,7 @@ const OutputSchema = z.object({
     giftMessage: z.string().optional()
   }).optional().describe("If intent is update_checkout, fill any details the user provides. Leave others undefined. Try to extract name, phone number, city, or date."),
   answer: z.string().optional().describe("If intent is 'answer', provide the answer to the user's question here. Be conversational, concise, and helpful."),
+  hint: z.string().optional().describe("A simple, short, non-technical context (1-2 sentences) about why these products are shown, to give the user a hint and encourage them to prompt again. e.g. 'I found these popular anniversary gifts for your wife.'"),
   reasoning: z.string().describe("Analyze the recipient and occasion. Explain what types of gifts are appropriate vs inappropriate, and why you are choosing the specific Kapruka search query."),
   recipient: z.string().describe("Who the gift is for (e.g. mother, friend, self, unspecified)"),
   searchQuery: z.string().describe("The specific Kapruka search term (e.g. 'roses', 'birthday cake', 'saree')"),
@@ -335,13 +336,14 @@ CRITICAL RULES FOR SEARCH QUERY:
       return { products: [], categories: [], reasoning: '', recipient: '', searchQuery: '' };
     }
 
-    const { intent, targetProductIds, reasoning, recipient, searchQuery, categories, searchParameters, followUpQuestions, answer } = parsed;
+    const { intent, targetProductIds, reasoning, hint, recipient, searchQuery, categories, searchParameters, followUpQuestions, answer } = parsed;
     
     let finalIntent = intent || 'search';
     let finalTargetProductIds = targetProductIds || [];
     
     suggestedCategories = categories || [];
     finalReasoning = reasoning || '';
+    let finalHint = hint || '';
     finalRecipient = recipient || '';
     finalOriginalSearchQuery = searchQuery || '';
     finalSearchQuery = searchQuery || '';
@@ -358,6 +360,7 @@ CRITICAL RULES FOR SEARCH QUERY:
         categories: suggestedCategories,
         products: [], // no products needed for cart/checkout/answer actions
         reasoning: finalReasoning,
+        hint: finalHint,
         recipient: finalRecipient,
         postFilterReasoning: finalPostFilterReasoning,
         followUpQuestions: finalFollowUpQuestions,
@@ -443,6 +446,7 @@ CRITICAL RULES FOR SEARCH QUERY:
     products: finalProducts, 
     categories: suggestedCategories,
     reasoning: finalReasoning,
+    hint: finalHint,
     recipient: finalRecipient,
     searchQuery: finalSearchQuery,
     originalSearchQuery: finalOriginalSearchQuery,

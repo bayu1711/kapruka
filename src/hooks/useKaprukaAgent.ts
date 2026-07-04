@@ -52,7 +52,7 @@ export async function parseUserQuery(
       actualSearchQuery: data.searchQuery, // The actual query Gemini used
       originalSearchQuery: data.originalSearchQuery,
       suggestedCategories: data.categories || [],
-      aiStatusMessage: data.intent === 'answer' ? (data.answer || '') : (data.intent && data.intent !== 'search' ? '' : `Found ${data.products ? data.products.length : 0} items`),
+      aiStatusMessage: data.intent === 'answer' ? (data.answer || '') : (data.intent && data.intent !== 'search' ? '' : (data.hint || `Found ${data.products ? data.products.length : 0} items`)),
       products: data.products || [],
       reasoning: data.reasoning,
       recipient: data.recipient,
