@@ -91,6 +91,7 @@ export function App() {
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [enablePostFilter, setEnablePostFilter] = useState(false);
   const [enableAnimations, setEnableAnimations] = useState(true);
+  const [defaultRegion, setDefaultRegion] = useState('Colombo');
   const [showDebugGrid, setShowDebugGrid] = useState(false);
   const [showCanopy, setShowCanopy] = useState(true);
 
@@ -500,6 +501,8 @@ export function App() {
         onTogglePostFilter={() => setEnablePostFilter(!enablePostFilter)}
         enableAnimations={enableAnimations}
         onToggleAnimations={() => setEnableAnimations(!enableAnimations)}
+        defaultRegion={defaultRegion}
+        onRegionChange={setDefaultRegion}
         onDeleteAllData={() => {
           localStorage.clear();
           window.location.reload();

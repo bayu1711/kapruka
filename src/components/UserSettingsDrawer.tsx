@@ -10,6 +10,8 @@ interface UserSettingsDrawerProps {
   enableAnimations: boolean;
   onToggleAnimations: () => void;
   onDeleteAllData: () => void;
+  defaultRegion: string;
+  onRegionChange: (region: string) => void;
 }
 
 export function UserSettingsDrawer({
@@ -19,7 +21,9 @@ export function UserSettingsDrawer({
   onTogglePostFilter,
   enableAnimations,
   onToggleAnimations,
-  onDeleteAllData
+  onDeleteAllData,
+  defaultRegion,
+  onRegionChange
 }: UserSettingsDrawerProps) {
   return (
     <AnimatePresence>
@@ -91,6 +95,26 @@ export function UserSettingsDrawer({
                         {enableAnimations ? <CheckSquare className="w-6 h-6" /> : <Square className="w-6 h-6" />}
                       </div>
                     </button>
+
+                    <div className="w-full flex items-center justify-between p-4 rounded-xl border border-white/10 bg-white/5 transition-colors text-left">
+                      <div>
+                        <div className="text-white font-medium mb-1">Default Delivery Region</div>
+                        <div className="text-white/50 text-sm">Select your primary delivery area for accurate shipping estimates.</div>
+                      </div>
+                      <div className="ml-4">
+                        <select
+                          value={defaultRegion}
+                          onChange={(e) => onRegionChange(e.target.value)}
+                          className="bg-black/40 border border-white/20 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2 outline-none cursor-pointer"
+                        >
+                          <option value="Colombo">Colombo</option>
+                          <option value="Gampaha">Gampaha</option>
+                          <option value="Kandy">Kandy</option>
+                          <option value="Galle">Galle</option>
+                          <option value="Other">Other</option>
+                        </select>
+                      </div>
+                    </div>
                   </div>
                 </section>
 
