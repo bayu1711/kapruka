@@ -92,6 +92,8 @@ export function App() {
   const [enablePostFilter, setEnablePostFilter] = useState(false);
   const [enableAnimations, setEnableAnimations] = useState(true);
   const [defaultRegion, setDefaultRegion] = useState('Colombo');
+  const [enableUISounds, setEnableUISounds] = useState(true);
+  const [enableVoiceAssistant, setEnableVoiceAssistant] = useState(false);
   const [showDebugGrid, setShowDebugGrid] = useState(false);
   const [showCanopy, setShowCanopy] = useState(true);
 
@@ -506,6 +508,10 @@ export function App() {
         onToggleAnimations={() => setEnableAnimations(!enableAnimations)}
         showCanopy={showCanopy}
         onToggleCanopy={() => setShowCanopy(!showCanopy)}
+        enableUISounds={enableUISounds}
+        onToggleUISounds={() => setEnableUISounds(!enableUISounds)}
+        enableVoiceAssistant={enableVoiceAssistant}
+        onToggleVoiceAssistant={() => setEnableVoiceAssistant(!enableVoiceAssistant)}
         defaultRegion={defaultRegion}
         onRegionChange={setDefaultRegion}
         onDeleteAllData={() => {

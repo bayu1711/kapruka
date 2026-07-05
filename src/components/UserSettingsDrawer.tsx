@@ -11,6 +11,10 @@ interface UserSettingsDrawerProps {
   onToggleAnimations: () => void;
   showCanopy: boolean;
   onToggleCanopy: () => void;
+  enableUISounds: boolean;
+  onToggleUISounds: () => void;
+  enableVoiceAssistant: boolean;
+  onToggleVoiceAssistant: () => void;
   onDeleteAllData: () => void;
   defaultRegion: string;
   onRegionChange: (region: string) => void;
@@ -25,6 +29,10 @@ export function UserSettingsDrawer({
   onToggleAnimations,
   showCanopy,
   onToggleCanopy,
+  enableUISounds,
+  onToggleUISounds,
+  enableVoiceAssistant,
+  onToggleVoiceAssistant,
   onDeleteAllData,
   defaultRegion,
   onRegionChange
@@ -137,6 +145,39 @@ export function UserSettingsDrawer({
                       </div>
                       <div className="text-blue-400 ml-4">
                         {!showCanopy ? <CheckSquare className="w-6 h-6" /> : <Square className="w-6 h-6" />}
+                      </div>
+                    </button>
+                  </div>
+                </section>
+
+                <section>
+                  <h3 className="text-xs font-bold text-white/50 uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <Activity className="w-4 h-4" /> Audio & Voice
+                  </h3>
+                  <div className="space-y-3">
+                    <button
+                      onClick={onToggleUISounds}
+                      className="w-full flex items-center justify-between p-4 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-colors text-left"
+                    >
+                      <div>
+                        <div className="text-white font-medium mb-1">Mute UI Sounds</div>
+                        <div className="text-white/50 text-sm">Disable sound effects for actions like adding to cart.</div>
+                      </div>
+                      <div className="text-blue-400 ml-4">
+                        {!enableUISounds ? <CheckSquare className="w-6 h-6" /> : <Square className="w-6 h-6" />}
+                      </div>
+                    </button>
+
+                    <button
+                      onClick={onToggleVoiceAssistant}
+                      className="w-full flex items-center justify-between p-4 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-colors text-left"
+                    >
+                      <div>
+                        <div className="text-white font-medium mb-1">Voice Assistant Output</div>
+                        <div className="text-white/50 text-sm">Allow the AI to speak out suggestions using text-to-speech.</div>
+                      </div>
+                      <div className="text-blue-400 ml-4">
+                        {enableVoiceAssistant ? <CheckSquare className="w-6 h-6" /> : <Square className="w-6 h-6" />}
                       </div>
                     </button>
                   </div>
