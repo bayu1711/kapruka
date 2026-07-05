@@ -419,7 +419,11 @@ export function App() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.8 }}
-                className="flex overflow-x-auto no-scrollbar gap-2 w-full"
+                className="flex overflow-x-auto no-scrollbar gap-2 w-full px-4 sm:px-6"
+                style={{
+                  maskImage: 'linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%)',
+                  WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%)'
+                }}
               >
                 {[
                   "Gift for my mother under 5000",
