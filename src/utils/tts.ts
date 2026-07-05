@@ -65,8 +65,8 @@ export function speakText(text: string, locale: string) {
       }
 
       try {
-        // ttsspeed=0.3 makes the robotic voice slightly slower and "calmer"
-        const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${langCode}&client=tw-ob&ttsspeed=0.3&q=${encodeURIComponent(chunkText)}`;
+        // Use our backend proxy to avoid browser-level blocks (CORS, Referer restrictions, etc)
+        const url = `/tts?lang=${langCode}&text=${encodeURIComponent(chunkText)}`;
         const audio = new Audio(url);
         (window as any).currentAudio = audio;
         

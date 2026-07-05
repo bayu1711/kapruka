@@ -17,6 +17,10 @@ export default defineConfig({
       '/chat': {
         target: 'http://localhost:3001',
         changeOrigin: true,
+      },
+      '/tts': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
       }
     },
   },
