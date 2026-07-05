@@ -38,15 +38,35 @@ function USpinner() {
       viewBox="0 0 24 24"
       className="w-4 h-4 sm:w-5 sm:h-5"
     >
-      <motion.path
-        initial={{ pathLength: 0, opacity: 0.4 }}
-        animate={{ pathLength: [0, 1, 0], pathOffset: [0, 0, 1], opacity: [0.4, 1, 0.4] }}
-        transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+      <defs>
+        <clipPath id="u-clip-loader">
+          <motion.rect
+            x="0"
+            y="24"
+            width="24"
+            height="0"
+            animate={{ y: [24, 0, 0], height: [0, 24, 0] }}
+            transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+          />
+        </clipPath>
+      </defs>
+      <path
         d="M 6 9 A 6 6 0 0 0 18 9"
         stroke="#FDE047"
         strokeWidth="3.5"
         strokeLinecap="round"
         fill="none"
+        opacity="0.3"
+      />
+      <motion.path
+        d="M 6 9 A 6 6 0 0 0 18 9"
+        stroke="#FDE047"
+        strokeWidth="3.5"
+        strokeLinecap="round"
+        fill="none"
+        clipPath="url(#u-clip-loader)"
+        animate={{ opacity: [0.4, 1, 0.4] }}
+        transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
       />
     </motion.svg>
   );
