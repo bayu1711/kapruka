@@ -107,6 +107,48 @@ const GRID_LAYOUT: GridCell[] = [
   contentId: 'Gift Message'
 }];
 
+const Fireflies = () => {
+  const fireflies = useMemo(() => Array.from({ length: 25 }).map((_, i) => ({
+    id: i,
+    left: `${Math.random() * 100}%`,
+    top: `${Math.random() * 100}%`,
+    size: Math.random() * 4 + 2,
+    duration: Math.random() * 4 + 3,
+    delay: Math.random() * 5,
+    xDrift: Math.random() * 60 - 30,
+  })), []);
+
+  return (
+    <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
+      {fireflies.map((f) => (
+        <motion.div
+          key={f.id}
+          className="absolute rounded-full bg-yellow-200"
+          style={{
+            left: f.left,
+            top: f.top,
+            width: f.size,
+            height: f.size,
+            boxShadow: '0 0 10px 2px rgba(253, 224, 71, 0.6)',
+          }}
+          animate={{
+            y: [0, -150],
+            x: [0, f.xDrift, 0],
+            opacity: [0, 0.8, 0],
+            scale: [0.8, 1.2, 0.8]
+          }}
+          transition={{
+            duration: f.duration,
+            repeat: Infinity,
+            delay: f.delay,
+            ease: "easeInOut",
+          }}
+        />
+      ))}
+    </div>
+  );
+};
+
 export function WishTree({
   stage,
   products,
@@ -553,6 +595,8 @@ export function WishTree({
     <div className="relative w-full h-full flex flex-col items-center justify-center overflow-hidden">
       {/* Responsive square container — kept strictly 1:1 so the % grid stays aligned to the canopy */}
       <div className="relative w-[min(150vw,68vh)] h-[min(150vw,68vh)] sm:w-[min(115vw,78vh)] sm:h-[min(115vw,78vh)] md:w-[800px] md:h-[800px] max-w-[800px] max-h-[800px] flex-shrink-0 origin-center">
+        <Fireflies />
+        
         {/* Trunk Extension to reach the bottom AI chat */}
         {showCanopy && (
           <div 
@@ -584,13 +628,15 @@ export function WishTree({
 
           {showCanopy && (
             <>
-              {/* Trunk */}
-              <rect
-                x="360"
-                y="420"
-                width="80"
-                height="380"
-                fill="url(#trunkGrad)" />
+              {/* Organic Trunk */}
+              <path 
+                d="M 360 420 C 350 550, 370 650, 360 800 L 440 800 C 430 650, 450 550, 440 420 Z" 
+                fill="url(#trunkGrad)" 
+              />
+              {/* Bark texture lines */}
+              <path d="M 375 420 C 365 550, 385 650, 375 800" stroke="#290f02" strokeWidth="2" fill="none" opacity="0.4" />
+              <path d="M 395 420 C 385 550, 405 650, 395 800" stroke="#290f02" strokeWidth="3" fill="none" opacity="0.3" />
+              <path d="M 415 420 C 405 550, 425 650, 415 800" stroke="#290f02" strokeWidth="2" fill="none" opacity="0.4" />
 
               {/* Canopy */}
               <rect
@@ -601,6 +647,7 @@ export function WishTree({
                 rx="80"
                 ry="80"
                 fill="url(#canopyGrad)"
+                filter="drop-shadow(0px 10px 30px rgba(16,185,129,0.5)) drop-shadow(0px -10px 40px rgba(16,185,129,0.2))"
               />
             </>
           )}
