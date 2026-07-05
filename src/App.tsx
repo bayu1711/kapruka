@@ -203,8 +203,9 @@ export function App() {
               if (state.showConfirmation) closeConfirmation();
               else if (state.showCheckout) {
                 cancelCheckout();
-                toggleCart(); // to go back to tree if we cancel checkout, or wait, cancel checkout goes to cart? Yes, if showCart is true. So let's just use a function that closes all.
+                toggleCart(); 
               }
+              else if (state.showOrders) toggleOrders();
               else toggleCart();
             }}
             className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-emerald-500/20 hover:bg-emerald-500/40 text-emerald-200 rounded-full shadow-lg transition-colors backdrop-blur-md border border-emerald-500/30"
@@ -403,7 +404,7 @@ export function App() {
             value={state.inputValue}
             onChange={updateInput}
             onSubmit={onSubmit}
-            placeholder={currentConfig?.prompt || 'What are you wishing for today?'}
+            placeholder={state.showOrders ? "Ask about your orders (e.g. Where is my package?)..." : (currentConfig?.prompt || 'What are you wishing for today?')}
             disabled={state.isSearching}
             isSearching={state.isSearching}
             history={isCartContext ? state.cartHistory : history}
@@ -483,6 +484,32 @@ export function App() {
                   </button>
                 )}
               </>
+            ) : (state.showOrders && !state.isSearching) ? (
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.8 }}
+                className="flex overflow-x-auto no-scrollbar gap-2 w-full px-4 sm:px-6"
+                style={{
+                  maskImage: 'linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%)',
+                  WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%)'
+                }}
+              >
+                {[
+                  { query: "Where is my most recent order?" },
+                  { query: "What is the status of VPAY827982BA?" },
+                  { query: "Can I cancel my order?" }
+                ].map((suggestion, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => handleSubmit(suggestion.query, enablePostFilter)}
+                    className="flex-shrink-0 flex items-center px-3 py-1.5 bg-black/40 hover:bg-black/60 border border-white/20 rounded-full text-white/95 text-xs font-semibold transition-colors shadow-lg backdrop-blur-md"
+                  >
+                    {suggestion.query}
+                  </button>
+                ))}
+              </motion.div>
             ) : (state.stage === 0 && !state.isSearching) ? (
               <motion.div 
                 initial={{ opacity: 0, y: 10 }}

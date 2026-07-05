@@ -16,12 +16,24 @@ export function speakText(text: string, locale: string) {
   const cleanText = text.replace(/[!]/g, '.');
 
   let targetLang = 'en-US';
-  if (locale === 'si-LK') targetLang = 'si';
-  else if (locale === 'ta-LK') targetLang = 'ta';
+  let ttsLocale = locale;
+  
+  // Auto-detect language based on characters, so it works even if app language was switched
+  if (/[\u0D80-\u0DFF]/.test(cleanText)) {
+    targetLang = 'si';
+    ttsLocale = 'si-LK';
+  } else if (/[\u0B80-\u0BFF]/.test(cleanText)) {
+    targetLang = 'ta';
+    ttsLocale = 'ta-LK';
+  } else if (locale === 'si-LK') {
+    targetLang = 'si';
+  } else if (locale === 'ta-LK') {
+    targetLang = 'ta';
+  }
 
   const speakNative = (voice: SpeechSynthesisVoice | null) => {
     const utterance = new SpeechSynthesisUtterance(cleanText);
-    utterance.lang = locale; // Use full locale like si-LK
+    utterance.lang = ttsLocale; // Use full locale like si-LK
     if (voice) {
       utterance.voice = voice;
       window.speechSynthesis.speak(utterance);
@@ -38,7 +50,8 @@ export function speakText(text: string, locale: string) {
 
   const speakGoogleTranslate = (textToSpeak: string, langCode: string) => {
     // We split by 150 chars to be safe with Google TTS limits
-    const chunks = textToSpeak.match(/.{1,150}(\s|$)/g) || [textToSpeak];
+    // Use [\s\S] to match newlines correctly instead of just .
+    const chunks = textToSpeak.match(/[\s\S]{1,150}(?:\s|$)|[\s\S]{1,150}/g) || [textToSpeak];
     let currentChunk = 0;
     
     const playNextChunk = () => {
@@ -67,7 +80,7 @@ export function speakText(text: string, locale: string) {
           // Last resort fallback
           if (window.speechSynthesis) {
             const utterance = new SpeechSynthesisUtterance(chunkText);
-            utterance.lang = locale;
+            utterance.lang = ttsLocale;
             window.speechSynthesis.speak(utterance);
           }
         });
