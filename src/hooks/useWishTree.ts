@@ -513,7 +513,14 @@ export function useWishTree() {
         liveCategories: snap.categories,
         aiStatus: snap.aiStatus,
         searchQuery: snap.query,
-        history: prev.history.slice(0, index + 1)
+        aiReasoning: snap.aiReasoning,
+        aiRecipient: snap.aiRecipient,
+        aiActualSearchQuery: snap.aiActualSearchQuery,
+        aiOriginalSearchQuery: snap.aiOriginalSearchQuery,
+        aiPostFilterReasoning: snap.aiPostFilterReasoning,
+        followUpQuestions: snap.followUpQuestions,
+        searchParameters: snap.searchParameters,
+        history: prev.history // do not truncate
       };
     });
   }, [updateSession]);

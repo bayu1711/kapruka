@@ -127,6 +127,21 @@ export function App() {
     }
   }, []);
 
+  // Voice Assistant Output
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+      if (enableVoiceAssistant && !state.isSearching && state.aiReasoning) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(state.aiReasoning);
+        if (locale === 'si-LK') utterance.lang = 'si-LK';
+        else if (locale === 'ta-LK') utterance.lang = 'ta-LK';
+        else utterance.lang = 'en-US';
+        
+        window.speechSynthesis.speak(utterance);
+      }
+    }
+  }, [state.aiReasoning, state.isSearching, enableVoiceAssistant, locale]);
+
   return (
     <div 
       className={`relative w-full bg-[#402970] overflow-hidden flex flex-col ${enableAnimations ? '' : 'disable-animations'}`}
