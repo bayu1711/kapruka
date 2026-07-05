@@ -1,7 +1,7 @@
 import 'regenerator-runtime/runtime';
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowUp, RefreshCw, ChevronRight, ChevronLeft, Mic, MicOff, MessageCircleQuestion, ShoppingCart, ListTree } from 'lucide-react';
+import { ArrowUp, RefreshCw, ChevronRight, ChevronLeft, Mic, MicOff, MessageCircleQuestion, ShoppingCart, ListTree, ArrowDownUp, Tag } from 'lucide-react';
 import type { HistorySnapshot } from '../hooks/useWishTree';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -29,6 +29,10 @@ interface WishInputBarProps {
   customTopContent?: React.ReactNode;
   liveCategories?: string[];
   onCategorySelect?: (category: string) => void;
+  sortOptions?: { label: string; value: string }[];
+  onSortSelect?: (sort: string) => void;
+  priceOptions?: { label: string; value: string }[];
+  onPriceSelect?: (price: string) => void;
 }
 
 /** A small 'U' SVG used as the loading indicator on the send button */
@@ -94,9 +98,15 @@ export function WishInputBar({
   customTopContent,
   liveCategories,
   onCategorySelect,
+  sortOptions,
+  onSortSelect,
+  priceOptions,
+  onPriceSelect,
 }: WishInputBarProps) {
   const [loading, setLoading] = useState(false);
   const [showCategories, setShowCategories] = useState(false);
+  const [showSort, setShowSort] = useState(false);
+  const [showPrice, setShowPrice] = useState(false);
   const { t } = useLanguage();
   const { transcript, listening, resetTranscript, browserSupportsSpeechRecognition } = useSpeechRecognition();
   const historyScrollRef = useRef<HTMLDivElement>(null);
@@ -246,7 +256,11 @@ export function WishInputBar({
                 <div className="relative flex items-end justify-end">
                   <button
                     type="button"
-                    onClick={() => setShowCategories(!showCategories)}
+                    onClick={() => {
+                      setShowCategories(!showCategories);
+                      setShowSort(false);
+                      setShowPrice(false);
+                    }}
                     className="flex items-center gap-1.5 text-xs font-semibold text-blue-100 bg-blue-500/20 hover:bg-blue-500/40 backdrop-blur-md border border-blue-500/30 rounded-full px-3 py-1.5 transition-colors"
                   >
                     <ListTree className="w-3.5 h-3.5" />
@@ -271,6 +285,86 @@ export function WishInputBar({
                             className="px-2 py-1 text-xs font-medium text-white/90 hover:text-white bg-white/10 hover:bg-white/20 rounded-lg transition-colors border border-white/10"
                           >
                             {cat}
+                          </button>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              )}
+              {priceOptions && priceOptions.length > 0 && (
+                <div className="relative flex items-end justify-end">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowPrice(!showPrice);
+                      setShowCategories(false);
+                      setShowSort(false);
+                    }}
+                    className="flex items-center gap-1.5 text-xs font-semibold text-purple-100 bg-purple-500/20 hover:bg-purple-500/40 backdrop-blur-md border border-purple-500/30 rounded-full px-3 py-1.5 transition-colors"
+                  >
+                    <Tag className="w-3.5 h-3.5" />
+                    Price
+                  </button>
+                  <AnimatePresence>
+                    {showPrice && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                        className="absolute bottom-full right-0 mb-2 w-48 p-2 bg-black/80 backdrop-blur-xl border border-white/20 rounded-xl shadow-2xl flex flex-col gap-1 z-50"
+                      >
+                        {priceOptions.map(opt => (
+                          <button
+                            key={opt.value}
+                            type="button"
+                            onClick={() => {
+                              setShowPrice(false);
+                              onPriceSelect?.(opt.value);
+                            }}
+                            className="px-3 py-2 text-xs font-medium text-left text-white/90 hover:text-white bg-white/5 hover:bg-white/10 rounded-lg transition-colors border border-transparent hover:border-white/10"
+                          >
+                            {opt.label}
+                          </button>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              )}
+              {sortOptions && sortOptions.length > 0 && (
+                <div className="relative flex items-end justify-end">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowSort(!showSort);
+                      setShowCategories(false);
+                      setShowPrice(false);
+                    }}
+                    className="flex items-center gap-1.5 text-xs font-semibold text-orange-100 bg-orange-500/20 hover:bg-orange-500/40 backdrop-blur-md border border-orange-500/30 rounded-full px-3 py-1.5 transition-colors"
+                  >
+                    <ArrowDownUp className="w-3.5 h-3.5" />
+                    Sort
+                  </button>
+                  <AnimatePresence>
+                    {showSort && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                        className="absolute bottom-full right-0 mb-2 w-48 p-2 bg-black/80 backdrop-blur-xl border border-white/20 rounded-xl shadow-2xl flex flex-col gap-1 z-50"
+                      >
+                        {sortOptions.map(opt => (
+                          <button
+                            key={opt.value}
+                            type="button"
+                            onClick={() => {
+                              setShowSort(false);
+                              onSortSelect?.(opt.value);
+                            }}
+                            className="px-3 py-2 text-xs font-medium text-left text-white/90 hover:text-white bg-white/5 hover:bg-white/10 rounded-lg transition-colors border border-transparent hover:border-white/10"
+                          >
+                            {opt.label}
                           </button>
                         ))}
                       </motion.div>

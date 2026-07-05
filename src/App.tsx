@@ -343,6 +343,17 @@ export function App() {
             hasPrevPages={isCartContext ? false : hasPrevPages}
             liveCategories={liveCategories}
             onCategorySelect={(cat) => handleSubmit(`Show me ${cat}`)}
+            priceOptions={[
+              { label: 'Under Rs. 1000', value: 'under 1000' },
+              { label: 'Rs. 1000 - Rs. 5000', value: 'between 1000 and 5000' },
+              { label: 'Over Rs. 5000', value: 'over 5000' }
+            ]}
+            onPriceSelect={(price) => handleSubmit(`Show me items ${price}`)}
+            sortOptions={[
+              { label: 'Price: Low to High', value: 'price low to high' },
+              { label: 'Price: High to Low', value: 'price high to low' }
+            ]}
+            onSortSelect={(sort) => handleSubmit(`Sort by ${sort}`)}
             onNextPage={isCartContext ? undefined : () => {
               setIsPaging(true);
               nextPage();
