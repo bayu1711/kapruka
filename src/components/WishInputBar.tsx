@@ -107,7 +107,7 @@ export function WishInputBar({
   const [showCategories, setShowCategories] = useState(false);
   const [showSort, setShowSort] = useState(false);
   const [showPrice, setShowPrice] = useState(false);
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
   const { transcript, listening, resetTranscript, browserSupportsSpeechRecognition } = useSpeechRecognition();
   const historyScrollRef = useRef<HTMLDivElement>(null);
 
@@ -128,7 +128,7 @@ export function WishInputBar({
       SpeechRecognition.stopListening();
     } else {
       resetTranscript();
-      SpeechRecognition.startListening({ continuous: true, language: 'en-US' }); // Or get current locale if we pass it
+      SpeechRecognition.startListening({ continuous: true, language: locale });
     }
   };
 
