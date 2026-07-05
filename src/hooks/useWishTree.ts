@@ -52,17 +52,28 @@ export interface CheckoutDetails {
   giftMessage: string;
 }
 
+export interface Order {
+  id: string;
+  date: string;
+  total: number;
+  items: Product[];
+  status: string;
+}
+
 export interface GlobalState {
   cartItems: Product[];
   showCart: boolean;
   showCheckout: boolean;
   showConfirmation: boolean;
+  showOrders: boolean;
   cartHistory: HistorySnapshot[];
   selectedCartItems: string[];
   selectedCartProduct: string | null;
   isSearchingCart?: boolean;
   checkoutDetails: CheckoutDetails;
   confirmedOrderNumber?: string;
+  ordersList: Order[];
+  selectedOrder: string | null;
 }
 
 const CART_STORAGE_KEY = 'kapruka_magic_cart';
@@ -150,6 +161,7 @@ export function useWishTree() {
       showCart: screenInit.showCart ?? false,
       showCheckout: screenInit.showCheckout ?? false,
       showConfirmation: screenInit.showConfirmation ?? false,
+      showOrders: false,
       cartHistory: [],
       selectedCartItems: [],
       selectedCartProduct: null,
@@ -160,7 +172,24 @@ export function useWishTree() {
         city: 'Colombo',
         deliveryDate: tomorrow.toISOString().split('T')[0],
         giftMessage: 'Happy Birthday! 🎉',
-      }
+      },
+      ordersList: [
+        {
+          id: 'VPAY827982BA',
+          date: new Date().toISOString().split('T')[0],
+          total: 15400,
+          status: 'Processing',
+          items: []
+        },
+        {
+          id: 'VPAY827982BB',
+          date: '2026-07-01',
+          total: 8200,
+          status: 'Delivered',
+          items: []
+        }
+      ],
+      selectedOrder: null,
     };
   });
 
@@ -246,7 +275,7 @@ export function useWishTree() {
   const handleSubmit = useCallback(async (query: string, enablePostFilter: boolean = false, isFallback: boolean = false, originalQuery?: string) => {
     if (!query.trim()) return;
 
-    const inCart = globalState.showCart || globalState.showCheckout || globalState.showConfirmation;
+    const inCart = globalState.showCart || globalState.showCheckout || globalState.showConfirmation || globalState.showOrders;
 
     if (!isFallback && !inCart) {
       updateSession((prev) => ({
@@ -580,13 +609,26 @@ export function useWishTree() {
   }, []);
 
   const confirmOrder = useCallback((orderNumber?: string) => {
-    setGlobalState((prev) => ({
-      ...prev,
-      showConfirmation: true,
-      showCheckout: false,
-      showCart: false,
-      confirmedOrderNumber: orderNumber,
-    }));
+    setGlobalState((prev) => {
+      // Add the new order to ordersList
+      const newOrder = {
+        id: orderNumber || 'VPAY' + Math.random().toString(36).substring(7).toUpperCase(),
+        date: new Date().toISOString().split('T')[0],
+        total: prev.cartItems.reduce((sum, item) => sum + item.price, 0),
+        status: 'Processing',
+        items: [...prev.cartItems],
+      };
+      
+      return {
+        ...prev,
+        showConfirmation: true,
+        showCheckout: false,
+        showCart: false,
+        showOrders: false,
+        confirmedOrderNumber: orderNumber,
+        ordersList: [newOrder, ...prev.ordersList],
+      };
+    });
   }, []);
 
   const cancelCheckout = useCallback(() => {
@@ -602,6 +644,14 @@ export function useWishTree() {
       ...prev,
       checkoutDetails: { ...prev.checkoutDetails, ...updates }
     }));
+  }, []);
+
+  const toggleOrders = useCallback(() => {
+    setGlobalState((prev) => ({ ...prev, showOrders: !prev.showOrders, showCart: false, showCheckout: false, showConfirmation: false }));
+  }, []);
+
+  const selectOrder = useCallback((orderId: string | null) => {
+    setGlobalState((prev) => ({ ...prev, selectedOrder: orderId }));
   }, []);
 
   const updateInput = useCallback((value: string) => {
@@ -746,5 +796,7 @@ export function useWishTree() {
     toggleCartItemSelection,
     clearCartSelection,
     selectCartProduct,
+    toggleOrders,
+    selectOrder,
   };
 }

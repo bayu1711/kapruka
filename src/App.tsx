@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Plus, Axe, Settings, Search, TreePine, ShoppingCart } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, Axe, Settings, Search, TreePine, ShoppingCart, Package } from 'lucide-react';
 import { useWishTree } from './hooks/useWishTree';
 import { AiStatus } from './components/AiStatus';
 import { WishTree } from './components/WishTree';
@@ -13,6 +13,7 @@ import { CheckoutSummary } from './components/CheckoutSummary';
 import { ConfirmationState } from './components/ConfirmationState';
 import { ProductDetailsModal } from './components/ProductDetailsModal';
 import { GlobalSearchModal } from './components/GlobalSearchModal';
+import { OrdersMainView } from './components/OrdersMainView';
 import { useLanguage } from './contexts/LanguageContext';
 import SpeechRecognition from 'react-speech-recognition';
 import { Locale } from './i18n/translations';
@@ -63,6 +64,8 @@ export function App() {
     clearCartSelection,
     updateCheckoutDetails,
     selectCartProduct,
+    toggleOrders,
+    selectOrder,
   } = useWishTree();
   // Enable dark mode
   useEffect(() => {
@@ -116,7 +119,7 @@ export function App() {
   const hasMorePages = (state.page + 1) * PRODUCT_PAGE_SIZE < totalProducts;
   const hasPrevPages = state.page > 0;
   const hasSelection = !!state.selectedProduct;
-  const isCartContext = state.showCart || state.showCheckout || state.showConfirmation;
+  const isCartContext = state.showCart || state.showCheckout || state.showConfirmation || state.showOrders;
   const [viewportHeight, setViewportHeight] = useState('100dvh');
 
   useEffect(() => {
@@ -155,7 +158,7 @@ export function App() {
       {/* UI Components */}
 
       <div className={`fixed top-4 right-4 sm:top-6 sm:right-6 z-50 flex items-center gap-2 sm:gap-3 transition-opacity duration-300 opacity-100`}>
-        {(state.showCart || state.showCheckout || state.showConfirmation) && !state.showConfirmation && (
+        {(state.showCart || state.showCheckout || state.showConfirmation || state.showOrders) && !state.showConfirmation && (
           <div className="flex items-center gap-1.5 sm:gap-2 mr-2 sm:mr-4">
             {/* Icon Box */}
             <div className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-black/60 backdrop-blur-md rounded-full border border-white/10 shadow-lg">
@@ -165,7 +168,7 @@ export function App() {
             {/* Title Box */}
             <div className="flex items-center h-8 sm:h-10 bg-black/60 backdrop-blur-md px-3 sm:px-4 rounded-full border border-white/10 shadow-lg">
               <span className="text-xs sm:text-sm font-heading font-bold text-white whitespace-nowrap">
-                {state.showCheckout ? 'CHECKOUT' : t('YOUR_CART')}
+                {state.showCheckout ? 'CHECKOUT' : state.showOrders ? 'MY ORDERS' : t('YOUR_CART')}
               </span>
             </div>
             
@@ -194,7 +197,7 @@ export function App() {
           {langLabel}
         </button>
 
-        {(state.showCart || state.showCheckout || state.showConfirmation) ? (
+        {(state.showCart || state.showCheckout || state.showConfirmation || state.showOrders) ? (
           <button
             onClick={() => {
               if (state.showConfirmation) closeConfirmation();
@@ -242,6 +245,13 @@ export function App() {
             >
               <Search className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
+            <button
+              onClick={toggleOrders}
+              className="relative flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-emerald-500/20 hover:bg-emerald-500/40 text-emerald-200 rounded-full shadow-lg transition-colors backdrop-blur-md border border-emerald-500/30"
+              title="My Orders"
+            >
+              <Package className="w-4 h-4 sm:w-5 sm:h-5" />
+            </button>
             <CartBadge count={state.cartItems.length} onClick={toggleCart} />
           </>
         )}
@@ -262,7 +272,7 @@ export function App() {
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
               className="flex-1 w-full h-full relative min-h-0"
             >
-              <ConfirmationState onClose={closeConfirmation} orderNumber={state.confirmedOrderNumber} />
+              <ConfirmationState onClose={closeConfirmation} onViewOrders={toggleOrders} />
             </motion.div>
           ) : state.showCheckout ? (
             <motion.div
@@ -303,6 +313,21 @@ export function App() {
                 onToggleItemSelection={toggleCartItemSelection}
               />
             </motion.div>
+          ) : state.showOrders ? (
+            <motion.div
+              key="orders-view"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              className="flex-1 w-full h-full relative min-h-0"
+            >
+              <OrdersMainView
+                orders={state.ordersList}
+                selectedOrder={state.selectedOrder}
+                onSelectOrder={selectOrder}
+              />
+            </motion.div>
           ) : (
             <motion.div
               key={currentSessionIndex}
@@ -337,7 +362,7 @@ export function App() {
         </AnimatePresence>
 
         {/* Navigation Arrows */}
-        {(!state.showCart && !state.showCheckout && !state.showConfirmation) && currentSessionIndex > 0 && (
+        {(!state.showCart && !state.showCheckout && !state.showConfirmation && !state.showOrders) && currentSessionIndex > 0 && (
           <div className={`absolute top-28 sm:top-1/2 sm:-translate-y-1/2 left-4 sm:left-6 z-40 transition-opacity duration-300 pointer-events-none opacity-100`}>
             <button
               onClick={goToPrevSession}
@@ -348,7 +373,7 @@ export function App() {
           </div>
         )}
 
-        {(!state.showCart && !state.showCheckout && !state.showConfirmation) && (
+        {(!state.showCart && !state.showCheckout && !state.showConfirmation && !state.showOrders) && (
           <div className={`absolute top-28 sm:top-1/2 sm:-translate-y-1/2 right-4 sm:right-6 z-40 transition-opacity duration-300 pointer-events-none flex items-center justify-end opacity-100`}>
             {currentSessionIndex === sessions.length - 1 ? (
               (history.length > 0 || state.stage > 0) && (
@@ -424,9 +449,9 @@ export function App() {
               if (selectedProductObj) removeFromCart(selectedProductObj.id);
             }}
             isProductInCart={selectedProductObj ? state.cartItems.some(item => item.id === selectedProductObj.id) : false}
-            customTopContent={(state.showCart && !state.showCheckout && !state.showConfirmation) ? (
+            customTopContent={(state.showCart && !state.showCheckout && !state.showConfirmation) || (state.showOrders && !state.selectedOrder) ? (
               <>
-                {state.selectedCartItems.length > 0 && (
+                {state.showCart && state.selectedCartItems.length > 0 && (
                   <div className="flex items-center gap-1.5 text-xs font-semibold text-white/90 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-3 py-1.5 shadow-lg truncate max-w-[50%]">
                     <span className="truncate">
                       {state.selectedCartItems.length === 1 
@@ -435,7 +460,7 @@ export function App() {
                     </span>
                   </div>
                 )}
-                {state.selectedCartItems.length > 1 && (
+                {state.showCart && state.selectedCartItems.length > 1 && (
                   <button
                     type="button"
                     onClick={() => {
@@ -446,7 +471,7 @@ export function App() {
                     Compare selected
                   </button>
                 )}
-                {(state.selectedCartItems.length > 0 || state.cartItems.length > 0) && (
+                {state.showCart && (state.selectedCartItems.length > 0 || state.cartItems.length > 0) && (
                   <button
                     type="button"
                     onClick={() => {

@@ -1,16 +1,23 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { CheckCircle, Sparkles, X } from 'lucide-react';
-import { OrderTracker } from './OrderTracker';
 import { useLanguage } from '../contexts/LanguageContext';
 
 interface ConfirmationStateProps {
   onClose: () => void;
-  orderNumber?: string;
+  onViewOrders: () => void;
 }
 
-export function ConfirmationState({ onClose, orderNumber }: ConfirmationStateProps) {
+export function ConfirmationState({ onClose, onViewOrders }: ConfirmationStateProps) {
   const { t } = useLanguage();
+
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      onViewOrders();
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, [onViewOrders]);
+
   return (
     <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
       <div className="relative w-full h-full px-2 sm:px-0 sm:w-[min(115vw,78vh)] sm:h-[min(115vw,78vh)] md:w-[800px] md:h-[800px] max-w-[800px] max-h-[800px] flex-shrink-0 origin-center flex flex-col">
@@ -72,18 +79,18 @@ export function ConfirmationState({ onClose, orderNumber }: ConfirmationStatePro
                 <Sparkles className="w-4 h-4" />
               </motion.div>
 
-              {/* Order tracker */}
               <motion.div
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.65 }}
-                className="w-full bg-white/5 border border-white/10 rounded-2xl p-6 relative overflow-hidden"
+                className="w-full flex justify-center mt-4"
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent pointer-events-none" />
-                <p className="text-xs font-mono text-white/40 uppercase tracking-wider mb-4 font-semibold">
-                  Track your order
-                </p>
-                <OrderTracker initialOrderNumber={orderNumber} />
+                <button
+                  onClick={onViewOrders}
+                  className="px-8 py-3 bg-white/10 hover:bg-white/20 border border-white/20 text-white font-heading font-semibold rounded-full transition-colors flex items-center gap-2"
+                >
+                  View My Orders
+                </button>
               </motion.div>
             </div>
           </div>
