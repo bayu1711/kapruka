@@ -130,9 +130,9 @@ export function App() {
   // Voice Assistant Output
   useEffect(() => {
     if (typeof window !== 'undefined' && window.speechSynthesis) {
-      if (enableVoiceAssistant && !state.isSearching && state.aiReasoning) {
+      if (enableVoiceAssistant && !state.isSearching && state.aiStatus) {
         window.speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(state.aiReasoning);
+        const utterance = new SpeechSynthesisUtterance(state.aiStatus);
         if (locale === 'si-LK') utterance.lang = 'si-LK';
         else if (locale === 'ta-LK') utterance.lang = 'ta-LK';
         else utterance.lang = 'en-US';
@@ -140,7 +140,7 @@ export function App() {
         window.speechSynthesis.speak(utterance);
       }
     }
-  }, [state.aiReasoning, state.isSearching, enableVoiceAssistant, locale]);
+  }, [state.aiStatus, state.isSearching, enableVoiceAssistant, locale]);
 
   return (
     <div 

@@ -1,7 +1,7 @@
 import 'regenerator-runtime/runtime';
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowUp, RefreshCw, ChevronRight, ChevronLeft, Mic, MicOff, MessageCircleQuestion, ShoppingCart, ListTree, ArrowDownUp, Tag } from 'lucide-react';
+import { ArrowUp, RefreshCw, ChevronRight, ChevronLeft, Mic, MicOff, MessageCircleQuestion, ShoppingCart, ListTree, ArrowDownUp, Tag, Volume2 } from 'lucide-react';
 import type { HistorySnapshot } from '../hooks/useWishTree';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -185,9 +185,26 @@ export function WishInputBar({
                     </button>
                   </div>
                   {snap.aiStatus && !snap.aiStatus.match(/^Found \d+ (items|results)/) && (
-                    <div className="flex justify-start w-full">
-                      <div className="text-left text-sm backdrop-blur-xl border rounded-2xl px-4 py-2 max-w-[80%] break-words transition-all text-emerald-50 bg-emerald-700/60 border-emerald-400/50 shadow-lg font-medium">
-                        {snap.aiStatus}
+                    <div className="flex justify-start w-full group">
+                      <div className="text-left text-sm backdrop-blur-xl border rounded-2xl px-4 py-2 max-w-[80%] break-words transition-all text-emerald-50 bg-emerald-700/60 border-emerald-400/50 shadow-lg font-medium flex items-center gap-2">
+                        <span>{snap.aiStatus}</span>
+                        <button 
+                          type="button"
+                          onClick={() => {
+                            if (typeof window !== 'undefined' && window.speechSynthesis) {
+                              window.speechSynthesis.cancel();
+                              const utterance = new SpeechSynthesisUtterance(snap.aiStatus);
+                              if (locale === 'si-LK') utterance.lang = 'si-LK';
+                              else if (locale === 'ta-LK') utterance.lang = 'ta-LK';
+                              else utterance.lang = 'en-US';
+                              window.speechSynthesis.speak(utterance);
+                            }
+                          }}
+                          className="p-1 hover:bg-emerald-600/50 rounded-full transition-colors opacity-50 hover:opacity-100 flex-shrink-0"
+                          title="Read aloud"
+                        >
+                          <Volume2 className="w-3.5 h-3.5" />
+                        </button>
                       </div>
                     </div>
                   )}
