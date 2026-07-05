@@ -232,11 +232,8 @@ export function WishTree({
             texts.push(`Maximum ${p.value} LKR`);
           } else if (key === 'min_price') {
             texts.push(`Minimum ${p.value} LKR`);
-          } else if (key === 'occasion' || key === 'recipient') {
-            texts.push(p.value.charAt(0).toUpperCase() + p.value.slice(1));
           } else {
-            const displayKey = key.replace(/_/g, ' ');
-            texts.push(`${displayKey.charAt(0).toUpperCase() + displayKey.slice(1)}: ${p.value}`);
+            texts.push(p.value.charAt(0).toUpperCase() + p.value.slice(1));
           }
         });
       }
