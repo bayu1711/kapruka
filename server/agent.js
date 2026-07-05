@@ -272,6 +272,10 @@ async function invokeWithFallback(schema, outputName, messages) {
 }
 
 async function processChat(message, history, enablePostFilter = false, language = 'en-US', visibleProducts = [], cartItems = [], selectedProduct = null) {
+  let languageName = 'English';
+  if (language === 'si-LK') languageName = 'Sinhala';
+  else if (language === 'ta-LK') languageName = 'Tamil';
+
   let internalSystemLog = "";
   let finalProducts = [];
   let suggestedCategories = [];
@@ -312,7 +316,7 @@ CRITICAL RULES FOR SEARCH QUERY:
 3. If the user intent is "gift for mom", pick "saree", "handbag", "perfume", or "mother's day cake" instead of "flowers".
 4. Extract ALL contextual facts and constraints (like occasion, recipient, budget, brand, style, color, relationship) into the searchParameters array as discrete key-value pairs (e.g. [{key: "occasion", value: "Birthday"}, {key: "recipient", value: "Father"}]). DO NOT write lengthy reasoning paragraphs explaining the context. DO NOT include these constraints in the query itself.
 5. You MUST always generate a 'hint' string that is an enthusiastic, personable, and short conversational response explaining why you picked these items and why they are great for the user. Give the agent a helpful and friendly personality.
-6. The user's preferred language is ${language}. You MUST translate your 'reasoning', 'hint', 'postFilterReasoning', and 'followUpQuestions' into ${language}. DO NOT translate the 'searchQuery' or 'categories' keys.`)
+6. The user's preferred language is ${languageName}. You MUST translate your 'reasoning', 'hint', 'postFilterReasoning', and 'followUpQuestions' into ${languageName}. DO NOT translate the 'searchQuery' or 'categories' keys.`)
     ];
 
     if (history && history.length > 0) {
