@@ -169,6 +169,18 @@ export function useWishTree() {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      const handleStorage = (e: StorageEvent) => {
+        if (e.key === CART_STORAGE_KEY) {
+          setGlobalState(prev => ({ ...prev, cartItems: loadCart() }));
+        }
+      };
+      window.addEventListener('storage', handleStorage);
+      return () => window.removeEventListener('storage', handleStorage);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
       localStorage.setItem(SESSIONS_STORAGE_KEY, JSON.stringify(sessions));
       localStorage.setItem(SESSION_INDEX_KEY, currentSessionIndex.toString());
     }
