@@ -6,10 +6,9 @@
  * No auth required. Rate limits: 60 req/min, 30 orders/hr per IP.
  */
 
-const MCP_ENDPOINT =
-  import.meta.env.DEV
-    ? '/api/mcp'                      // Vite proxy → avoids CORS in local dev
-    : 'https://mcp.kapruka.com/mcp'; // Direct in production
+// In both local dev (Vite proxy) and production (Vercel rewrite), we use /api/mcp
+// to avoid CORS errors.
+const MCP_ENDPOINT = '/api/mcp';
 
 let _reqId = 1;
 
