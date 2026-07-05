@@ -34,41 +34,40 @@ interface WishInputBarProps {
 /** A small 'U' SVG used as the loading indicator on the send button */
 function USpinner() {
   return (
-    <motion.svg
-      viewBox="0 0 24 24"
-      className="w-4 h-4 sm:w-5 sm:h-5"
-    >
-      <defs>
-        <clipPath id="u-clip-loader">
-          <motion.rect
-            x="0"
-            y="24"
-            width="24"
-            height="0"
-            animate={{ y: [24, 0, 0], height: [0, 24, 0] }}
-            transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
-          />
-        </clipPath>
-      </defs>
-      <path
-        d="M 6 9 A 6 6 0 0 0 18 9"
-        stroke="#FDE047"
-        strokeWidth="3.5"
-        strokeLinecap="round"
-        fill="none"
-        opacity="0.3"
-      />
-      <motion.path
-        d="M 6 9 A 6 6 0 0 0 18 9"
-        stroke="#FDE047"
-        strokeWidth="3.5"
-        strokeLinecap="round"
-        fill="none"
-        clipPath="url(#u-clip-loader)"
-        animate={{ opacity: [0.4, 1, 0.4] }}
+    <div className="relative w-4 h-4 sm:w-5 sm:h-5">
+      <svg
+        viewBox="0 0 24 24"
+        className="w-full h-full absolute inset-0 text-[#FDE047] opacity-30"
+      >
+        <path
+          d="M 6 9 A 6 6 0 0 0 18 9"
+          stroke="currentColor"
+          strokeWidth="3.5"
+          strokeLinecap="round"
+          fill="none"
+        />
+      </svg>
+      <motion.svg
+        viewBox="0 0 24 24"
+        className="w-full h-full absolute inset-0 text-[#FDE047]"
+        animate={{ 
+          clipPath: [
+            'inset(100% 0% 0% 0%)',
+            'inset(0% 0% 0% 0%)',
+            'inset(0% 0% 0% 0%)'
+          ]
+        }}
         transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
-      />
-    </motion.svg>
+      >
+        <path
+          d="M 6 9 A 6 6 0 0 0 18 9"
+          stroke="currentColor"
+          strokeWidth="3.5"
+          strokeLinecap="round"
+          fill="none"
+        />
+      </motion.svg>
+    </div>
   );
 }
 
