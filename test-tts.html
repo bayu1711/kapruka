@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <button onclick="play()">Play</button>
+  <script>
+    function play() {
+      const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=si&client=tw-ob&ttsspeed=0.3&q=${encodeURIComponent('මෙය පරීක්ෂණයකි')}`;
+      const audio = new Audio(url);
+      audio.play().catch(e => alert(e.message));
+    }
+  </script>
+</body>
+</html>

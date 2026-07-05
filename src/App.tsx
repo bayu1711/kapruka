@@ -156,6 +156,13 @@ export function App() {
       </div>
 
       {/* UI Components */}
+      
+      {/* Logo / Brand Name */}
+      <div className="fixed top-5 left-4 sm:top-7 sm:left-8 z-50 flex items-center pointer-events-none transition-opacity duration-300">
+        <h1 className="text-xl sm:text-3xl font-heading font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 to-teal-100 tracking-[0.2em] drop-shadow-[0_2px_10px_rgba(52,211,153,0.2)]">
+          KAPRUKA
+        </h1>
+      </div>
 
       <div className={`fixed top-4 right-4 sm:top-6 sm:right-6 z-50 flex items-center gap-2 sm:gap-3 transition-opacity duration-300 opacity-100`}>
         {(state.showCart || state.showCheckout || state.showConfirmation || state.showOrders) && !state.showConfirmation && (
