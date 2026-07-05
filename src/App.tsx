@@ -261,7 +261,10 @@ export function App() {
             >
               <CheckoutSummary 
                 items={cartProducts} 
-                details={state.checkoutDetails}
+                details={{
+                  ...state.checkoutDetails,
+                  city: state.checkoutDetails.city || defaultRegion
+                }}
                 onUpdateDetails={updateCheckoutDetails}
                 onConfirm={confirmOrder} 
                 onClose={cancelCheckout} 
