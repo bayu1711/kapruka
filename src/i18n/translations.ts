@@ -24,6 +24,10 @@ const en: Translations = {
   OUT_OF_STOCK: 'Out of Stock',
   ORDER_CONFIRMED: 'Order Confirmed!',
   TREE_MADE_IT_HAPPEN: 'The Wish Tree made it happen',
+  SUGGESTION_1: 'Gift for my mother under 5000',
+  SUGGESTION_2: 'Birthday gift for a 5 year old boy',
+  SUGGESTION_3: 'Romantic anniversary dinner ideas',
+  SUGGESTION_4: 'Same day delivery cakes to Colombo',
 };
 
 const si: Translations = {
@@ -48,6 +52,10 @@ const si: Translations = {
   OUT_OF_STOCK: 'තොග අවසන්',
   ORDER_CONFIRMED: 'ඇණවුම තහවුරු විය!',
   TREE_MADE_IT_HAPPEN: 'ප්‍රාර්ථනා ගස එය ඉටු කළේය',
+  SUGGESTION_1: 'රුපියල් 5000 ට අඩු මගේ මවට තෑග්ගක්',
+  SUGGESTION_2: 'අවුරුදු 5 ක පිරිමි ළමයෙකු සඳහා උපන්දින තෑග්ගක්',
+  SUGGESTION_3: 'ආදරණීය සංවත්සර රාත්‍රී භෝජන අදහස්',
+  SUGGESTION_4: 'කොළඹට එදිනම බෙදාහරින කේක්',
 };
 
 const ta: Translations = {
@@ -72,6 +80,10 @@ const ta: Translations = {
   OUT_OF_STOCK: 'ஸ்டாக் இல்லை',
   ORDER_CONFIRMED: 'ஆர்டர் உறுதி செய்யப்பட்டது!',
   TREE_MADE_IT_HAPPEN: 'விருப்ப மரம் அதை சாத்தியமாக்கியது',
+  SUGGESTION_1: 'ரூ. 5000க்குள் என் அம்மாவுக்கு பரிசு',
+  SUGGESTION_2: '5 வயது சிறுவனுக்கு பிறந்தநாள் பரிசு',
+  SUGGESTION_3: 'காதல் ஆண்டுவிழா இரவு உணவு யோசனைகள்',
+  SUGGESTION_4: 'கொழும்புக்கு அன்றே டெலிவரி செய்யப்படும் கேக்குகள்',
 };
 
 export const dict: Record<Locale, Translations> = {

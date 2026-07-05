@@ -469,18 +469,18 @@ export function App() {
                 }}
               >
                 {[
-                  "Gift for my mother under 5000",
-                  "Birthday gift for a 5 year old boy",
-                  "Romantic anniversary dinner ideas",
-                  "Same day delivery cakes to Colombo"
+                  { key: 'SUGGESTION_1', query: "Gift for my mother under 5000" },
+                  { key: 'SUGGESTION_2', query: "Birthday gift for a 5 year old boy" },
+                  { key: 'SUGGESTION_3', query: "Romantic anniversary dinner ideas" },
+                  { key: 'SUGGESTION_4', query: "Same day delivery cakes to Colombo" }
                 ].map((suggestion, idx) => (
                   <button
                     key={idx}
                     type="button"
-                    onClick={() => handleSubmit(suggestion, enablePostFilter)}
+                    onClick={() => handleSubmit(suggestion.query, enablePostFilter)}
                     className="flex-shrink-0 flex items-center px-3 py-1.5 bg-black/40 hover:bg-black/60 border border-white/20 rounded-full text-white/95 text-xs font-semibold transition-colors shadow-lg backdrop-blur-md"
                   >
-                    {suggestion}
+                    {t(suggestion.key)}
                   </button>
                 ))}
               </motion.div>
