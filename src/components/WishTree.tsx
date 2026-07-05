@@ -603,13 +603,13 @@ export function WishTree({
         )}
         
         {/* Soft glows behind the tree */}
-        <div className="absolute inset-x-0 top-0 h-2/3 bg-emerald-500/15 blur-3xl rounded-full pointer-events-none" />
-        <div className="absolute inset-0 bg-blue-500/10 blur-3xl rounded-full scale-90 pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_40%,rgba(16,185,129,0.15),transparent_50%)] pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_50%,rgba(59,130,246,0.1),transparent_50%)] pointer-events-none" />
 
         {/* Base layer: cartoon tree with branches (inline SVG) scaled to 800x800 */}
         <svg
           viewBox="0 0 800 800"
-          className="absolute inset-0 w-full h-full"
+          className="absolute inset-0 w-full h-full overflow-visible"
           aria-hidden="true">
           
           <defs>
