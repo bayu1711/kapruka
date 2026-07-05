@@ -504,6 +504,8 @@ export function App() {
         onTogglePostFilter={() => setEnablePostFilter(!enablePostFilter)}
         enableAnimations={enableAnimations}
         onToggleAnimations={() => setEnableAnimations(!enableAnimations)}
+        showCanopy={showCanopy}
+        onToggleCanopy={() => setShowCanopy(!showCanopy)}
         defaultRegion={defaultRegion}
         onRegionChange={setDefaultRegion}
         onDeleteAllData={() => {
