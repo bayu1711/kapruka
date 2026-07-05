@@ -181,8 +181,19 @@ export function useWishTree() {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      localStorage.setItem(SESSIONS_STORAGE_KEY, JSON.stringify(sessions));
-      localStorage.setItem(SESSION_INDEX_KEY, currentSessionIndex.toString());
+      try {
+        const MAX_SESSIONS = 5;
+        let sessionsToSave = sessions;
+        let indexToSave = currentSessionIndex;
+        if (sessions.length > MAX_SESSIONS) {
+          sessionsToSave = sessions.slice(sessions.length - MAX_SESSIONS);
+          indexToSave = Math.max(0, currentSessionIndex - (sessions.length - MAX_SESSIONS));
+        }
+        localStorage.setItem(SESSIONS_STORAGE_KEY, JSON.stringify(sessionsToSave));
+        localStorage.setItem(SESSION_INDEX_KEY, indexToSave.toString());
+      } catch (e) {
+        console.warn('Failed to save sessions to localStorage, quota may be exceeded:', e);
+      }
     }
   }, [sessions, currentSessionIndex]);
 

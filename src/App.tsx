@@ -108,9 +108,24 @@ export function App() {
   const hasPrevPages = state.page > 0;
   const hasSelection = !!state.selectedProduct;
   const isCartContext = state.showCart || state.showCheckout || state.showConfirmation;
+  const [viewportHeight, setViewportHeight] = useState('100dvh');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.visualViewport) {
+      const handleResize = () => {
+        setViewportHeight(`${window.visualViewport?.height}px`);
+      };
+      window.visualViewport.addEventListener('resize', handleResize);
+      handleResize();
+      return () => window.visualViewport?.removeEventListener('resize', handleResize);
+    }
+  }, []);
 
   return (
-    <div className="relative w-full h-[100dvh] bg-[#402970] overflow-hidden flex flex-col">
+    <div 
+      className="relative w-full bg-[#402970] overflow-hidden flex flex-col"
+      style={{ height: viewportHeight }}
+    >
       {/* Background effects */}
       <div className="absolute inset-0 bg-gradient-radial from-[#4b3282]/50 via-[#402970] to-[#402970] pointer-events-none" />
       <div className="absolute inset-0 bg-gradient-radial from-[#5b3e9d]/20 via-transparent to-transparent pointer-events-none" />
