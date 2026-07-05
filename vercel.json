@@ -1,0 +1,20 @@
+{
+  "rewrites": [
+    {
+      "source": "/chat",
+      "destination": "/api/index"
+    },
+    {
+      "source": "/tts",
+      "destination": "/api/index"
+    },
+    {
+      "source": "/api/mcp(.*)",
+      "destination": "https://mcp.kapruka.com/mcp$1"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
