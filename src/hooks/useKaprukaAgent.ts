@@ -32,11 +32,15 @@ export async function parseUserQuery(
   selectedProduct: any = null
 ): Promise<AgentResult> {
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout
     const res = await fetch('/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: userMessage, history, enablePostFilter, language, visibleProducts, cartItems, selectedProduct })
+      body: JSON.stringify({ message: userMessage, history, enablePostFilter, language, visibleProducts, cartItems, selectedProduct }),
+      signal: controller.signal
     });
+    clearTimeout(timeoutId);
     
     if (!res.ok) {
       throw new Error(`Backend error: ${res.statusText}`);
