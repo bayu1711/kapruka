@@ -59,6 +59,7 @@ export interface GlobalState {
   showConfirmation: boolean;
   cartHistory: HistorySnapshot[];
   selectedCartItems: string[];
+  selectedCartProduct: string | null;
   isSearchingCart?: boolean;
   checkoutDetails: CheckoutDetails;
 }
@@ -150,6 +151,7 @@ export function useWishTree() {
       showConfirmation: screenInit.showConfirmation ?? false,
       cartHistory: [],
       selectedCartItems: [],
+      selectedCartProduct: null,
       isSearchingCart: false,
       checkoutDetails: {
         recipientName: '',
@@ -264,11 +266,14 @@ export function useWishTree() {
     const session = sessions[currentSessionIndex];
     const currentProducts = inCart ? globalState.cartItems : (session?.liveProducts || []);
     
-    // For cart, selectedProductObj might be one of the selected cart items if we are chatting about it
-    // If only one item is selected in cart, we can use that as context, else null.
+    // For cart, selectedProductObj might be the one currently viewed (selectedCartProduct) or checked (selectedCartItems)
     let selectedProductObj = null;
-    if (inCart && globalState.selectedCartItems.length === 1) {
-      selectedProductObj = currentProducts.find(p => p.id === globalState.selectedCartItems[0]) || null;
+    if (inCart) {
+      if (globalState.selectedCartProduct) {
+        selectedProductObj = currentProducts.find(p => p.id === globalState.selectedCartProduct) || null;
+      } else if (globalState.selectedCartItems.length === 1) {
+        selectedProductObj = currentProducts.find(p => p.id === globalState.selectedCartItems[0]) || null;
+      }
     } else if (!inCart) {
       selectedProductObj = session?.liveProducts?.find(p => p.id === session?.selectedProduct) || null;
     }
@@ -307,7 +312,12 @@ export function useWishTree() {
         } else if (agentResult.intent === 'remove_from_cart') {
           setGlobalState(prev => {
             const ids = agentResult.targetProductIds || [];
-            return { ...prev, cartItems: prev.cartItems.filter(item => !ids.includes(item.id)) };
+            const newSelectedCartProduct = ids.includes(prev.selectedCartProduct || '') ? null : prev.selectedCartProduct;
+            return { 
+              ...prev, 
+              cartItems: prev.cartItems.filter(item => !ids.includes(item.id)),
+              selectedCartProduct: newSelectedCartProduct
+            };
           });
           const count = agentResult.targetProductIds?.length || 0;
           actionMessage = count > 1 ? `${count} items removed from cart.` : 'Item removed from cart.';
@@ -529,6 +539,10 @@ export function useWishTree() {
     updateSession((prev) => ({ ...prev, selectedProduct: productId }));
   }, [updateSession]);
 
+  const selectCartProduct = useCallback((productId: string | null) => {
+    setGlobalState(prev => ({ ...prev, selectedCartProduct: productId }));
+  }, []);
+
   const addToCart = useCallback((productId: string) => {
     const session = sessions[currentSessionIndex];
     const product = session?.liveProducts.find(p => p.id === productId);
@@ -729,5 +743,6 @@ export function useWishTree() {
     deleteSessionByIndex,
     toggleCartItemSelection,
     clearCartSelection,
+    selectCartProduct,
   };
 }

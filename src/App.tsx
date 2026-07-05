@@ -62,6 +62,7 @@ export function App() {
     toggleCartItemSelection,
     clearCartSelection,
     updateCheckoutDetails,
+    selectCartProduct,
   } = useWishTree();
   // Enable dark mode
   useEffect(() => {
@@ -296,8 +297,8 @@ export function App() {
                 items={cartProducts}
                 onCheckout={proceedToCheckout}
                 onRemoveItem={removeFromCart}
-                selectedProduct={state.selectedProduct}
-                onSelectProduct={selectProduct}
+                selectedProduct={state.selectedCartProduct}
+                onSelectProduct={selectCartProduct}
                 selectedCartItems={state.selectedCartItems}
                 onToggleItemSelection={toggleCartItemSelection}
               />
