@@ -5,6 +5,7 @@ import { useWishTree } from './hooks/useWishTree';
 import { AiStatus } from './components/AiStatus';
 import { WishTree } from './components/WishTree';
 import { DevToolsDrawer } from './components/DevToolsDrawer';
+import { UserSettingsDrawer } from './components/UserSettingsDrawer';
 import { WishInputBar } from './components/WishInputBar';
 import { CartBadge } from './components/CartBadge';
 import { CartMainView } from './components/CartMainView';
@@ -86,8 +87,10 @@ export function App() {
 
   const [isPaging, setIsPaging] = useState(false);
   const [isDevToolsOpen, setIsDevToolsOpen] = useState(false);
+  const [isUserSettingsOpen, setIsUserSettingsOpen] = useState(false);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [enablePostFilter, setEnablePostFilter] = useState(false);
+  const [enableAnimations, setEnableAnimations] = useState(true);
   const [showDebugGrid, setShowDebugGrid] = useState(false);
   const [showCanopy, setShowCanopy] = useState(true);
 
@@ -123,7 +126,7 @@ export function App() {
 
   return (
     <div 
-      className="relative w-full bg-[#402970] overflow-hidden flex flex-col"
+      className={`relative w-full bg-[#402970] overflow-hidden flex flex-col ${enableAnimations ? '' : 'disable-animations'}`}
       style={{ height: viewportHeight }}
     >
       {/* Background effects */}
@@ -193,10 +196,18 @@ export function App() {
           </button>
         ) : (
           <>
-            <button
+            {/* Hidden Developer Tools - uncomment or add shortcut if needed */}
+            {/* <button
               onClick={() => setIsDevToolsOpen(true)}
               className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-purple-500/20 hover:bg-purple-500/40 text-purple-200 rounded-full shadow-lg transition-colors backdrop-blur-md border border-purple-500/30"
               title="Developer Tools"
+            >
+              <Settings className="w-4 h-4 sm:w-5 sm:h-5" />
+            </button> */}
+            <button
+              onClick={() => setIsUserSettingsOpen(true)}
+              className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-blue-500/20 hover:bg-blue-500/40 text-blue-200 rounded-full shadow-lg transition-colors backdrop-blur-md border border-blue-500/30"
+              title="Settings"
             >
               <Settings className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
@@ -479,6 +490,20 @@ export function App() {
         aiPostFilterReasoning={state.aiPostFilterReasoning}
         searchParameters={state.searchParameters}
         liveCategories={liveCategories}
+      />
+
+      {/* User Settings Drawer */}
+      <UserSettingsDrawer
+        isOpen={isUserSettingsOpen}
+        onClose={() => setIsUserSettingsOpen(false)}
+        enablePostFilter={enablePostFilter}
+        onTogglePostFilter={() => setEnablePostFilter(!enablePostFilter)}
+        enableAnimations={enableAnimations}
+        onToggleAnimations={() => setEnableAnimations(!enableAnimations)}
+        onDeleteAllData={() => {
+          localStorage.clear();
+          window.location.reload();
+        }}
       />
 
       {/* Global Search Modal */}

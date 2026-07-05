@@ -98,3 +98,9 @@
     background-image: radial-gradient(circle, var(--tw-gradient-stops));
   }
 }
+
+/* Disable animations utility */
+.disable-animations * {
+  animation: none !important;
+  transition: none !important;
+}
