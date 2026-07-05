@@ -16,6 +16,8 @@ import { GlobalSearchModal } from './components/GlobalSearchModal';
 import { useLanguage } from './contexts/LanguageContext';
 import SpeechRecognition from 'react-speech-recognition';
 import { Locale } from './i18n/translations';
+import { speakText } from './utils/tts';
+
 const PRODUCT_PAGE_SIZE = 20;
 export function App() {
   const { locale, setLocale, t } = useLanguage();
@@ -129,15 +131,9 @@ export function App() {
 
   // Voice Assistant Output
   useEffect(() => {
-    if (typeof window !== 'undefined' && window.speechSynthesis) {
+    if (typeof window !== 'undefined') {
       if (enableVoiceAssistant && !state.isSearching && state.aiStatus) {
-        window.speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(state.aiStatus);
-        if (locale === 'si-LK') utterance.lang = 'si-LK';
-        else if (locale === 'ta-LK') utterance.lang = 'ta-LK';
-        else utterance.lang = 'en-US';
-        
-        window.speechSynthesis.speak(utterance);
+        speakText(state.aiStatus, locale);
       }
     }
   }, [state.aiStatus, state.isSearching, enableVoiceAssistant, locale]);

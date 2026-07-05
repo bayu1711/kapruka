@@ -6,6 +6,7 @@ import type { HistorySnapshot } from '../hooks/useWishTree';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 import { useLanguage } from '../contexts/LanguageContext';
 import { Locale } from '../i18n/translations';
+import { speakText } from '../utils/tts';
 
 interface WishInputBarProps {
   value: string;
@@ -191,14 +192,7 @@ export function WishInputBar({
                         <button 
                           type="button"
                           onClick={() => {
-                            if (typeof window !== 'undefined' && window.speechSynthesis) {
-                              window.speechSynthesis.cancel();
-                              const utterance = new SpeechSynthesisUtterance(snap.aiStatus);
-                              if (locale === 'si-LK') utterance.lang = 'si-LK';
-                              else if (locale === 'ta-LK') utterance.lang = 'ta-LK';
-                              else utterance.lang = 'en-US';
-                              window.speechSynthesis.speak(utterance);
-                            }
+                            speakText(snap.aiStatus, locale);
                           }}
                           className="p-1 hover:bg-emerald-600/50 rounded-full transition-colors opacity-50 hover:opacity-100 flex-shrink-0"
                           title="Read aloud"
