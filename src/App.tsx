@@ -262,7 +262,7 @@ export function App() {
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
               className="flex-1 w-full h-full relative min-h-0"
             >
-              <ConfirmationState onClose={closeConfirmation} />
+              <ConfirmationState onClose={closeConfirmation} orderNumber={state.confirmedOrderNumber} />
             </motion.div>
           ) : state.showCheckout ? (
             <motion.div

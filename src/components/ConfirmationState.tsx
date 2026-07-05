@@ -6,9 +6,10 @@ import { useLanguage } from '../contexts/LanguageContext';
 
 interface ConfirmationStateProps {
   onClose: () => void;
+  orderNumber?: string;
 }
 
-export function ConfirmationState({ onClose }: ConfirmationStateProps) {
+export function ConfirmationState({ onClose, orderNumber }: ConfirmationStateProps) {
   const { t } = useLanguage();
   return (
     <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
@@ -82,7 +83,7 @@ export function ConfirmationState({ onClose }: ConfirmationStateProps) {
                 <p className="text-xs font-mono text-white/40 uppercase tracking-wider mb-4 font-semibold">
                   Track your order
                 </p>
-                <OrderTracker />
+                <OrderTracker initialOrderNumber={orderNumber} />
               </motion.div>
             </div>
           </div>

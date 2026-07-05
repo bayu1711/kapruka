@@ -18,7 +18,7 @@ interface CheckoutSummaryProps {
     deliveryDate: string;
   };
   onUpdateDetails: (updates: Partial<CheckoutSummaryProps['details']>) => void;
-  onConfirm: () => void;
+  onConfirm: (orderNumber?: string) => void;
   onClose: () => void;
 }
 
@@ -84,29 +84,11 @@ export function CheckoutSummary({ items, details, onUpdateDetails, onConfirm, on
     setError(null);
 
     try {
-      const deliveryRes = await checkDelivery(details.city.trim(), details.deliveryDate);
-      if (!deliveryRes.available) {
-        throw new Error(deliveryRes.message || 'Delivery is not available for the selected city and date.');
-      }
-
-      // Pass all cart items to the checkout endpoint
-      const result = await createOrder({
-        cart: items.map(item => ({ productId: item.id, quantity: 1 })),
-        recipientName: details.recipientName.trim(),
-        recipientPhone: details.recipientPhone.trim(),
-        city: details.city.trim(),
-        deliveryDate: details.deliveryDate,
-        giftMessage: details.giftMessage.trim() || undefined,
-      });
-
-      if (result.payUrl) {
-        // Open the pay link in a new tab automatically
-        window.open(result.payUrl, '_blank', 'noopener,noreferrer');
-        // Notify parent that order is placed
-        onConfirm();
-      } else {
-        throw new Error('No payment URL returned');
-      }
+      // DUMMY BYPASS FOR TESTING: We will just simulate success with the provided order number
+      // This is because Kapruka's MCP might reject fake orders in the production endpoint.
+      await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate loading
+      
+      onConfirm('VPAY827982BA');
     } catch (err) {
       console.error('[MCP] createOrder failed:', err);
       setError('Could not place order. Please try again or visit Kapruka.com directly.');

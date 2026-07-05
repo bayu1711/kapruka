@@ -62,6 +62,7 @@ export interface GlobalState {
   selectedCartProduct: string | null;
   isSearchingCart?: boolean;
   checkoutDetails: CheckoutDetails;
+  confirmedOrderNumber?: string;
 }
 
 const CART_STORAGE_KEY = 'kapruka_magic_cart';
@@ -578,12 +579,13 @@ export function useWishTree() {
     setGlobalState((prev) => ({ ...prev, showCheckout: true }));
   }, []);
 
-  const confirmOrder = useCallback(() => {
+  const confirmOrder = useCallback((orderNumber?: string) => {
     setGlobalState((prev) => ({
       ...prev,
       showConfirmation: true,
       showCheckout: false,
       showCart: false,
+      confirmedOrderNumber: orderNumber,
     }));
   }, []);
 
